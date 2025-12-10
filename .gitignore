@@ -43,3 +43,6 @@ next-env.d.ts
 
 # analytics data
 /data/analytics.json
+/data/analytics.db
+/data/analytics.db-shm
+/data/analytics.db-wal
