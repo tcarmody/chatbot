@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface AnalyticsSummary {
   totalQueries: number;
@@ -17,13 +19,47 @@ interface AnalyticsSummary {
 }
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
 
   useEffect(() => {
-    fetchAnalytics();
+    checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchAnalytics();
+    }
+  }, [user]);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/admin/auth/me');
+
+      if (!response.ok) {
+        router.push('/admin/login');
+        return;
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      router.push('/admin/login');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth/logout', { method: 'POST' });
+      router.push('/admin/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const fetchAnalytics = async () => {
     try {
@@ -59,9 +95,26 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Chatbot Analytics</h1>
-          <p className="text-gray-600 mt-2">Usage insights and performance metrics</p>
+        {/* Header with user info and logout */}
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Chatbot Analytics</h1>
+            <p className="text-gray-600 mt-2">Usage insights and performance metrics</p>
+          </div>
+          {user && (
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                <div className="text-xs text-gray-600">{user.role}</div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Overview Stats */}
@@ -136,8 +189,14 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Refresh Button */}
-        <div className="mt-8 flex justify-center">
+        {/* Action Buttons */}
+        <div className="mt-8 flex justify-center gap-4">
+          <Link
+            href="/"
+            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+          >
+            ← Back to Home
+          </Link>
           <button
             onClick={fetchAnalytics}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"

@@ -1,7 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAnalyticsSummary } from '@/lib/analytics';
+import { requireAdmin } from '@/lib/admin-middleware';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Require admin authentication
+  const user = await requireAdmin(req);
+
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Admin access required' },
+      { status: 401 }
+    );
+  }
+
   try {
     const summary = getAnalyticsSummary();
 
