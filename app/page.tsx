@@ -40,9 +40,28 @@ export default function Home() {
             <h3 className="font-semibold text-gray-900 mb-2">Create Support Ticket</h3>
             <p className="text-sm text-gray-600">Need personalized help? Submit a ticket to our team</p>
           </a>
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-2">Community Forum</h3>
-            <p className="text-sm text-gray-600">Connect with fellow learners</p>
+          <a href="/tickets/list" className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:border-blue-300 transition-colors">
+            <h3 className="font-semibold text-gray-900 mb-2">My Tickets</h3>
+            <p className="text-sm text-gray-600">View all your support tickets</p>
+          </a>
+        </div>
+
+        {/* Admin & Demo Links */}
+        <div className="mt-8">
+          <h3 className="text-center text-sm font-semibold text-gray-700 mb-4">Demo Access</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="/analytics" className="bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-400 transition-colors text-center">
+              <h4 className="font-semibold text-blue-900 mb-1">📊 Analytics</h4>
+              <p className="text-xs text-blue-700">View chatbot usage metrics</p>
+            </a>
+            <a href="/admin/tickets" className="bg-purple-50 p-4 rounded-lg border border-purple-200 hover:border-purple-400 transition-colors text-center">
+              <h4 className="font-semibold text-purple-900 mb-1">🎫 Admin Dashboard</h4>
+              <p className="text-xs text-purple-700">Manage support tickets</p>
+            </a>
+            <a href="/admin/sessions" className="bg-indigo-50 p-4 rounded-lg border border-indigo-200 hover:border-indigo-400 transition-colors text-center">
+              <h4 className="font-semibold text-indigo-900 mb-1">👥 Active Sessions</h4>
+              <p className="text-xs text-indigo-700">View active user sessions</p>
+            </a>
           </div>
         </div>
       </main>
