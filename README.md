@@ -102,6 +102,19 @@ For high-volume production deployment:
 - **LLM**: Claude Haiku 4.5 (via Anthropic SDK)
 - **Knowledge Base**: JSON (easily upgradeable to vector DB)
 
+## Architecture & Design Decisions
+
+For detailed documentation on why specific technologies and design patterns were chosen, see [DOCTRINE.md](DOCTRINE.md).
+
+This document covers:
+- Architecture decisions (why Next.js, full-stack approach)
+- LLM selection rationale (why Claude Haiku 4.5)
+- Knowledge base strategy (JSON vs vector database)
+- Visual design & UX choices
+- Scaling and migration paths
+
+**For maintainers and contributors**: Please review DOCTRINE.md before making significant architectural changes.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
