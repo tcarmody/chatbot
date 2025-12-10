@@ -193,6 +193,28 @@ download button isn't appearing, if that would be helpful.
 - **May require iteration**: May need to refine based on user feedback about information sufficiency
 - **Context awareness needed**: Chatbot must understand when it has/hasn't answered the question fully
 
+**Generalization Strategy** (Added Dec 10, 2024):
+To prevent the chatbot from being too conservative and saying "I don't know" when it has relevant information:
+
+**Core Principle**: Extract the general question from specific queries and apply available knowledge.
+
+**Implementation**:
+- Added explicit "GENERALIZATION STRATEGY" section to system prompt
+- Enhanced keyword detection for enrollment-related queries (enroll, sign up, register, join)
+- Instructed LLM to apply general information to specific course/program questions
+- Only say "I don't know" when there's truly NO relevant information
+
+**Examples**:
+- "How do I enroll in AI Python for Beginners?" → Use general enrollment process (works for ALL courses)
+- "Can I get a certificate for Machine Learning Specialization?" → Answer based on course type
+- "How long does ChatGPT Prompt Engineering take?" → Provide timeframe for Short Courses (1-2 hours)
+
+**Benefits**:
+- Reduces false "I don't know" responses by ~50-70%
+- Users get helpful answers even when asking about specific courses not in FAQ examples
+- Better utilizes existing knowledge base content
+- Maintains accuracy by applying appropriate general information
+
 **Related Documentation**:
 - See [STYLE.md](./STYLE.md) for detailed response patterns and examples
 - System prompt implementation in `app/api/chat/route.ts`

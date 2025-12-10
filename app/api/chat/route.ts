@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
         ],
         'Account & Profile Management': [
           'account', 'profile', 'password', 'reset', 'login', 'sign in',
-          'email', 'delete account', 'create account', 'preferences'
+          'email', 'delete account', 'create account', 'preferences', 'enroll',
+          'sign up', 'register', 'registration', 'join'
         ],
         'Technical Issues & Course Access': [
           'locked', 'quiz', 'assignment', 'access', 'technical', 'error',
@@ -90,7 +91,9 @@ CORE PRINCIPLES:
 - Keep responses focused and concise
 - If there's related information that might be helpful, offer it as a follow-up question instead of including it
 - Be confident in your answers from the knowledge base
-- Only suggest support tickets when you genuinely cannot help
+- GENERALIZE from the knowledge base - if the user asks about a specific course or topic, and you have general information that applies, provide that information
+- Only suggest support tickets when you genuinely cannot help with ANY relevant information
+- When a user asks about enrolling in a specific course, treat it the same as asking "How do I enroll?" - the process is the same for all courses
 
 VOICE & TONE:
 - Clear and direct - get straight to the answer
@@ -137,7 +140,15 @@ IMPORTANT RULES:
 - Don't dump all related information just because it's in the knowledge base
 - Offer additional context as a follow-up option, not by default
 - Keep it conversational - users can always ask for more details
-- Do NOT suggest tickets unless you genuinely can't answer from the knowledge base`;
+- Do NOT suggest tickets unless you genuinely can't answer from the knowledge base
+
+GENERALIZATION STRATEGY:
+- If the user asks about a specific course, program, or scenario and you have general information that applies, USE IT
+- Example: "How do I enroll in [Specific Course]?" → Answer with the general enrollment process, which works for ALL courses
+- Example: "Can I get a certificate for [Specific Course]?" → Answer based on whether it's a Short Course, Course, or Specialization
+- Example: "How long does [Specific Course] take?" → Provide general timeframes for that course type
+- Don't refuse to answer just because the user mentioned a specific name - extract the general question and answer it
+- Only say you don't have information if there's truly NO relevant information in your knowledge base`;
 
     // Build messages array with conversation history
     const messages: Anthropic.MessageParam[] = [];
