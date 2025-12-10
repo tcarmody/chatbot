@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface Ticket {
@@ -31,6 +32,7 @@ interface Stats {
 }
 
 export default function AdminTicketsPage() {
+  const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,11 +40,44 @@ export default function AdminTicketsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [priorityFilter, setPriorityFilter] = useState<string>('');
   const [updatingTicket, setUpdatingTicket] = useState<string | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
 
   useEffect(() => {
-    fetchTickets();
-    fetchStats();
-  }, [statusFilter, priorityFilter]);
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchTickets();
+      fetchStats();
+    }
+  }, [statusFilter, priorityFilter, user]);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/admin/auth/me');
+
+      if (!response.ok) {
+        router.push('/admin/login');
+        return;
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      router.push('/admin/login');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth/logout', { method: 'POST' });
+      router.push('/admin/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const fetchTickets = async () => {
     try {
@@ -151,12 +186,28 @@ export default function AdminTicketsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-700 text-sm mb-4 inline-block"
-          >
-            ← Back to Home
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/"
+              className="text-blue-600 hover:text-blue-700 text-sm"
+            >
+              ← Back to Home
+            </Link>
+            {user && (
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium text-gray-900">{user.name}</span>
+                  <span className="ml-2">({user.role})</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
           <h1 className="text-3xl font-bold text-gray-900">Support Tickets Admin</h1>
           <p className="text-gray-600 mt-2">Manage and respond to customer support tickets</p>
         </div>

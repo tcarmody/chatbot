@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup-admin": "ts-node scripts/setup-admin.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.5.0",
     "next": "16.0.8",
+    "next-auth": "^5.0.0-beta.30",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-markdown": "^10.1.0",
@@ -27,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

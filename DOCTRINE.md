@@ -396,6 +396,107 @@ CREATE TABLE support_tickets (
 
 ---
 
+## Admin Authentication System
+
+### Approach: Cookie-based Sessions with Bcrypt Password Hashing
+
+**Decision**: Build a custom admin authentication system using SQLite for user storage and secure session management.
+
+**Rationale**:
+- **Security**: Passwords hashed with bcrypt (industry standard)
+- **Simple**: No external auth providers or complex OAuth flows
+- **Control**: Full control over user management and permissions
+- **Fast**: Cookie-based sessions avoid database lookups on every request
+- **Aligned**: Uses existing SQLite infrastructure
+
+**Current Implementation**:
+- **Database Tables**:
+  - `admin_users`: Stores admin accounts with hashed passwords
+  - `admin_sessions`: Stores active sessions with expiration
+- **Authentication Flow**:
+  1. Admin enters email/password at `/admin/login`
+  2. Credentials validated against hashed password in database
+  3. Session token generated and stored in HTTPOnly cookie
+  4. Cookie sent with every request to admin routes
+  5. Middleware validates session before allowing access
+- **Security Features**:
+  - Bcrypt password hashing with salt (10 rounds)
+  - HTTPOnly cookies prevent XSS attacks
+  - Secure flag in production (HTTPS only)
+  - SameSite=lax prevents CSRF
+  - 7-day session expiration
+  - Automatic session cleanup of expired tokens
+
+**User Roles**:
+- **admin**: Full access to all features (future: user management)
+- **support**: Access to tickets, cannot manage users
+
+**Setup Process**:
+1. Run `npm run setup-admin` to create first admin user
+2. Enter email, name, password, and role
+3. Log in at `/admin/login`
+4. Access admin dashboard at `/admin/tickets`
+
+**Protected Routes**:
+- `/admin/tickets` - Ticket management dashboard
+- `/api/admin/tickets` - Ticket CRUD operations
+- `/api/admin/auth/me` - Check auth status
+
+**Public Routes**:
+- `/admin/login` - Login page
+- `/api/admin/auth/login` - Login endpoint
+- `/api/admin/auth/logout` - Logout endpoint
+
+**Session Management**:
+- Sessions stored in SQLite with expiration timestamp
+- Expired sessions automatically cleaned up
+- Logout deletes session from database and clears cookie
+- Session validation on every protected API call
+
+**Database Schema**:
+```sql
+CREATE TABLE admin_users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'support',
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_login DATETIME
+);
+
+CREATE TABLE admin_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  session_token TEXT UNIQUE NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES admin_users(id)
+);
+```
+
+**Alternatives Considered**:
+- **NextAuth**: More features but complex setup, overkill for simple needs
+- **Auth0/Clerk**: Third-party SaaS, monthly costs, external dependency
+- **JWT tokens**: Stateless but harder to revoke, no built-in expiration management
+- **Basic auth**: Too simple, credentials sent with every request
+
+**Future Enhancements**:
+- Admin user management UI (add/edit/delete admins)
+- Password reset via email
+- Two-factor authentication (2FA)
+- Audit logs for admin actions
+- Role-based permissions (granular access control)
+
+**Trade-offs**:
+- Custom auth requires more initial setup vs. third-party
+- Sessions stored in SQLite (additional database queries)
+- No built-in 2FA or OAuth (can add later if needed)
+- Manual user management for now (requires script or database access)
+
+---
+
 ## Production Considerations
 
 ### Scaling Strategy

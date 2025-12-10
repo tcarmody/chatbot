@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllTickets, getTicketStats, updateTicketStatus, getTicketByNumber } from '@/lib/tickets';
 import { sendTicketStatusChangeNotification } from '@/lib/email';
+import { requireAdmin } from '@/lib/admin-middleware';
 
 // GET - Get all tickets with optional filters
 export async function GET(req: NextRequest) {
+  // Check authentication
+  const user = await requireAdmin(req);
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status') || undefined;
@@ -38,7 +48,16 @@ export async function GET(req: NextRequest) {
 
 // PATCH - Update ticket status
 export async function PATCH(req: NextRequest) {
-  try {
+  // Check authentication
+  const user = await requireAdmin(req);
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  try{
     const body = await req.json();
     const { ticket_number, status } = body;
 
