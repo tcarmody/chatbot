@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import faqData from '@/data/faq.json';
+import { logAnalyticsEvent } from '@/lib/analytics';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -17,8 +18,59 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Build the knowledge base context from FAQ
-    const knowledgeBase = faqData.faqs
+    // Detect relevant categories based on keywords in the user's message
+    const detectRelevantCategories = (userMessage: string): string[] => {
+      const messageLower = userMessage.toLowerCase();
+      const categoryKeywords: { [key: string]: string[] } = {
+        'Certificates & Course Completion': [
+          'certificate', 'accomplishment', 'completion', 'finish', 'complete',
+          'short course', 'pdf', 'download certificate', 'credential'
+        ],
+        'Account & Profile Management': [
+          'account', 'profile', 'password', 'reset', 'login', 'sign in',
+          'email', 'delete account', 'create account', 'preferences'
+        ],
+        'Technical Issues & Course Access': [
+          'locked', 'quiz', 'assignment', 'access', 'technical', 'error',
+          'notebook', 'code', 'download', 'api key', 'file'
+        ],
+        'Membership Support': [
+          'pro', 'membership', 'free', 'trial', 'subscribe', 'upgrade',
+          'downgrade', 'beginner', 'programming', 'time commit', 'course'
+        ],
+        'Billing & Payments': [
+          'billing', 'payment', 'refund', 'price', 'cost', 'receipt',
+          'invoice', 'credit card', 'charge', 'tax', 'monthly', 'annual'
+        ],
+      };
+
+      const relevantCategories: string[] = [];
+
+      for (const [category, keywords] of Object.entries(categoryKeywords)) {
+        if (keywords.some(keyword => messageLower.includes(keyword))) {
+          relevantCategories.push(category);
+        }
+      }
+
+      // If no categories matched, return all categories (fallback)
+      return relevantCategories.length > 0
+        ? relevantCategories
+        : Object.keys(categoryKeywords);
+    };
+
+    // Track start time for analytics
+    const startTime = Date.now();
+
+    // Get relevant categories for this query
+    const relevantCategories = detectRelevantCategories(message);
+
+    // Filter FAQs to only include relevant categories
+    const relevantFaqs = faqData.faqs.filter(faq =>
+      relevantCategories.includes(faq.category)
+    );
+
+    // Build the knowledge base context from filtered FAQs
+    const knowledgeBase = relevantFaqs
       .map(
         (faq) =>
           `Q: ${faq.question}\nA: ${faq.answer}\nCategory: ${faq.category}`
@@ -96,6 +148,20 @@ Always end support responses with:
     // Extract the assistant's response
     const assistantMessage =
       response.content[0].type === 'text' ? response.content[0].text : '';
+
+    // Log analytics event
+    const responseTime = Date.now() - startTime;
+    logAnalyticsEvent({
+      timestamp: new Date().toISOString(),
+      userMessage: message,
+      detectedCategories: relevantCategories,
+      faqCount: relevantFaqs.length,
+      responseTime,
+      tokenUsage: {
+        input: response.usage.input_tokens,
+        output: response.usage.output_tokens,
+      },
+    });
 
     return NextResponse.json({
       response: assistantMessage,
