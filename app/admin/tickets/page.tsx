@@ -195,7 +195,13 @@ export default function AdminTicketsPage() {
             </Link>
             {user && (
               <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-600">
+                <button
+                  onClick={() => router.push('/admin/sessions')}
+                  className="text-sm px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Sessions
+                </button>
+                <div className="text-sm text-gray-600 border-l border-gray-300 pl-4">
                   <span className="font-medium text-gray-900">{user.name}</span>
                   <span className="ml-2">({user.role})</span>
                 </div>

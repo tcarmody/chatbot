@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env tsx
 
 import * as readline from 'readline';
 import { createAdminUser, getAdminUserByEmail } from '../lib/auth';
