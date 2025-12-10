@@ -252,6 +252,113 @@ If you have existing JSON analytics data, you can migrate with a simple script. 
 
 ---
 
+## Support Ticket System
+
+### Approach: Hybrid SQLite System with Migration Path
+
+**Decision**: Build a simple SQLite-based ticket system initially, with a clear path to migrate to a full-featured platform if needed.
+
+**Rationale**:
+- **Alignment**: Uses existing SQLite infrastructure (same database as analytics)
+- **No external costs**: Free until outgrown, no per-ticket or per-agent fees
+- **Control**: Full control over features, UI, and integration with chatbot
+- **Fast implementation**: 2-3 hours vs. weeks of third-party integration
+- **Learn first**: Understand actual needs before committing to a platform
+- **Easy migration**: Can export data to Zendesk/Freshdesk later if needed
+
+**Current Implementation**:
+- **Database**: Extends `data/analytics.db` with `support_tickets` table
+- **Features**:
+  - Ticket creation form at `/tickets/new`
+  - Unique ticket numbers (format: `TICK-YYYYMMDD-XXXX`)
+  - Status tracking (open, in_progress, resolved, closed)
+  - Priority levels (low, medium, high)
+  - Category assignment matching FAQ categories
+  - Ticket lookup by ticket number at `/tickets/[ticketNumber]`
+  - Email-based ticket retrieval
+  - Optional conversation context (link tickets to chat history)
+
+**Ticket Schema**:
+```sql
+CREATE TABLE support_tickets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_number TEXT UNIQUE NOT NULL,
+  user_email TEXT NOT NULL,
+  user_name TEXT,
+  subject TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  priority TEXT NOT NULL DEFAULT 'medium',
+  category TEXT,
+  conversation_context TEXT,  -- JSON of chat history
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+```
+
+**User Experience**:
+1. User tries chatbot first (instant answers)
+2. If chatbot can't help, user clicks link to create ticket
+3. User fills form with email, subject, description, priority, category
+4. System generates unique ticket number (e.g., `TICK-20241210-1234`)
+5. User redirected to ticket view page with status
+6. Ticket stored in SQLite, ready for support team review
+
+**Integration Points**:
+- Chatbot responses include link: "Still need help? [create a support ticket](/tickets/new)"
+- Homepage quick link: "Create Support Ticket" card
+- Ticket pages allow users to return to chatbot or create new tickets
+
+**Current Limitations** (Phase 1):
+- No automatic email notifications to support team (TODO: add Resend/SendGrid)
+- No email notifications to users on status updates
+- No admin dashboard for support team (manual database queries for now)
+- No file attachments
+- No internal notes/comments
+
+**Phase 2 Features** (when needed):
+- Admin dashboard at `/admin/tickets` for support team
+- Email notifications via Resend or SendGrid
+- Ticket assignment to specific team members
+- Internal notes and comment threads
+- File attachment support
+- Search and filtering capabilities
+- SLA tracking and auto-reminders
+
+**When to Migrate to Third-Party Platform**:
+- Ticket volume exceeds 100+ per week consistently
+- Need multi-channel support (email, chat, phone integration)
+- Require advanced automation and workflows
+- Support team grows beyond 3-5 agents
+- Need mobile apps for support team
+- Require advanced reporting and analytics
+
+**Migration Options**:
+- **Freshdesk**: Free tier for up to 10 agents, good feature/cost balance
+- **Zendesk**: Industry standard, $19-99/agent/month, enterprise features
+- **Plain.com**: Modern, API-first, $29/user/month, beautiful UI
+- **Linear**: Developer-focused, $8/user/month, treat tickets as issues
+
+**Migration Strategy**:
+1. Export ticket data from SQLite to CSV
+2. Import into chosen platform
+3. Update API endpoints to point to new platform
+4. Keep SQLite as backup/archive for 6 months
+5. Optional: Maintain dual-write during transition period
+
+**Alternatives Considered**:
+- **Email-only system**: Simpler but no tracking or status updates
+- **Third-party from day 1**: More features but higher cost, slower to implement
+- **PostgreSQL tickets**: More powerful but requires separate database server
+
+**Trade-offs**:
+- Limited features initially vs. full-featured platforms
+- Manual support team workflows vs. automated ticketing
+- May need to migrate later vs. starting with scalable solution
+- No built-in email integration vs. multi-channel support
+
+---
+
 ## Production Considerations
 
 ### Scaling Strategy
@@ -317,10 +424,11 @@ If you have existing JSON analytics data, you can migrate with a simple script. 
 |-------|-----------|------------|
 | Framework | Next.js 15 | Full-stack simplicity, Vercel deployment |
 | Language | TypeScript | Type safety, better DX |
-| Styling | Tailwind CSS | Rapid development, consistent design system |
+| Styling | Tailwind CSS + Typography | Rapid development, consistent design system, prose formatting |
 | LLM | Claude Haiku 4.5 | Cost-effective, fast, high-quality for customer service |
 | Knowledge Base | JSON with category filtering | Simple, version-controlled, token-efficient |
 | Analytics | SQLite (better-sqlite3) | Local, scalable, fast queries, no external dependencies |
+| Ticketing | SQLite (same database) | Free, controlled, chatbot integration, migration-ready |
 | Markdown | react-markdown | LLM-friendly, clean rendering |
 | Hosting | Vercel (recommended) | Automatic scaling, edge network, simple deployment |
 

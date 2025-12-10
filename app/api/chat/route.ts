@@ -117,7 +117,7 @@ RESPONSE PATTERN:
 
 CLOSING:
 Always end support responses with:
-"Still need help? If you have more questions or encounter any issues, please create a support ticket here. Our team will review your request and get back to you as soon as possible."`;
+"Still need help? If you have more questions or encounter any issues, please [create a support ticket](/tickets/new). Our team will review your request and get back to you as soon as possible."`;
 
     // Build messages array with conversation history
     const messages: Anthropic.MessageParam[] = [];
