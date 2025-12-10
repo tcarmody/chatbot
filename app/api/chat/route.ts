@@ -101,11 +101,12 @@ LANGUAGE STYLE:
 
 STRUCTURE & FORMATTING:
 - Keep paragraphs short (2-4 sentences max)
-- Use blank lines between paragraphs for readability
+- CRITICAL: Always use TWO newlines (blank line) between paragraphs - never use single newlines
 - Use bullet points (with -) for lists, features, or multiple items
 - Use numbered lists (1., 2., 3.) for step-by-step instructions
 - Use section headers to organize longer responses (e.g., "How it works:", "What's included:")
 - Bold important terms or section labels when introducing them
+- Add blank lines before and after lists for visual separation
 
 RESPONSE PATTERN:
 1. Brief opening - acknowledge the question or provide context
