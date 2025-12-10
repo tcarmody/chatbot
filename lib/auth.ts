@@ -372,3 +372,206 @@ export function deleteAdminUser(id: number): boolean {
     return false;
   }
 }
+
+// Get all active sessions
+export function getAllSessions(): Array<{
+  id: number;
+  user_id: number;
+  user_email: string;
+  user_name: string;
+  session_token: string;
+  expires_at: string;
+  created_at: string;
+}> {
+  try {
+    const db = getDatabase();
+
+    const stmt = db.prepare(`
+      SELECT
+        s.id, s.user_id, s.session_token, s.expires_at, s.created_at,
+        u.email as user_email, u.name as user_name
+      FROM admin_sessions s
+      JOIN admin_users u ON s.user_id = u.id
+      WHERE s.expires_at > datetime('now')
+      ORDER BY s.created_at DESC
+    `);
+
+    const sessions = stmt.all() as Array<{
+      id: number;
+      user_id: number;
+      user_email: string;
+      user_name: string;
+      session_token: string;
+      expires_at: string;
+      created_at: string;
+    }>;
+    db.close();
+
+    return sessions;
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    return [];
+  }
+}
+
+// Get sessions for a specific user
+export function getUserSessions(userId: number): Array<{
+  id: number;
+  session_token: string;
+  expires_at: string;
+  created_at: string;
+}> {
+  try {
+    const db = getDatabase();
+
+    const stmt = db.prepare(`
+      SELECT id, session_token, expires_at, created_at
+      FROM admin_sessions
+      WHERE user_id = ? AND expires_at > datetime('now')
+      ORDER BY created_at DESC
+    `);
+
+    const sessions = stmt.all(userId) as Array<{
+      id: number;
+      session_token: string;
+      expires_at: string;
+      created_at: string;
+    }>;
+    db.close();
+
+    return sessions;
+  } catch (error) {
+    console.error('Error fetching user sessions:', error);
+    return [];
+  }
+}
+
+// Delete session by ID (for force logout)
+export function deleteSessionById(id: number): boolean {
+  try {
+    const db = getDatabase();
+
+    const stmt = db.prepare('DELETE FROM admin_sessions WHERE id = ?');
+    const result = stmt.run(id);
+    db.close();
+
+    return result.changes > 0;
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    return false;
+  }
+}
+
+// Delete all sessions for a user
+export function deleteAllUserSessions(userId: number): number {
+  try {
+    const db = getDatabase();
+
+    const stmt = db.prepare('DELETE FROM admin_sessions WHERE user_id = ?');
+    const result = stmt.run(userId);
+    db.close();
+
+    return result.changes;
+  } catch (error) {
+    console.error('Error deleting user sessions:', error);
+    return 0;
+  }
+}
+
+// Generate password reset token
+export function createPasswordResetToken(email: string): string | null {
+  try {
+    const user = getAdminUserByEmail(email);
+    if (!user) {
+      return null;
+    }
+
+    const db = getDatabase();
+
+    // Create password_reset_tokens table if it doesn't exist
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        token TEXT UNIQUE NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used INTEGER NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES admin_users(id)
+      )
+    `);
+
+    // Generate token
+    const token = Math.random().toString(36).substring(2) +
+                  Math.random().toString(36).substring(2) +
+                  Date.now().toString(36);
+
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiry
+
+    const stmt = db.prepare(`
+      INSERT INTO password_reset_tokens (user_id, token, expires_at)
+      VALUES (?, ?, ?)
+    `);
+
+    stmt.run(user.id, token, expiresAt.toISOString());
+    db.close();
+
+    return token;
+  } catch (error) {
+    console.error('Error creating reset token:', error);
+    return null;
+  }
+}
+
+// Validate and use password reset token
+export async function resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+  try {
+    const db = getDatabase();
+
+    // Find valid token
+    const tokenStmt = db.prepare(`
+      SELECT user_id FROM password_reset_tokens
+      WHERE token = ?
+        AND expires_at > datetime('now')
+        AND used = 0
+    `);
+
+    const tokenData = tokenStmt.get(token) as { user_id: number } | undefined;
+
+    if (!tokenData) {
+      db.close();
+      return false;
+    }
+
+    // Hash new password
+    const passwordHash = await hashPassword(newPassword);
+
+    // Update password
+    const updateStmt = db.prepare(`
+      UPDATE admin_users
+      SET password_hash = ?
+      WHERE id = ?
+    `);
+
+    updateStmt.run(passwordHash, tokenData.user_id);
+
+    // Mark token as used
+    const markUsedStmt = db.prepare(`
+      UPDATE password_reset_tokens
+      SET used = 1
+      WHERE token = ?
+    `);
+
+    markUsedStmt.run(token);
+
+    // Delete all sessions for this user (force re-login)
+    db.prepare('DELETE FROM admin_sessions WHERE user_id = ?').run(tokenData.user_id);
+
+    db.close();
+    return true;
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    return false;
+  }
+}
