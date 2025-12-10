@@ -1,0 +1,52 @@
+{
+  "faqs": [
+    {
+      "id": 1,
+      "category": "Courses",
+      "question": "What courses do you offer?",
+      "answer": "We offer a wide range of AI and machine learning courses including Deep Learning Specialization, Machine Learning Specialization, AI for Everyone, Natural Language Processing, Computer Vision, and Generative AI courses."
+    },
+    {
+      "id": 2,
+      "category": "Enrollment",
+      "question": "How do I enroll in a course?",
+      "answer": "You can enroll in any course by visiting our course catalog, selecting your desired course, and clicking the 'Enroll' button. You'll need to create an account if you don't have one already."
+    },
+    {
+      "id": 3,
+      "category": "Pricing",
+      "question": "What are the pricing options?",
+      "answer": "We offer individual course purchases, monthly subscriptions for unlimited access to all courses, and enterprise plans for teams. Many courses also offer a 7-day free trial."
+    },
+    {
+      "id": 4,
+      "category": "Certificates",
+      "question": "Do you provide certificates?",
+      "answer": "Yes! Upon successful completion of a course, you'll receive a shareable certificate that you can add to your LinkedIn profile or resume."
+    },
+    {
+      "id": 5,
+      "category": "Technical",
+      "question": "What are the technical requirements?",
+      "answer": "You'll need a computer with internet access and a modern web browser (Chrome, Firefox, Safari, or Edge). Some courses may require additional software like Python, which we'll guide you through installing."
+    },
+    {
+      "id": 6,
+      "category": "Support",
+      "question": "How can I get help if I'm stuck?",
+      "answer": "We provide multiple support channels: discussion forums for each course, office hours with instructors, and our customer support team available via email and chat."
+    },
+    {
+      "id": 7,
+      "category": "Refunds",
+      "question": "What is your refund policy?",
+      "answer": "We offer a 30-day money-back guarantee for individual course purchases. If you're not satisfied, contact our support team within 30 days of purchase for a full refund."
+    },
+    {
+      "id": 8,
+      "category": "Duration",
+      "question": "How long do courses take to complete?",
+      "answer": "Course duration varies. Most courses take 4-12 weeks to complete if you study 3-5 hours per week. You can learn at your own pace, and course access doesn't expire."
+    }
+  ]
+}
