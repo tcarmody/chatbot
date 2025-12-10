@@ -46,3 +46,6 @@ next-env.d.ts
 /data/analytics.db
 /data/analytics.db-shm
 /data/analytics.db-wal
+
+# uploaded files
+/data/uploads/

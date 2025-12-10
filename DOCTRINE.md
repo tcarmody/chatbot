@@ -309,21 +309,27 @@ CREATE TABLE support_tickets (
 - Homepage quick link: "Create Support Ticket" card
 - Ticket pages allow users to return to chatbot or create new tickets
 
-**Current Limitations** (Phase 1):
-- No automatic email notifications to support team (TODO: add Resend/SendGrid)
-- No email notifications to users on status updates
-- No admin dashboard for support team (manual database queries for now)
-- No file attachments
-- No internal notes/comments
+**Current Features** (Fully Implemented):
+- ✅ Ticket creation form with validation
+- ✅ Unique ticket number generation
+- ✅ Email notifications to support team (Resend)
+- ✅ Email notifications to users (confirmation + status changes)
+- ✅ Admin dashboard at `/admin/tickets` with filtering
+- ✅ Ticket search by email on homepage
+- ✅ File attachment support (database + file system)
+- ✅ Internal notes and comment threads
+- ✅ Status tracking with 4 states (open, in_progress, resolved, closed)
+- ✅ Priority levels (low, medium, high)
+- ✅ Category assignment matching FAQ categories
 
-**Phase 2 Features** (when needed):
-- Admin dashboard at `/admin/tickets` for support team
-- Email notifications via Resend or SendGrid
+**Phase 3 Features** (future enhancements):
 - Ticket assignment to specific team members
-- Internal notes and comment threads
-- File attachment support
-- Search and filtering capabilities
 - SLA tracking and auto-reminders
+- Advanced search (full-text search across descriptions)
+- Bulk operations (close multiple tickets, bulk status changes)
+- Ticket templates for common issues
+- Customer satisfaction ratings
+- Advanced analytics (resolution time, first response time)
 
 **When to Migrate to Third-Party Platform**:
 - Ticket volume exceeds 100+ per week consistently
@@ -351,11 +357,42 @@ CREATE TABLE support_tickets (
 - **Third-party from day 1**: More features but higher cost, slower to implement
 - **PostgreSQL tickets**: More powerful but requires separate database server
 
+**Email Notifications** (via Resend):
+- **To support team**: Notification when new ticket is created with all details
+- **To users**: Confirmation email with ticket number and tracking link
+- **To users**: Status change notifications (open → in_progress → resolved → closed)
+- **Configuration**: Requires `RESEND_API_KEY`, `FROM_EMAIL`, `SUPPORT_EMAIL` in .env
+- **Graceful degradation**: System works without email if API key not configured
+
+**Admin Dashboard** (`/admin/tickets`):
+- **Real-time statistics**: Total, open, in progress, resolved, closed counts
+- **Filtering**: By status and priority with dropdown selectors
+- **Sortable table**: Ticket number, subject, user, status, priority, created date
+- **Inline status updates**: Change status directly from table with dropdown
+- **Auto-refresh**: Stats and list update after status changes
+- **Responsive design**: Works on desktop and mobile
+
+**File Attachments**:
+- **Database schema**: `ticket_attachments` table tracks metadata
+- **File storage**: Physical files saved to `/data/uploads/` directory
+- **Filename format**: `{ticket_number}_{timestamp}_{random}{ext}`
+- **Metadata tracked**: Original name, file size, MIME type, upload timestamp
+- **Security**: Files named uniquely to prevent collisions
+- **APIs**: Add, get, and delete attachment functions
+
+**Comments & Notes**:
+- **Database schema**: `ticket_comments` table with internal/external flag
+- **Internal notes**: Staff-only comments (is_internal = true)
+- **Customer comments**: Visible to users (is_internal = false)
+- **Metadata tracked**: Author name/email, comment text, timestamp
+- **APIs**: Add, get, update, delete comment functions
+- **Chronological ordering**: Comments sorted by creation time
+
 **Trade-offs**:
-- Limited features initially vs. full-featured platforms
-- Manual support team workflows vs. automated ticketing
+- Still need to build UI for attachments and comments (backend ready)
+- No built-in video/screen recording (can link to Loom/etc.)
 - May need to migrate later vs. starting with scalable solution
-- No built-in email integration vs. multi-channel support
+- Single application instance (file locking on high concurrency)
 
 ---
 

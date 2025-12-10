@@ -1,4 +1,5 @@
 import ChatBot from './components/ChatBot';
+import TicketSearch from './components/TicketSearch';
 
 export default function Home() {
   return (
@@ -34,10 +35,7 @@ export default function Home() {
 
         {/* Quick Links */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-2">Browse Courses</h3>
-            <p className="text-sm text-gray-600">Explore our comprehensive AI and ML curriculum</p>
-          </div>
+          <TicketSearch />
           <a href="/tickets/new" className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:border-blue-300 transition-colors">
             <h3 className="font-semibold text-gray-900 mb-2">Create Support Ticket</h3>
             <p className="text-sm text-gray-600">Need personalized help? Submit a ticket to our team</p>

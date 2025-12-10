@@ -17,6 +17,26 @@ export interface Ticket {
   updated_at?: string;
 }
 
+export interface TicketAttachment {
+  id?: number;
+  ticket_number: string;
+  filename: string;
+  original_name: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_at?: string;
+}
+
+export interface TicketComment {
+  id?: number;
+  ticket_number: string;
+  author_name?: string;
+  author_email?: string;
+  comment_text: string;
+  is_internal: boolean; // true for staff notes, false for customer-visible
+  created_at?: string;
+}
+
 const DB_PATH = path.join(process.cwd(), 'data', 'analytics.db');
 
 // Initialize database and create tickets table if needed

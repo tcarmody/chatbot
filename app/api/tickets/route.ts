@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createTicket, getTicketByNumber, getTicketsByEmail } from '@/lib/tickets';
+import { sendTicketCreatedNotification, sendTicketConfirmationEmail } from '@/lib/email';
 
 // POST - Create a new support ticket
 export async function POST(req: NextRequest) {
@@ -35,8 +36,30 @@ export async function POST(req: NextRequest) {
       conversation_context: body.conversation_context,
     });
 
-    // TODO: Send email notification to support team
-    // This would integrate with Resend, SendGrid, or SMTP
+    // Send email notifications (don't block on failure)
+    if (process.env.RESEND_API_KEY) {
+      // Send notification to support team
+      sendTicketCreatedNotification({
+        ticketNumber,
+        userEmail: body.user_email,
+        userName: body.user_name,
+        subject: body.subject,
+        description: body.description,
+        priority: body.priority || 'medium',
+        category: body.category,
+      }).catch(err => console.error('Failed to send support notification:', err));
+
+      // Send confirmation to user
+      sendTicketConfirmationEmail({
+        ticketNumber,
+        userEmail: body.user_email,
+        userName: body.user_name,
+        subject: body.subject,
+        description: body.description,
+        priority: body.priority || 'medium',
+        category: body.category,
+      }).catch(err => console.error('Failed to send user confirmation:', err));
+    }
 
     return NextResponse.json({
       success: true,
