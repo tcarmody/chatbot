@@ -6,6 +6,7 @@ This document captures the key design, architectural, and technical decisions ma
 - [Architecture Decisions](#architecture-decisions)
 - [LLM Selection](#llm-selection)
 - [Knowledge Base Strategy](#knowledge-base-strategy)
+- [Chatbot Response Strategy](#chatbot-response-strategy)
 - [Visual Design & UX](#visual-design--ux)
 - [Frontend Implementation](#frontend-implementation)
 - [Production Considerations](#production-considerations)
@@ -122,6 +123,79 @@ Hybrid JSON (current, <100 FAQs) → Vector DB with semantic search (100-1000 FA
 - **Maintenance**: Keyword lists need occasional updates as FAQ language evolves
 - **Edge cases**: Ambiguous queries may match multiple categories (acceptable, just larger context)
 - **No semantic understanding**: Unlike vector DB, can't find similar concepts without exact keywords
+
+---
+
+## Chatbot Response Strategy
+
+### Approach: Focused Answers with Engagement Over Escalation
+
+**Decision**: Configure the chatbot to provide concise, focused answers that address only what the user asks, while minimizing unnecessary support ticket suggestions.
+
+**Rationale**:
+- **Better User Experience**: Users get direct answers without information overload
+- **Conversational Flow**: Keeps interactions natural; users can ask follow-up questions
+- **Reduces Ticket Volume**: Only escalates when genuinely unable to help from knowledge base
+- **Cost Efficiency**: Shorter responses = lower output token costs
+- **Higher Engagement**: Users feel heard and can control the level of detail they receive
+
+**Implementation Details**:
+
+**1. Core Principles in System Prompt:**
+- "Answer the specific question asked - nothing more"
+- "If there's related information that might be helpful, offer it as a follow-up question instead of including it"
+- "Only suggest support tickets when you genuinely cannot help"
+
+**2. Three-Tier Closing Strategy:**
+- **Complete answers**: "Did that answer your question?" (optional: offer related topic)
+- **Partial help**: "Does this help? Let me know if you have other questions about [topic]."
+- **Outside knowledge base**: Direct ticket suggestion with specific reason
+
+**3. Response Length Guidelines:**
+- Simple questions: One or two brief paragraphs
+- Step-by-step processes: Numbered list with brief intro
+- Complex topics: Use structure only when truly necessary
+
+**Example - Before vs After:**
+
+**Old Approach (verbose, auto-escalates):**
+```
+How to download your certificate:
+[3 paragraphs explaining process]
+[Bullet list of what's included]
+[Troubleshooting section]
+[System requirements]
+Still need help? Create a support ticket... [standard footer]
+```
+
+**New Approach (focused, engagement-oriented):**
+```
+Once you complete a short course, click the Download Certificate button
+on the course completion page. The certificate will download as a PDF.
+
+Did that answer your question? I can also explain what to do if the
+download button isn't appearing, if that would be helpful.
+```
+
+**Benefits**:
+- **50-70% reduction in response length** for simple questions
+- **Fewer unnecessary tickets**: Users get answers immediately instead of being pushed to tickets
+- **Better conversation flow**: Users can dig deeper only if needed
+- **More helpful perception**: Chatbot feels responsive rather than dumping information
+
+**Alternatives Considered**:
+- **Always comprehensive answers**: Covers all bases but feels overwhelming; users skim past relevant info
+- **Always suggest tickets**: Safe but defeats purpose of chatbot; creates unnecessary support burden
+- **One-size-fits-all closing**: Lacks nuance; doesn't adapt to whether question was answered
+
+**Trade-offs**:
+- **Requires careful prompt engineering**: System prompt must clearly communicate when to offer vs provide information
+- **May require iteration**: May need to refine based on user feedback about information sufficiency
+- **Context awareness needed**: Chatbot must understand when it has/hasn't answered the question fully
+
+**Related Documentation**:
+- See [STYLE.md](./STYLE.md) for detailed response patterns and examples
+- System prompt implementation in `app/api/chat/route.ts`
 
 ---
 
@@ -606,7 +680,10 @@ CREATE TABLE admin_sessions (
 ## Document History
 
 **Created**: December 2024
-**Last Updated**: December 2024
+**Last Updated**: December 10, 2024
 **Authors**: Tim (Project Owner), Claude Sonnet 4.5 (AI Assistant)
+
+### Recent Updates
+- **Dec 10, 2024**: Added "Chatbot Response Strategy" section documenting the shift to focused, concise responses with engagement-oriented closings and minimal ticket escalation
 
 This document should be updated whenever significant architectural or design decisions are made or reconsidered.
