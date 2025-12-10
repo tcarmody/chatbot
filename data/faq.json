@@ -2,123 +2,177 @@
   "faqs": [
     {
       "id": 1,
-      "category": "Courses",
-      "question": "What courses do you offer?",
-      "answer": "We offer a wide range of AI and machine learning courses including Deep Learning Specialization, Machine Learning Specialization, AI for Everyone, Natural Language Processing, Computer Vision, Generative AI with Large Language Models, MLOps Specialization, and TensorFlow courses. All courses are taught by industry experts and academic leaders."
+      "category": "Certificates & Course Completion",
+      "question": "How do certificates and accomplishments work in DeepLearning.AI programs?",
+      "answer": "When you complete a DeepLearning.AI program, you can earn a Coursera certificate (paid) if you are taking it on the Coursera platform, an Accomplishment, or a DeepLearning.AI certificate for Pro Members who complete long-form courses or specializations on our platform. A Pro subscription is required to fully complete and access an Accomplishment and/or a DeepLearning.AI certificate."
     },
     {
       "id": 2,
-      "category": "Enrollment",
-      "question": "How do I enroll in a course?",
-      "answer": "You can enroll in any course by visiting our course catalog, selecting your desired course, and clicking the 'Enroll' button. You'll need to create an account if you don't have one already. The process takes less than 2 minutes."
+      "category": "Certificates & Course Completion",
+      "question": "Why didn't I receive a certificate after completing a Short Course?",
+      "answer": "Short Courses do not provide certificates, but they unlock an Accomplishment when completed. Accomplishments are proof that you successfully finished the course and engaged with its content. Certificates are reserved for Specializations and long-form Courses. You can access your Accomplishment from your course dashboard and share it on LinkedIn or your portfolio."
     },
     {
       "id": 3,
-      "category": "Pricing",
-      "question": "What are the pricing options?",
-      "answer": "We offer individual course purchases starting at $49, monthly subscriptions for $39/month with unlimited access to all courses, and enterprise plans for teams starting at $299/month. Many courses also offer a 7-day free trial so you can explore before committing."
+      "category": "Certificates & Course Completion",
+      "question": "Why does my Short Course still appear incomplete after I've finished it?",
+      "answer": "To unlock an Accomplishment, you must have an active Pro Subscription and complete every step: all videos marked as watched, all sections checked off as complete, and the feedback form at the end of the course submitted successfully. If the course still shows incomplete after confirming all steps, try refreshing your browser or logging out and back in."
     },
     {
       "id": 4,
-      "category": "Certificates",
-      "question": "Do you provide certificates?",
-      "answer": "Yes! Upon successful completion of a course, you'll receive a shareable certificate that you can add to your LinkedIn profile or resume. Certificates include verification codes and can be shared with employers."
+      "category": "Certificates & Course Completion",
+      "question": "Can I download a PDF version of my Short Course Accomplishment?",
+      "answer": "At this time, Short Course Accomplishments do not include a downloadable PDF. The record of your completion is available online through your Accomplishment page. You can take a screenshot or print to PDF directly from your browser. Your Accomplishment is designed to be shareable digitally via a link to LinkedIn, your resume, or portfolio."
     },
     {
       "id": 5,
-      "category": "Technical",
-      "question": "What are the technical requirements?",
-      "answer": "You'll need a computer with internet access and a modern web browser (Chrome, Firefox, Safari, or Edge). Some courses may require additional software like Python, Jupyter Notebook, or TensorFlow, which we'll guide you through installing step-by-step."
+      "category": "Certificates & Course Completion",
+      "question": "How long will it take me to complete a Short Course?",
+      "answer": "Most Short Courses take about 1 to 2 hours to complete. They're built to give you practical AI knowledge in a short amount of time, making it possible to learn a new concept or tool in a single session. You can complete a course in one sitting, pause and continue whenever it works for you, or revisit the material anytime after finishing."
     },
     {
       "id": 6,
-      "category": "Support",
-      "question": "How can I get help if I'm stuck?",
-      "answer": "We provide multiple support channels: discussion forums for each course with peer and instructor support, weekly office hours with instructors, detailed documentation, and our customer support team available via email at support@aieducation.com and chat 24/7."
+      "category": "Account & Profile Management",
+      "question": "How can I create a DeepLearning.AI account?",
+      "answer": "Go to learn.deeplearning.ai and click Sign in at the top-right corner. Under the sign-in form, click 'Don't have an account? Create account.' Choose to sign up with your Google account, LinkedIn account, or email address. If you choose email, you'll receive a registration email to confirm your account. Verify your email by clicking the confirmation link to complete registration."
     },
     {
       "id": 7,
-      "category": "Refunds",
-      "question": "What is your refund policy?",
-      "answer": "We offer a 30-day money-back guarantee for individual course purchases. If you're not satisfied for any reason, contact our support team within 30 days of purchase for a full refund, no questions asked."
+      "category": "Account & Profile Management",
+      "question": "How can I delete my DeepLearning.AI account and personal data?",
+      "answer": "You cannot delete your account or data by yourself. To proceed, you must submit a request through our Support team. You can request to delete only your Learning Platform account (which removes course access but keeps your email in our database), only your personal data (which unsubscribes you from emails but keeps your Learning Platform account active), or both. Create a support ticket and specify what you want deleted."
     },
     {
       "id": 8,
-      "category": "Duration",
-      "question": "How long do courses take to complete?",
-      "answer": "Course duration varies. Most courses take 4-12 weeks to complete if you study 3-5 hours per week. However, you can learn at your own pace, and course access doesn't expire. Some students finish faster, others take longer."
+      "category": "Account & Profile Management",
+      "question": "How can I reset my DeepLearning.AI password?",
+      "answer": "Go to the DeepLearning.AI login page and click 'Forgot password?' Enter your email address and click Submit. A reset password link will be sent to your email (check spam/promotions folder if needed). Click the Reset password button in the email, enter your new password twice, and click Submit to save. Then log in with your new password."
     },
     {
       "id": 9,
-      "category": "Prerequisites",
-      "question": "Do I need prior programming experience?",
-      "answer": "It depends on the course. Our 'AI for Everyone' course has no prerequisites and is designed for beginners. Technical courses like Deep Learning Specialization require basic Python programming and linear algebra. Each course page lists specific prerequisites."
+      "category": "Account & Profile Management",
+      "question": "How can I edit my DeepLearning.AI profile?",
+      "answer": "Log into the DeepLearning.AI Learning Platform, go to 'My Learnings' page (learn.deeplearning.ai/my/learnings), and click the edit pencil icon at the top left of your profile. From the Edit Profile window, you can update your Display Name. To change your email address, contact our support team with both your current and new email addresses. Note that we do not support merging data from two different accounts."
     },
     {
       "id": 10,
-      "category": "Certificates",
-      "question": "Are the certificates recognized by employers?",
-      "answer": "Yes! Our certificates are widely recognized in the industry. We partner with leading tech companies and universities. Many of our graduates have successfully used their certificates to advance their careers or transition into AI roles."
+      "category": "Account & Profile Management",
+      "question": "How can I update my DeepLearning.AI email preferences?",
+      "answer": "You can manage your preferences through the links at the bottom of every DeepLearning.AI email. Click 'Manage preferences' to select which types of emails you want to receive (Data Points, The Batch Newsletter, Course Announcements, Events, etc.) and uncheck the boxes for emails you don't want. Click 'Unsubscribe' to remove yourself from all DeepLearning.AI communications."
     },
     {
       "id": 11,
-      "category": "Access",
-      "question": "Can I access courses on mobile devices?",
-      "answer": "Yes! Our platform is fully responsive and works on smartphones and tablets. We also have dedicated iOS and Android apps for learning on the go. However, for coding assignments, we recommend using a laptop or desktop."
+      "category": "Technical Issues & Course Access",
+      "question": "Why are quizzes or assignments locked in my course?",
+      "answer": "Quizzes and assignments are available only to Pro members. Learners on the free plan have access to course videos and materials, but advanced features like quizzes and graded assignments are restricted. To unlock this content, visit the Pro membership page to review subscription options and upgrade your account to Pro."
     },
     {
       "id": 12,
-      "category": "Content",
-      "question": "How are courses structured?",
-      "answer": "Each course consists of video lectures, reading materials, quizzes, and hands-on programming assignments. You'll work on real-world projects and build a portfolio. Most courses include interactive Jupyter notebooks for practice."
+      "category": "Technical Issues & Course Access",
+      "question": "Can I access Short Course code and resources outside of the platform?",
+      "answer": "The API keys used within Short Courses are confidential and not shared. If you want to run notebooks on your own, you'll need to use your own API keys. To download notebooks and files, open the workspace of the first lab in the Short Course, click File → Open in the Jupyter notebook, and from there you can view and download all files. Some courses provide a requirements.txt file to help you recreate the same environment on your own computer."
     },
     {
       "id": 13,
-      "category": "Instructors",
-      "question": "Who are the instructors?",
-      "answer": "Our courses are taught by world-renowned experts in AI and machine learning, including professors from Stanford, MIT, and other top universities, as well as engineers from leading tech companies like Google, Meta, and OpenAI."
+      "category": "Membership Support",
+      "question": "What is the DeepLearning.AI Pro membership?",
+      "answer": "The DeepLearning.AI Pro membership is a paid subscription that gives you unlimited access to our complete catalog of AI learning resources. With Pro, you can build real projects, earn certificates, and keep your skills current with weekly updates. It includes unlimited access to courses, professional certificates, quizzes, interactive labs, and new content released every week."
     },
     {
       "id": 14,
-      "category": "Updates",
-      "question": "Are courses updated regularly?",
-      "answer": "Yes! We continuously update our courses to reflect the latest developments in AI and machine learning. When significant updates are made, enrolled students get free access to the new content."
+      "category": "Membership Support",
+      "question": "What do I get with the DeepLearning.AI Pro membership that I don't get for free?",
+      "answer": "Pro membership includes: quizzes and interactive labs in all courses, certificates of completion, ability to save your work and resume anytime, access to professional certificate learning tracks, projects that help you build real AI applications, community support and global peer network, and weekly updates on new AI tools and techniques. Free members can watch course videos, access the community forum, and receive newsletters."
     },
     {
       "id": 15,
-      "category": "Community",
-      "question": "Is there a community I can join?",
-      "answer": "Absolutely! We have an active community of over 500,000 learners worldwide. You can connect through course discussion forums, our Discord server, monthly meetups, and study groups. Many students form lasting professional connections."
+      "category": "Membership Support",
+      "question": "How much does the DeepLearning.AI Pro membership cost?",
+      "answer": "The DeepLearning.AI Pro membership offers both monthly and yearly plans. The exact pricing is always available on the membership page for the most up-to-date information. All prices are listed in USD, exclusive of taxes unless otherwise stated. You can choose a monthly or annual billing plan, and payments are processed securely via Stripe."
     },
     {
       "id": 16,
-      "category": "Career",
-      "question": "Do you offer career support?",
-      "answer": "Yes! Premium subscribers get access to career services including resume reviews, interview preparation, job board access, and connections with hiring partners. We also host regular career webinars and networking events."
+      "category": "Membership Support",
+      "question": "Are Professional Certificates included in the DeepLearning.AI Pro membership?",
+      "answer": "Yes. Pro members have full access to DeepLearning.AI's Professional Certificates. Each time you complete a course, you'll receive its certificate at no extra cost. This includes full access to every course, quizzes, labs, hands-on projects, and a certificate of completion for each course. There is no separate charge for each course or track — it's all included in your Pro membership."
     },
     {
       "id": 17,
-      "category": "Enterprise",
-      "question": "Do you offer team or enterprise plans?",
-      "answer": "Yes! Our enterprise plans include bulk licenses, custom learning paths, advanced analytics, dedicated account management, and priority support. Contact our enterprise team at enterprise@aieducation.com for a customized quote."
+      "category": "Membership Support",
+      "question": "How does the 7-day trial for DeepLearning.AI Pro membership work?",
+      "answer": "The 7-day free trial gives you full access to all Pro features (courses, quizzes, labs, saved progress, portfolio projects, community support). Your payment method is collected upfront and will be charged automatically at the end of the trial unless you cancel. Certificates are only available after a payment has been made and the subscription is active, not during the trial period. You can cancel any time during the trial to avoid charges."
     },
     {
       "id": 18,
-      "category": "Financial Aid",
-      "question": "Do you offer financial aid or scholarships?",
-      "answer": "Yes! We offer need-based financial aid and scholarships for qualified applicants. The application process is simple and confidential. You can apply directly from any course page. We also offer student discounts."
+      "category": "Membership Support",
+      "question": "Will I lose my certificates or progress if I go back to Free?",
+      "answer": "No. All certificates you earned and your course progress will remain linked to your account. You will still be able to view and download certificates earned during your Pro access, see your course progress, and resume watching course videos (which remain free to access). Your progress will be saved for up to 180 days, and you can pick up where you left off if you upgrade again during that period."
     },
     {
       "id": 19,
-      "category": "Specializations",
-      "question": "What's the difference between a course and a specialization?",
-      "answer": "A course is a single focused topic (typically 4-6 weeks). A specialization is a series of related courses (3-7 courses) that together provide deep expertise in a specific area like Deep Learning or MLOps. Completing a specialization earns you a specialization certificate."
+      "category": "Membership Support",
+      "question": "Can I change my DeepLearning.AI Pro membership anytime?",
+      "answer": "Yes. You can upgrade or downgrade your membership at any time. When you upgrade, changes take effect immediately so you'll get instant access to new courses, certifications, and features. When you downgrade, your current access will remain active until the end of your billing cycle, and your progress in any started course will be saved for 180 days."
     },
     {
       "id": 20,
-      "category": "Account",
-      "question": "Can I pause my subscription?",
-      "answer": "Yes! You can pause your monthly subscription for up to 6 months. Your progress will be saved and you can resume anytime. You can manage your subscription from your account settings page."
+      "category": "Membership Support",
+      "question": "Can I join the DeepLearning.AI Pro membership if I'm new to programming?",
+      "answer": "Yes. You can join Pro even if you've never written code before. The program supports both beginners and experienced learners with a clear path from basics to building real AI projects. Our AI Python for Beginners course has helped over 230,000 people learn to code from scratch using AI as their tutor. AI for Everyone and Generative AI for Everyone require no coding at all and are great entry points."
+    },
+    {
+      "id": 21,
+      "category": "Membership Support",
+      "question": "How much time do I need to commit each week with the DeepLearning.AI Pro membership?",
+      "answer": "Pro membership courses are fully self-paced and modular, so you can decide how much time to dedicate each week. Most learners spend 3–5 hours per week on coursework. You can move through the material at your own speed, take breaks when needed, and return later without losing your progress."
+    },
+    {
+      "id": 22,
+      "category": "Membership Support",
+      "question": "Why don't I see certain courses in my Pro membership?",
+      "answer": "Pro membership includes a wide range of DeepLearning.AI courses and short courses. However, some new or specialized programs may not yet be available under Pro. We're continuously adding more content. If the course you want isn't included in Pro, you may consider exploring other available Pro courses in the meantime. If the program is offered on Coursera, you can still take it there with a separate fee."
+    },
+    {
+      "id": 23,
+      "category": "Billing & Payments",
+      "question": "How does billing work for the DeepLearning.AI Pro membership?",
+      "answer": "Billing is automatic and based on the plan you choose at signup. Monthly plan: charged once every month on the same calendar date as your original signup. Annual plan: charged once per year on your signup date. Payments are processed automatically through Stripe at the beginning of each billing cycle. If you cancel, you keep Pro access until the end of your current billing period."
+    },
+    {
+      "id": 24,
+      "category": "Billing & Payments",
+      "question": "What payment methods can I use for the DeepLearning.AI Pro membership?",
+      "answer": "We accept all major credit and debit cards through our payment processor, Stripe: Visa, Mastercard, American Express, and Discover. Stripe ensures that all transactions are secure and compliant with global payment standards."
+    },
+    {
+      "id": 25,
+      "category": "Billing & Payments",
+      "question": "What should I do if my Pro membership payment fails?",
+      "answer": "Our payment processor, Stripe, will automatically retry the charge and send you an email notification. Make sure your payment details are up to date, update your card or billing information in your Plan settings, and contact your bank to ensure they aren't blocking the transaction. If the issue persists, create a support ticket with the payment attempt date, error messages, or screenshots."
+    },
+    {
+      "id": 26,
+      "category": "Billing & Payments",
+      "question": "How do refunds work for the DeepLearning.AI Pro membership?",
+      "answer": "You can cancel any time during the 7-day trial to avoid charges. After the trial, renewals, upgrades, or new payments are non-refundable. We do not issue partial refunds if you cancel or downgrade before the end of your billing cycle. If you believe you were charged incorrectly or canceled during your trial but were still billed, create a support ticket and our team will review your case."
+    },
+    {
+      "id": 27,
+      "category": "Billing & Payments",
+      "question": "How can I get a receipt for my Pro membership payment?",
+      "answer": "Log in to your DeepLearning.AI account, click your profile icon, go to 'Manage Subscription', click 'Manage Subscription' again from the pricing pop-up, scroll down to the Invoice history section, and click on a payment entry to view your receipt. Receipts include important details about your subscription and payment."
+    },
+    {
+      "id": 28,
+      "category": "Billing & Payments",
+      "question": "Can I switch between monthly and annual billing?",
+      "answer": "Yes. You can change your Pro membership billing cycle at any time in your account settings. Switching from monthly to annual takes effect immediately and you'll be charged for the annual plan right away. Switching from annual to monthly takes effect at the end of your current annual period, and you continue to have Pro access until your annual plan expires."
+    },
+    {
+      "id": 29,
+      "category": "Billing & Payments",
+      "question": "Are taxes included in my Pro membership payment?",
+      "answer": "Pro membership pricing is listed in US dollars (USD). Prices shown are exclusive of taxes unless otherwise stated. Stripe, our payment processor, automatically calculates and applies taxes based on your billing address. The exact tax amount (if any) will appear before you confirm your payment."
     }
   ]
 }
