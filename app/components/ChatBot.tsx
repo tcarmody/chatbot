@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -98,7 +99,13 @@ export default function ChatBot() {
                   : 'bg-white text-gray-800 border border-gray-200'
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              {message.role === 'user' ? (
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              ) : (
+                <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-1">
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         ))}
