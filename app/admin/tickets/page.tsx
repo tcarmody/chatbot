@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Navigation from '@/app/components/Navigation';
+import { SkeletonTable, SkeletonStats } from '@/app/components/Skeleton';
+import { RefreshCw, Filter, X, LogOut } from 'lucide-react';
 
 interface Ticket {
   id: number;
@@ -175,47 +178,48 @@ export default function AdminTicketsPage() {
 
   if (loading && !stats) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading admin dashboard...</div>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation variant="admin" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-2" />
+            <div className="h-4 w-96 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <SkeletonStats count={5} />
+          <div className="mt-8">
+            <SkeletonTable rows={5} cols={7} />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <Navigation variant="admin" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <Link
-              href="/"
-              className="text-blue-600 hover:text-blue-700 text-sm"
-            >
-              ← Back to Home
-            </Link>
-            {user && (
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => router.push('/admin/sessions')}
-                  className="text-sm px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Sessions
-                </button>
-                <div className="text-sm text-gray-600 border-l border-gray-300 pl-4">
-                  <span className="font-medium text-gray-900">{user.name}</span>
-                  <span className="ml-2">({user.role})</span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Support Tickets</h1>
+            <p className="text-gray-600 mt-1">Manage and respond to customer support tickets</p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Support Tickets Admin</h1>
-          <p className="text-gray-600 mt-2">Manage and respond to customer support tickets</p>
+          {user && (
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-right">
+                <div className="font-medium text-gray-900">{user.name}</div>
+                <div className="text-gray-500">{user.role}</div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Stats Overview */}

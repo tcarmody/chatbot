@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Navigation from '@/app/components/Navigation';
+import { SkeletonTable } from '@/app/components/Skeleton';
+import { RefreshCw, LogOut, Info, Clock } from 'lucide-react';
 
 interface Session {
   id: number;
@@ -124,42 +127,42 @@ export default function SessionsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation variant="admin" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <SkeletonTable rows={4} cols={6} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <Navigation variant="admin" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Active Sessions</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Manage all active admin sessions
-              </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Active Sessions</h1>
+            <p className="text-gray-600 mt-1">Manage all active admin sessions</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-right">
+              <div className="font-medium text-gray-900">{user.name}</div>
+              <div className="text-gray-500">{user.role}</div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push('/admin/tickets')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Back to Tickets
-              </button>
-              <div className="text-sm text-gray-600 border-l border-gray-300 pl-4">
-                <span className="font-medium text-gray-900">{user.name}</span>
-                <span className="ml-2">({user.role})</span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
           </div>
         </div>
 
@@ -172,8 +175,9 @@ export default function SessionsPage() {
               </h2>
               <button
                 onClick={fetchSessions}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
+                <RefreshCw className="w-4 h-4" />
                 Refresh
               </button>
             </div>
@@ -266,30 +270,20 @@ export default function SessionsPage() {
 
         {/* Info Box */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <svg
-              className="w-5 h-5 text-blue-600 mt-0.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <div className="ml-3">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div>
               <h3 className="text-sm font-medium text-blue-900">
                 About Session Management
               </h3>
-              <div className="mt-2 text-sm text-blue-800">
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Sessions expire automatically after 7 days</li>
-                  <li>Force logout will immediately terminate a session</li>
-                  <li>Users will need to log in again after being logged out</li>
-                  <li>All force logout actions are logged in the audit trail</li>
-                </ul>
-              </div>
+              <ul className="mt-2 text-sm text-blue-800 space-y-1">
+                <li className="flex items-center gap-2">
+                  <Clock className="w-3 h-3" /> Sessions expire automatically after 7 days
+                </li>
+                <li>Force logout will immediately terminate a session</li>
+                <li>Users will need to log in again after being logged out</li>
+                <li>All force logout actions are logged in the audit trail</li>
+              </ul>
             </div>
           </div>
         </div>

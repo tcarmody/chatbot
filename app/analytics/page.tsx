@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Navigation from '@/app/components/Navigation';
+import { SkeletonStats, SkeletonCard } from '@/app/components/Skeleton';
+import { RefreshCw, LogOut, MessageSquare, Clock, Coins, Zap } from 'lucide-react';
 
 interface AnalyticsSummary {
   totalQueries: number;
@@ -78,39 +80,58 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading analytics...</div>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation variant="admin" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+            <div className="h-4 w-72 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <SkeletonStats count={4} />
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !analytics) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error || 'No data available'}</div>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation variant="admin" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-800">Error: {error || 'No data available'}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <Navigation variant="admin" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with user info and logout */}
         <div className="mb-8 flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Chatbot Analytics</h1>
-            <p className="text-gray-600 mt-2">Usage insights and performance metrics</p>
+            <p className="text-gray-600 mt-1">Usage insights and performance metrics</p>
           </div>
           {user && (
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                <div className="text-xs text-gray-600">{user.role}</div>
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-right">
+                <div className="font-medium text-gray-900">{user.name}</div>
+                <div className="text-gray-500">{user.role}</div>
               </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
+                <LogOut className="w-4 h-4" />
                 Logout
               </button>
             </div>
@@ -120,15 +141,24 @@ export default function AnalyticsPage() {
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Total Queries</div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+              <MessageSquare className="w-4 h-4" />
+              Total Queries
+            </div>
             <div className="text-3xl font-bold text-gray-900">{analytics.totalQueries}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Avg Response Time</div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+              <Clock className="w-4 h-4" />
+              Avg Response Time
+            </div>
             <div className="text-3xl font-bold text-gray-900">{analytics.avgResponseTime}ms</div>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Total Tokens</div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+              <Zap className="w-4 h-4" />
+              Total Tokens
+            </div>
             <div className="text-3xl font-bold text-gray-900">
               {(analytics.totalInputTokens + analytics.totalOutputTokens).toLocaleString()}
             </div>
@@ -137,7 +167,10 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Estimated Cost</div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+              <Coins className="w-4 h-4" />
+              Estimated Cost
+            </div>
             <div className="text-3xl font-bold text-gray-900">
               ${analytics.estimatedCost.total.toFixed(3)}
             </div>
@@ -190,17 +223,12 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex justify-center gap-4">
-          <Link
-            href="/"
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-          >
-            ← Back to Home
-          </Link>
+        <div className="mt-8 flex justify-center">
           <button
             onClick={fetchAnalytics}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
+            <RefreshCw className="w-4 h-4" />
             Refresh Data
           </button>
         </div>
