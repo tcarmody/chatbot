@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createTicket, getTicketByNumber, getTicketsByEmail } from '@/lib/tickets';
+import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 // POST - Create a new support ticket
 export async function POST(req: NextRequest) {
+  // Rate limiting for ticket creation
+  const clientIP = getClientIP(req);
+  const rateLimitResult = checkRateLimit(clientIP, RATE_LIMITS.ticketCreate);
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult);
+  }
+
   try {
     const body = await req.json();
 
@@ -52,6 +60,13 @@ export async function POST(req: NextRequest) {
 // GET - Retrieve ticket(s)
 // Query params: ticket_number OR email
 export async function GET(req: NextRequest) {
+  // Rate limiting for ticket lookups
+  const clientIP = getClientIP(req);
+  const rateLimitResult = checkRateLimit(clientIP, RATE_LIMITS.ticketLookup);
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult);
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const ticketNumber = searchParams.get('ticket_number');

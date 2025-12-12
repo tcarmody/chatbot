@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateAdmin, createSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  // Rate limiting for brute force protection
+  const clientIP = getClientIP(req);
+  const rateLimitResult = checkRateLimit(clientIP, RATE_LIMITS.adminLogin);
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult);
+  }
+
   try {
     const { email, password } = await req.json();
 

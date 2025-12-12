@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -14,7 +14,7 @@ interface Ticket {
   created_at: string;
 }
 
-export default function TicketListPage() {
+function TicketListContent() {
   const searchParams = useSearchParams();
   const email = searchParams?.get('email');
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -193,5 +193,17 @@ export default function TicketListPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TicketListPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading tickets...</div>
+      </div>
+    }>
+      <TicketListContent />
+    </Suspense>
   );
 }
