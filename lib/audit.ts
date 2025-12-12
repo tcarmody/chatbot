@@ -1,5 +1,5 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+// Audit logging using Vercel Postgres
+import { sql, initializeSchema } from './db';
 
 export interface AuditLog {
   id?: number;
@@ -14,64 +14,28 @@ export interface AuditLog {
   created_at?: string;
 }
 
-const DB_PATH = path.join(process.cwd(), 'data', 'analytics.db');
-
-// Initialize audit log table
-function getDatabase() {
-  const db = new Database(DB_PATH);
-
-  // Create audit logs table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS audit_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      user_email TEXT NOT NULL,
-      action TEXT NOT NULL,
-      resource_type TEXT NOT NULL,
-      resource_id TEXT,
-      details TEXT,
-      ip_address TEXT,
-      user_agent TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES admin_users(id)
-    )
-  `);
-
-  // Create indexes
-  db.exec(`
-    CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);
-    CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action);
-    CREATE INDEX IF NOT EXISTS idx_audit_resource ON audit_logs(resource_type, resource_id);
-    CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
-  `);
-
-  return db;
-}
-
 // Log an action
-export function logAudit(log: Omit<AuditLog, 'id' | 'created_at'>): number {
+export async function logAudit(log: Omit<AuditLog, 'id' | 'created_at'>): Promise<number> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       INSERT INTO audit_logs (
         user_id, user_email, action, resource_type, resource_id, details, ip_address, user_agent
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+      ) VALUES (
+        ${log.user_id},
+        ${log.user_email},
+        ${log.action},
+        ${log.resource_type},
+        ${log.resource_id || null},
+        ${log.details || null},
+        ${log.ip_address || null},
+        ${log.user_agent || null}
+      )
+      RETURNING id
+    `;
 
-    const result = stmt.run(
-      log.user_id,
-      log.user_email,
-      log.action,
-      log.resource_type,
-      log.resource_id || null,
-      log.details || null,
-      log.ip_address || null,
-      log.user_agent || null
-    );
-
-    db.close();
-    return result.lastInsertRowid as number;
+    return result.rows[0]?.id || 0;
   } catch (error) {
     console.error('Error logging audit:', error);
     return 0;
@@ -79,52 +43,126 @@ export function logAudit(log: Omit<AuditLog, 'id' | 'created_at'>): number {
 }
 
 // Get audit logs with filters
-export function getAuditLogs(filters?: {
+export async function getAuditLogs(filters?: {
   user_id?: number;
   action?: string;
   resource_type?: string;
   limit?: number;
   offset?: number;
-}): { logs: AuditLog[]; total: number } {
+}): Promise<{ logs: AuditLog[]; total: number }> {
   try {
-    const db = getDatabase();
-    const whereClauses: string[] = [];
-    const params: any[] = [];
+    await initializeSchema();
 
-    if (filters?.user_id) {
-      whereClauses.push('user_id = ?');
-      params.push(filters.user_id);
-    }
-
-    if (filters?.action) {
-      whereClauses.push('action = ?');
-      params.push(filters.action);
-    }
-
-    if (filters?.resource_type) {
-      whereClauses.push('resource_type = ?');
-      params.push(filters.resource_type);
-    }
-
-    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
-
-    // Get total count
-    const countStmt = db.prepare(`SELECT COUNT(*) as count FROM audit_logs ${whereClause}`);
-    const countResult = countStmt.get(...params) as { count: number };
-    const total = countResult.count;
-
-    // Get logs with pagination
     const limit = filters?.limit || 50;
     const offset = filters?.offset || 0;
 
-    const logsStmt = db.prepare(`
-      SELECT * FROM audit_logs ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `);
+    // Build query based on filters
+    let logs: AuditLog[] = [];
+    let total = 0;
 
-    const logs = logsStmt.all(...params, limit, offset) as AuditLog[];
-    db.close();
+    if (filters?.user_id && filters?.action && filters?.resource_type) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs
+        WHERE user_id = ${filters.user_id} AND action = ${filters.action} AND resource_type = ${filters.resource_type}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs
+        WHERE user_id = ${filters.user_id} AND action = ${filters.action} AND resource_type = ${filters.resource_type}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else if (filters?.user_id && filters?.action) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs
+        WHERE user_id = ${filters.user_id} AND action = ${filters.action}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs
+        WHERE user_id = ${filters.user_id} AND action = ${filters.action}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else if (filters?.user_id && filters?.resource_type) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs
+        WHERE user_id = ${filters.user_id} AND resource_type = ${filters.resource_type}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs
+        WHERE user_id = ${filters.user_id} AND resource_type = ${filters.resource_type}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else if (filters?.action && filters?.resource_type) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs
+        WHERE action = ${filters.action} AND resource_type = ${filters.resource_type}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs
+        WHERE action = ${filters.action} AND resource_type = ${filters.resource_type}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else if (filters?.user_id) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs WHERE user_id = ${filters.user_id}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs WHERE user_id = ${filters.user_id}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else if (filters?.action) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs WHERE action = ${filters.action}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs WHERE action = ${filters.action}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else if (filters?.resource_type) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM audit_logs WHERE resource_type = ${filters.resource_type}
+      `;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs WHERE resource_type = ${filters.resource_type}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    } else {
+      const countResult = await sql`SELECT COUNT(*) as count FROM audit_logs`;
+      total = Number(countResult.rows[0]?.count || 0);
+
+      const logsResult = await sql`
+        SELECT * FROM audit_logs
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      logs = logsResult.rows.map(mapAuditRow);
+    }
 
     return { logs, total };
   } catch (error) {
@@ -133,22 +171,35 @@ export function getAuditLogs(filters?: {
   }
 }
 
+// Helper to map database row to AuditLog
+function mapAuditRow(row: Record<string, unknown>): AuditLog {
+  return {
+    id: row.id as number,
+    user_id: row.user_id as number,
+    user_email: row.user_email as string,
+    action: row.action as string,
+    resource_type: row.resource_type as string,
+    resource_id: row.resource_id as string | undefined,
+    details: row.details as string | undefined,
+    ip_address: row.ip_address as string | undefined,
+    user_agent: row.user_agent as string | undefined,
+    created_at: (row.created_at as Date)?.toISOString(),
+  };
+}
+
 // Get recent activity for a user
-export function getUserRecentActivity(userId: number, limit: number = 10): AuditLog[] {
+export async function getUserRecentActivity(userId: number, limit: number = 10): Promise<AuditLog[]> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT * FROM audit_logs
-      WHERE user_id = ?
+      WHERE user_id = ${userId}
       ORDER BY created_at DESC
-      LIMIT ?
-    `);
+      LIMIT ${limit}
+    `;
 
-    const logs = stmt.all(userId, limit) as AuditLog[];
-    db.close();
-
-    return logs;
+    return result.rows.map(mapAuditRow);
   } catch (error) {
     console.error('Error fetching user activity:', error);
     return [];
@@ -156,47 +207,52 @@ export function getUserRecentActivity(userId: number, limit: number = 10): Audit
 }
 
 // Get audit statistics
-export function getAuditStats(): {
+export async function getAuditStats(): Promise<{
   total_actions: number;
   actions_today: number;
   top_actions: { action: string; count: number }[];
   active_users_today: number;
-} {
+}> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
     // Total actions
-    const totalResult = db.prepare('SELECT COUNT(*) as count FROM audit_logs').get() as { count: number };
+    const totalResult = await sql`SELECT COUNT(*) as count FROM audit_logs`;
+    const total_actions = Number(totalResult.rows[0]?.count || 0);
 
     // Actions today
-    const todayResult = db.prepare(`
+    const todayResult = await sql`
       SELECT COUNT(*) as count FROM audit_logs
-      WHERE DATE(created_at) = DATE('now')
-    `).get() as { count: number };
+      WHERE DATE(created_at) = CURRENT_DATE
+    `;
+    const actions_today = Number(todayResult.rows[0]?.count || 0);
 
     // Top actions
-    const topActionsResult = db.prepare(`
+    const topActionsResult = await sql`
       SELECT action, COUNT(*) as count
       FROM audit_logs
       GROUP BY action
       ORDER BY count DESC
       LIMIT 5
-    `).all() as { action: string; count: number }[];
+    `;
+    const top_actions = topActionsResult.rows.map(row => ({
+      action: row.action as string,
+      count: Number(row.count),
+    }));
 
     // Active users today
-    const activeUsersResult = db.prepare(`
+    const activeUsersResult = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM audit_logs
-      WHERE DATE(created_at) = DATE('now')
-    `).get() as { count: number };
-
-    db.close();
+      WHERE DATE(created_at) = CURRENT_DATE
+    `;
+    const active_users_today = Number(activeUsersResult.rows[0]?.count || 0);
 
     return {
-      total_actions: totalResult.count,
-      actions_today: todayResult.count,
-      top_actions: topActionsResult,
-      active_users_today: activeUsersResult.count,
+      total_actions,
+      actions_today,
+      top_actions,
+      active_users_today,
     };
   } catch (error) {
     console.error('Error fetching audit stats:', error);

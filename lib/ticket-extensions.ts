@@ -1,81 +1,29 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
+// Ticket extensions (attachments and comments) using Vercel Postgres
+// Note: File uploads should use Vercel Blob or another cloud storage service
+import { sql, initializeSchema } from './db';
 import { TicketAttachment, TicketComment } from './tickets';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'analytics.db');
-const UPLOADS_DIR = path.join(process.cwd(), 'data', 'uploads');
-
-// Initialize extended database tables
-function getDatabase() {
-  const db = new Database(DB_PATH);
-
-  // Create attachments table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS ticket_attachments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      ticket_number TEXT NOT NULL,
-      filename TEXT NOT NULL,
-      original_name TEXT NOT NULL,
-      file_size INTEGER NOT NULL,
-      mime_type TEXT NOT NULL,
-      uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (ticket_number) REFERENCES support_tickets(ticket_number)
-    )
-  `);
-
-  // Create comments table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS ticket_comments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      ticket_number TEXT NOT NULL,
-      author_name TEXT,
-      author_email TEXT,
-      comment_text TEXT NOT NULL,
-      is_internal INTEGER NOT NULL DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (ticket_number) REFERENCES support_tickets(ticket_number)
-    )
-  `);
-
-  // Create indexes
-  db.exec(`
-    CREATE INDEX IF NOT EXISTS idx_attachments_ticket ON ticket_attachments(ticket_number);
-    CREATE INDEX IF NOT EXISTS idx_comments_ticket ON ticket_comments(ticket_number);
-    CREATE INDEX IF NOT EXISTS idx_comments_created ON ticket_comments(created_at);
-  `);
-
-  return db;
-}
-
-// Ensure uploads directory exists
-function ensureUploadsDir() {
-  if (!fs.existsSync(UPLOADS_DIR)) {
-    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  }
-}
-
-// Add attachment to ticket
-export function addAttachment(attachment: Omit<TicketAttachment, 'id' | 'uploaded_at'>): number {
+// Add attachment metadata to database
+// Note: Actual file storage should be handled separately (e.g., Vercel Blob)
+export async function addAttachment(attachment: Omit<TicketAttachment, 'id' | 'uploaded_at'> & { storage_url?: string }): Promise<number> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       INSERT INTO ticket_attachments (
-        ticket_number, filename, original_name, file_size, mime_type
-      ) VALUES (?, ?, ?, ?, ?)
-    `);
+        ticket_number, filename, original_name, file_size, mime_type, storage_url
+      ) VALUES (
+        ${attachment.ticket_number},
+        ${attachment.filename},
+        ${attachment.original_name},
+        ${attachment.file_size},
+        ${attachment.mime_type},
+        ${attachment.storage_url || null}
+      )
+      RETURNING id
+    `;
 
-    const result = stmt.run(
-      attachment.ticket_number,
-      attachment.filename,
-      attachment.original_name,
-      attachment.file_size,
-      attachment.mime_type
-    );
-
-    db.close();
-    return result.lastInsertRowid as number;
+    return result.rows[0]?.id || 0;
   } catch (error) {
     console.error('Error adding attachment:', error);
     throw new Error('Failed to add attachment');
@@ -83,102 +31,74 @@ export function addAttachment(attachment: Omit<TicketAttachment, 'id' | 'uploade
 }
 
 // Get attachments for a ticket
-export function getTicketAttachments(ticketNumber: string): TicketAttachment[] {
+export async function getTicketAttachments(ticketNumber: string): Promise<(TicketAttachment & { storage_url?: string })[]> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT * FROM ticket_attachments
-      WHERE ticket_number = ?
+      WHERE ticket_number = ${ticketNumber}
       ORDER BY uploaded_at DESC
-    `);
+    `;
 
-    const attachments = stmt.all(ticketNumber) as TicketAttachment[];
-    db.close();
-
-    return attachments;
+    return result.rows.map(row => ({
+      id: row.id as number,
+      ticket_number: row.ticket_number as string,
+      filename: row.filename as string,
+      original_name: row.original_name as string,
+      file_size: row.file_size as number,
+      mime_type: row.mime_type as string,
+      storage_url: row.storage_url as string | undefined,
+      uploaded_at: (row.uploaded_at as Date)?.toISOString(),
+    }));
   } catch (error) {
     console.error('Error fetching attachments:', error);
     return [];
   }
 }
 
-// Delete attachment
-export function deleteAttachment(id: number): boolean {
+// Delete attachment metadata
+// Note: Actual file deletion from storage should be handled separately
+export async function deleteAttachment(id: number): Promise<{ deleted: boolean; storageUrl?: string }> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    // Get attachment info first to delete file
-    const attachment = db.prepare('SELECT * FROM ticket_attachments WHERE id = ?').get(id) as TicketAttachment | undefined;
+    // Get attachment info first (for storage cleanup)
+    const attachmentResult = await sql`
+      SELECT storage_url FROM ticket_attachments WHERE id = ${id}
+    `;
 
-    if (attachment) {
-      // Delete file from disk
-      const filePath = path.join(UPLOADS_DIR, attachment.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+    const storageUrl = attachmentResult.rows[0]?.storage_url as string | undefined;
 
-      // Delete from database
-      const stmt = db.prepare('DELETE FROM ticket_attachments WHERE id = ?');
-      stmt.run(id);
-    }
+    // Delete from database
+    await sql`DELETE FROM ticket_attachments WHERE id = ${id}`;
 
-    db.close();
-    return true;
+    return { deleted: true, storageUrl };
   } catch (error) {
     console.error('Error deleting attachment:', error);
-    return false;
+    return { deleted: false };
   }
 }
 
-// Save uploaded file
-export async function saveUploadedFile(
-  ticketNumber: string,
-  file: File
-): Promise<{ filename: string; originalName: string; fileSize: number; mimeType: string }> {
-  ensureUploadsDir();
-
-  // Generate unique filename
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 10000);
-  const ext = path.extname(file.name);
-  const filename = `${ticketNumber}_${timestamp}_${random}${ext}`;
-  const filePath = path.join(UPLOADS_DIR, filename);
-
-  // Convert File to Buffer and save
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  fs.writeFileSync(filePath, buffer);
-
-  return {
-    filename,
-    originalName: file.name,
-    fileSize: file.size,
-    mimeType: file.type,
-  };
-}
-
 // Add comment to ticket
-export function addComment(comment: Omit<TicketComment, 'id' | 'created_at'>): number {
+export async function addComment(comment: Omit<TicketComment, 'id' | 'created_at'>): Promise<number> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       INSERT INTO ticket_comments (
         ticket_number, author_name, author_email, comment_text, is_internal
-      ) VALUES (?, ?, ?, ?, ?)
-    `);
+      ) VALUES (
+        ${comment.ticket_number},
+        ${comment.author_name || null},
+        ${comment.author_email || null},
+        ${comment.comment_text},
+        ${comment.is_internal}
+      )
+      RETURNING id
+    `;
 
-    const result = stmt.run(
-      comment.ticket_number,
-      comment.author_name || null,
-      comment.author_email || null,
-      comment.comment_text,
-      comment.is_internal ? 1 : 0
-    );
-
-    db.close();
-    return result.lastInsertRowid as number;
+    return result.rows[0]?.id || 0;
   } catch (error) {
     console.error('Error adding comment:', error);
     throw new Error('Failed to add comment');
@@ -186,22 +106,33 @@ export function addComment(comment: Omit<TicketComment, 'id' | 'created_at'>): n
 }
 
 // Get comments for a ticket
-export function getTicketComments(ticketNumber: string, includeInternal: boolean = false): TicketComment[] {
+export async function getTicketComments(ticketNumber: string, includeInternal: boolean = false): Promise<TicketComment[]> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const query = includeInternal
-      ? 'SELECT * FROM ticket_comments WHERE ticket_number = ? ORDER BY created_at ASC'
-      : 'SELECT * FROM ticket_comments WHERE ticket_number = ? AND is_internal = 0 ORDER BY created_at ASC';
+    let result;
+    if (includeInternal) {
+      result = await sql`
+        SELECT * FROM ticket_comments
+        WHERE ticket_number = ${ticketNumber}
+        ORDER BY created_at ASC
+      `;
+    } else {
+      result = await sql`
+        SELECT * FROM ticket_comments
+        WHERE ticket_number = ${ticketNumber} AND is_internal = false
+        ORDER BY created_at ASC
+      `;
+    }
 
-    const stmt = db.prepare(query);
-    const comments = stmt.all(ticketNumber) as TicketComment[];
-    db.close();
-
-    // Convert is_internal from integer to boolean
-    return comments.map(c => ({
-      ...c,
-      is_internal: Boolean(c.is_internal),
+    return result.rows.map(row => ({
+      id: row.id as number,
+      ticket_number: row.ticket_number as string,
+      author_name: row.author_name as string | undefined,
+      author_email: row.author_email as string | undefined,
+      comment_text: row.comment_text as string,
+      is_internal: row.is_internal as boolean,
+      created_at: (row.created_at as Date)?.toISOString(),
     }));
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -210,20 +141,17 @@ export function getTicketComments(ticketNumber: string, includeInternal: boolean
 }
 
 // Update comment
-export function updateComment(id: number, commentText: string): boolean {
+export async function updateComment(id: number, commentText: string): Promise<boolean> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       UPDATE ticket_comments
-      SET comment_text = ?
-      WHERE id = ?
-    `);
+      SET comment_text = ${commentText}
+      WHERE id = ${id}
+    `;
 
-    const result = stmt.run(commentText, id);
-    db.close();
-
-    return result.changes > 0;
+    return (result.rowCount ?? 0) > 0;
   } catch (error) {
     console.error('Error updating comment:', error);
     return false;
@@ -231,15 +159,13 @@ export function updateComment(id: number, commentText: string): boolean {
 }
 
 // Delete comment
-export function deleteComment(id: number): boolean {
+export async function deleteComment(id: number): Promise<boolean> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare('DELETE FROM ticket_comments WHERE id = ?');
-    const result = stmt.run(id);
-    db.close();
+    const result = await sql`DELETE FROM ticket_comments WHERE id = ${id}`;
 
-    return result.changes > 0;
+    return (result.rowCount ?? 0) > 0;
   } catch (error) {
     console.error('Error deleting comment:', error);
     return false;

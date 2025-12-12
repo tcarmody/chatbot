@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const sessions = getAllSessions();
+    const sessions = await getAllSessions();
     return NextResponse.json({ sessions });
   } catch (error) {
     console.error('Error fetching sessions:', error);
@@ -33,7 +33,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid session ID' }, { status: 400 });
     }
 
-    const success = deleteSessionById(sessionId);
+    const success = await deleteSessionById(sessionId);
 
     if (success) {
       // Log the action

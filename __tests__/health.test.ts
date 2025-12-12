@@ -9,15 +9,16 @@ describe('Health Check Endpoint', () => {
     // Mock environment
     process.env.ANTHROPIC_API_KEY = 'test_key';
     process.env.HUBSPOT_ACCESS_TOKEN = 'test_token';
+    process.env.POSTGRES_URL = 'postgres://test';
 
-    // Mock better-sqlite3
-    vi.doMock('better-sqlite3', () => ({
-      default: vi.fn().mockImplementation(() => ({
-        prepare: vi.fn().mockReturnValue({
-          get: vi.fn().mockReturnValue({ 1: 1 }),
-        }),
-        close: vi.fn(),
-      })),
+    // Mock @vercel/postgres
+    vi.doMock('@vercel/postgres', () => ({
+      sql: vi.fn().mockResolvedValue({ rows: [{ 1: 1 }] }),
+    }));
+
+    // Mock the db module
+    vi.doMock('@/lib/db', () => ({
+      checkDatabaseConnection: vi.fn().mockResolvedValue(true),
     }));
 
     const { GET } = await import('@/app/api/health/route');
@@ -33,14 +34,10 @@ describe('Health Check Endpoint', () => {
   it('should return degraded status when HubSpot token is missing', async () => {
     process.env.ANTHROPIC_API_KEY = 'test_key';
     delete process.env.HUBSPOT_ACCESS_TOKEN;
+    process.env.POSTGRES_URL = 'postgres://test';
 
-    vi.doMock('better-sqlite3', () => ({
-      default: vi.fn().mockImplementation(() => ({
-        prepare: vi.fn().mockReturnValue({
-          get: vi.fn().mockReturnValue({ 1: 1 }),
-        }),
-        close: vi.fn(),
-      })),
+    vi.doMock('@/lib/db', () => ({
+      checkDatabaseConnection: vi.fn().mockResolvedValue(true),
     }));
 
     const { GET } = await import('@/app/api/health/route');
@@ -51,17 +48,30 @@ describe('Health Check Endpoint', () => {
     expect(data.checks.hubspot).toBe('missing');
   });
 
+  it('should return degraded status when database is unconfigured', async () => {
+    process.env.ANTHROPIC_API_KEY = 'test_key';
+    process.env.HUBSPOT_ACCESS_TOKEN = 'test_token';
+    delete process.env.POSTGRES_URL;
+
+    vi.doMock('@/lib/db', () => ({
+      checkDatabaseConnection: vi.fn().mockResolvedValue(false),
+    }));
+
+    const { GET } = await import('@/app/api/health/route');
+    const response = await GET();
+    const data = await response.json();
+
+    expect(data.status).toBe('degraded');
+    expect(data.checks.database).toBe('unconfigured');
+  });
+
   it('should include uptime in response', async () => {
     process.env.ANTHROPIC_API_KEY = 'test_key';
     process.env.HUBSPOT_ACCESS_TOKEN = 'test_token';
+    process.env.POSTGRES_URL = 'postgres://test';
 
-    vi.doMock('better-sqlite3', () => ({
-      default: vi.fn().mockImplementation(() => ({
-        prepare: vi.fn().mockReturnValue({
-          get: vi.fn().mockReturnValue({ 1: 1 }),
-        }),
-        close: vi.fn(),
-      })),
+    vi.doMock('@/lib/db', () => ({
+      checkDatabaseConnection: vi.fn().mockResolvedValue(true),
     }));
 
     const { GET } = await import('@/app/api/health/route');

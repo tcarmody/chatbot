@@ -19,11 +19,21 @@ async function main() {
   console.log('║   Admin User Setup - Support Ticket System  ║');
   console.log('╚════════════════════════════════════════════╝\n');
 
+  // Check for database configuration
+  if (!process.env.POSTGRES_URL) {
+    console.log('⚠️  POSTGRES_URL environment variable is not set.');
+    console.log('   Make sure to set up Vercel Postgres and configure the connection string.\n');
+    console.log('   For local development, add to .env.local:');
+    console.log('   POSTGRES_URL=postgres://...\n');
+    rl.close();
+    return;
+  }
+
   try {
     const email = await question('Email address: ');
 
     // Check if user already exists
-    const existing = getAdminUserByEmail(email);
+    const existing = await getAdminUserByEmail(email);
     if (existing) {
       console.log('\n❌ An admin user with this email already exists.');
       rl.close();

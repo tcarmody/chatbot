@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const user = validateSession(sessionToken);
+    const user = await validateSession(sessionToken);
 
     if (!user) {
       // Invalid or expired session

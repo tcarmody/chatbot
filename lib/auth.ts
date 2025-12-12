@@ -1,7 +1,6 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
+// Admin authentication using Vercel Postgres
 import bcrypt from 'bcryptjs';
+import { sql, initializeSchema } from './db';
 
 export interface AdminUser {
   id?: number;
@@ -20,54 +19,6 @@ export interface AdminSession {
   session_token: string;
   expires_at: string;
   created_at?: string;
-}
-
-const DB_PATH = path.join(process.cwd(), 'data', 'analytics.db');
-
-// Initialize database and create admin tables
-function getDatabase() {
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-
-  const db = new Database(DB_PATH);
-
-  // Create admin users table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS admin_users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      name TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'support',
-      is_active INTEGER NOT NULL DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      last_login DATETIME
-    )
-  `);
-
-  // Create admin sessions table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS admin_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      session_token TEXT UNIQUE NOT NULL,
-      expires_at DATETIME NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES admin_users(id)
-    )
-  `);
-
-  // Create indexes
-  db.exec(`
-    CREATE INDEX IF NOT EXISTS idx_admin_email ON admin_users(email);
-    CREATE INDEX IF NOT EXISTS idx_admin_active ON admin_users(is_active);
-    CREATE INDEX IF NOT EXISTS idx_session_token ON admin_sessions(session_token);
-    CREATE INDEX IF NOT EXISTS idx_session_expires ON admin_sessions(expires_at);
-  `);
-
-  return db;
 }
 
 // Hash password
@@ -95,23 +46,16 @@ export async function createAdminUser(user: {
   role?: 'admin' | 'support';
 }): Promise<number> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
     const passwordHash = await hashPassword(user.password);
 
-    const stmt = db.prepare(`
+    const result = await sql`
       INSERT INTO admin_users (email, password_hash, name, role, is_active)
-      VALUES (?, ?, ?, ?, 1)
-    `);
+      VALUES (${user.email.toLowerCase()}, ${passwordHash}, ${user.name}, ${user.role || 'support'}, true)
+      RETURNING id
+    `;
 
-    const result = stmt.run(
-      user.email.toLowerCase(),
-      passwordHash,
-      user.name,
-      user.role || 'support'
-    );
-
-    db.close();
-    return result.lastInsertRowid as number;
+    return result.rows[0].id;
   } catch (error) {
     console.error('Error creating admin user:', error);
     throw new Error('Failed to create admin user');
@@ -119,20 +63,29 @@ export async function createAdminUser(user: {
 }
 
 // Get admin user by email
-export function getAdminUserByEmail(email: string): AdminUser | null {
+export async function getAdminUserByEmail(email: string): Promise<AdminUser | null> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT id, email, password_hash, name, role, is_active, created_at, last_login
       FROM admin_users
-      WHERE email = ? AND is_active = 1
-    `);
+      WHERE email = ${email.toLowerCase()} AND is_active = true
+    `;
 
-    const user = stmt.get(email.toLowerCase()) as AdminUser | undefined;
-    db.close();
+    if (result.rows.length === 0) return null;
 
-    return user || null;
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      email: row.email,
+      password_hash: row.password_hash,
+      name: row.name,
+      role: row.role as 'admin' | 'support',
+      is_active: row.is_active,
+      created_at: row.created_at?.toISOString(),
+      last_login: row.last_login?.toISOString(),
+    };
   } catch (error) {
     console.error('Error fetching admin user:', error);
     return null;
@@ -140,20 +93,28 @@ export function getAdminUserByEmail(email: string): AdminUser | null {
 }
 
 // Get admin user by ID
-export function getAdminUserById(id: number): AdminUser | null {
+export async function getAdminUserById(id: number): Promise<AdminUser | null> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT id, email, name, role, is_active, created_at, last_login
       FROM admin_users
-      WHERE id = ? AND is_active = 1
-    `);
+      WHERE id = ${id} AND is_active = true
+    `;
 
-    const user = stmt.get(id) as AdminUser | undefined;
-    db.close();
+    if (result.rows.length === 0) return null;
 
-    return user || null;
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      role: row.role as 'admin' | 'support',
+      is_active: row.is_active,
+      created_at: row.created_at?.toISOString(),
+      last_login: row.last_login?.toISOString(),
+    };
   } catch (error) {
     console.error('Error fetching admin user:', error);
     return null;
@@ -162,7 +123,7 @@ export function getAdminUserById(id: number): AdminUser | null {
 
 // Authenticate admin user
 export async function authenticateAdmin(email: string, password: string): Promise<AdminUser | null> {
-  const user = getAdminUserByEmail(email);
+  const user = await getAdminUserByEmail(email);
 
   if (!user || !user.password_hash) {
     return null;
@@ -176,9 +137,7 @@ export async function authenticateAdmin(email: string, password: string): Promis
 
   // Update last login
   try {
-    const db = getDatabase();
-    db.prepare('UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
-    db.close();
+    await sql`UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ${user.id}`;
   } catch (error) {
     console.error('Error updating last login:', error);
   }
@@ -189,20 +148,17 @@ export async function authenticateAdmin(email: string, password: string): Promis
 }
 
 // Create session
-export function createSession(userId: number): { sessionToken: string; expiresAt: Date } {
+export async function createSession(userId: number): Promise<{ sessionToken: string; expiresAt: Date }> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
     const sessionToken = generateSessionToken();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
-    const stmt = db.prepare(`
+    await sql`
       INSERT INTO admin_sessions (user_id, session_token, expires_at)
-      VALUES (?, ?, ?)
-    `);
-
-    stmt.run(userId, sessionToken, expiresAt.toISOString());
-    db.close();
+      VALUES (${userId}, ${sessionToken}, ${expiresAt.toISOString()})
+    `;
 
     return { sessionToken, expiresAt };
   } catch (error) {
@@ -212,25 +168,32 @@ export function createSession(userId: number): { sessionToken: string; expiresAt
 }
 
 // Validate session
-export function validateSession(sessionToken: string): AdminUser | null {
+export async function validateSession(sessionToken: string): Promise<AdminUser | null> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    // Get session and join with user
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT
         u.id, u.email, u.name, u.role, u.is_active, u.created_at, u.last_login
       FROM admin_sessions s
       JOIN admin_users u ON s.user_id = u.id
-      WHERE s.session_token = ?
-        AND s.expires_at > datetime('now')
-        AND u.is_active = 1
-    `);
+      WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > CURRENT_TIMESTAMP
+        AND u.is_active = true
+    `;
 
-    const user = stmt.get(sessionToken) as AdminUser | undefined;
-    db.close();
+    if (result.rows.length === 0) return null;
 
-    return user || null;
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      role: row.role as 'admin' | 'support',
+      is_active: row.is_active,
+      created_at: row.created_at?.toISOString(),
+      last_login: row.last_login?.toISOString(),
+    };
   } catch (error) {
     console.error('Error validating session:', error);
     return null;
@@ -238,15 +201,15 @@ export function validateSession(sessionToken: string): AdminUser | null {
 }
 
 // Delete session (logout)
-export function deleteSession(sessionToken: string): boolean {
+export async function deleteSession(sessionToken: string): Promise<boolean> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare('DELETE FROM admin_sessions WHERE session_token = ?');
-    const result = stmt.run(sessionToken);
-    db.close();
+    const result = await sql`
+      DELETE FROM admin_sessions WHERE session_token = ${sessionToken}
+    `;
 
-    return result.changes > 0;
+    return (result.rowCount ?? 0) > 0;
   } catch (error) {
     console.error('Error deleting session:', error);
     return false;
@@ -254,15 +217,15 @@ export function deleteSession(sessionToken: string): boolean {
 }
 
 // Clean up expired sessions
-export function cleanupExpiredSessions(): number {
+export async function cleanupExpiredSessions(): Promise<number> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`DELETE FROM admin_sessions WHERE expires_at < datetime('now')`);
-    const result = stmt.run();
-    db.close();
+    const result = await sql`
+      DELETE FROM admin_sessions WHERE expires_at < CURRENT_TIMESTAMP
+    `;
 
-    return result.changes;
+    return result.rowCount ?? 0;
   } catch (error) {
     console.error('Error cleaning up sessions:', error);
     return 0;
@@ -270,20 +233,25 @@ export function cleanupExpiredSessions(): number {
 }
 
 // Get all admin users (for admin management)
-export function getAllAdminUsers(): Omit<AdminUser, 'password_hash'>[] {
+export async function getAllAdminUsers(): Promise<Omit<AdminUser, 'password_hash'>[]> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT id, email, name, role, is_active, created_at, last_login
       FROM admin_users
       ORDER BY created_at DESC
-    `);
+    `;
 
-    const users = stmt.all() as Omit<AdminUser, 'password_hash'>[];
-    db.close();
-
-    return users;
+    return result.rows.map(row => ({
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      role: row.role as 'admin' | 'support',
+      is_active: row.is_active,
+      created_at: row.created_at?.toISOString(),
+      last_login: row.last_login?.toISOString(),
+    }));
   } catch (error) {
     console.error('Error fetching admin users:', error);
     return [];
@@ -299,74 +267,45 @@ export async function updateAdminUser(id: number, updates: {
   is_active?: boolean;
 }): Promise<boolean> {
   try {
-    const db = getDatabase();
-    const setClauses: string[] = [];
-    const values: any[] = [];
+    await initializeSchema();
 
-    if (updates.name) {
-      setClauses.push('name = ?');
-      values.push(updates.name);
-    }
-
-    if (updates.email) {
-      setClauses.push('email = ?');
-      values.push(updates.email.toLowerCase());
-    }
-
+    // Build dynamic update - Postgres doesn't support dynamic columns easily
+    // So we update all fields, using COALESCE to keep existing values
+    let passwordHash: string | null = null;
     if (updates.password) {
-      const passwordHash = await hashPassword(updates.password);
-      setClauses.push('password_hash = ?');
-      values.push(passwordHash);
+      passwordHash = await hashPassword(updates.password);
     }
 
-    if (updates.role) {
-      setClauses.push('role = ?');
-      values.push(updates.role);
-    }
-
-    if (typeof updates.is_active === 'boolean') {
-      setClauses.push('is_active = ?');
-      values.push(updates.is_active ? 1 : 0);
-    }
-
-    if (setClauses.length === 0) {
-      db.close();
-      return false;
-    }
-
-    values.push(id);
-
-    const stmt = db.prepare(`
+    const result = await sql`
       UPDATE admin_users
-      SET ${setClauses.join(', ')}
-      WHERE id = ?
-    `);
+      SET
+        name = COALESCE(${updates.name ?? null}, name),
+        email = COALESCE(${updates.email?.toLowerCase() ?? null}, email),
+        password_hash = COALESCE(${passwordHash}, password_hash),
+        role = COALESCE(${updates.role ?? null}, role),
+        is_active = COALESCE(${updates.is_active ?? null}, is_active)
+      WHERE id = ${id}
+    `;
 
-    const result = stmt.run(...values);
-    db.close();
-
-    return result.changes > 0;
+    return (result.rowCount ?? 0) > 0;
   } catch (error) {
     console.error('Error updating admin user:', error);
     return false;
   }
 }
 
-// Delete admin user
-export function deleteAdminUser(id: number): boolean {
+// Delete admin user (soft delete)
+export async function deleteAdminUser(id: number): Promise<boolean> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    // Soft delete by setting is_active to 0
-    const stmt = db.prepare('UPDATE admin_users SET is_active = 0 WHERE id = ?');
-    const result = stmt.run(id);
+    // Soft delete by setting is_active to false
+    await sql`UPDATE admin_users SET is_active = false WHERE id = ${id}`;
 
     // Also delete all sessions for this user
-    db.prepare('DELETE FROM admin_sessions WHERE user_id = ?').run(id);
+    await sql`DELETE FROM admin_sessions WHERE user_id = ${id}`;
 
-    db.close();
-
-    return result.changes > 0;
+    return true;
   } catch (error) {
     console.error('Error deleting admin user:', error);
     return false;
@@ -374,7 +313,7 @@ export function deleteAdminUser(id: number): boolean {
 }
 
 // Get all active sessions
-export function getAllSessions(): Array<{
+export async function getAllSessions(): Promise<Array<{
   id: number;
   user_id: number;
   user_email: string;
@@ -382,32 +321,29 @@ export function getAllSessions(): Array<{
   session_token: string;
   expires_at: string;
   created_at: string;
-}> {
+}>> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT
         s.id, s.user_id, s.session_token, s.expires_at, s.created_at,
         u.email as user_email, u.name as user_name
       FROM admin_sessions s
       JOIN admin_users u ON s.user_id = u.id
-      WHERE s.expires_at > datetime('now')
+      WHERE s.expires_at > CURRENT_TIMESTAMP
       ORDER BY s.created_at DESC
-    `);
+    `;
 
-    const sessions = stmt.all() as Array<{
-      id: number;
-      user_id: number;
-      user_email: string;
-      user_name: string;
-      session_token: string;
-      expires_at: string;
-      created_at: string;
-    }>;
-    db.close();
-
-    return sessions;
+    return result.rows.map(row => ({
+      id: row.id,
+      user_id: row.user_id,
+      user_email: row.user_email,
+      user_name: row.user_name,
+      session_token: row.session_token,
+      expires_at: row.expires_at?.toISOString(),
+      created_at: row.created_at?.toISOString(),
+    }));
   } catch (error) {
     console.error('Error fetching sessions:', error);
     return [];
@@ -415,31 +351,28 @@ export function getAllSessions(): Array<{
 }
 
 // Get sessions for a specific user
-export function getUserSessions(userId: number): Array<{
+export async function getUserSessions(userId: number): Promise<Array<{
   id: number;
   session_token: string;
   expires_at: string;
   created_at: string;
-}> {
+}>> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare(`
+    const result = await sql`
       SELECT id, session_token, expires_at, created_at
       FROM admin_sessions
-      WHERE user_id = ? AND expires_at > datetime('now')
+      WHERE user_id = ${userId} AND expires_at > CURRENT_TIMESTAMP
       ORDER BY created_at DESC
-    `);
+    `;
 
-    const sessions = stmt.all(userId) as Array<{
-      id: number;
-      session_token: string;
-      expires_at: string;
-      created_at: string;
-    }>;
-    db.close();
-
-    return sessions;
+    return result.rows.map(row => ({
+      id: row.id,
+      session_token: row.session_token,
+      expires_at: row.expires_at?.toISOString(),
+      created_at: row.created_at?.toISOString(),
+    }));
   } catch (error) {
     console.error('Error fetching user sessions:', error);
     return [];
@@ -447,15 +380,13 @@ export function getUserSessions(userId: number): Array<{
 }
 
 // Delete session by ID (for force logout)
-export function deleteSessionById(id: number): boolean {
+export async function deleteSessionById(id: number): Promise<boolean> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare('DELETE FROM admin_sessions WHERE id = ?');
-    const result = stmt.run(id);
-    db.close();
+    const result = await sql`DELETE FROM admin_sessions WHERE id = ${id}`;
 
-    return result.changes > 0;
+    return (result.rowCount ?? 0) > 0;
   } catch (error) {
     console.error('Error deleting session:', error);
     return false;
@@ -463,15 +394,13 @@ export function deleteSessionById(id: number): boolean {
 }
 
 // Delete all sessions for a user
-export function deleteAllUserSessions(userId: number): number {
+export async function deleteAllUserSessions(userId: number): Promise<number> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
-    const stmt = db.prepare('DELETE FROM admin_sessions WHERE user_id = ?');
-    const result = stmt.run(userId);
-    db.close();
+    const result = await sql`DELETE FROM admin_sessions WHERE user_id = ${userId}`;
 
-    return result.changes;
+    return result.rowCount ?? 0;
   } catch (error) {
     console.error('Error deleting user sessions:', error);
     return 0;
@@ -479,27 +408,14 @@ export function deleteAllUserSessions(userId: number): number {
 }
 
 // Generate password reset token
-export function createPasswordResetToken(email: string): string | null {
+export async function createPasswordResetToken(email: string): Promise<string | null> {
   try {
-    const user = getAdminUserByEmail(email);
-    if (!user) {
+    const user = await getAdminUserByEmail(email);
+    if (!user || !user.id) {
       return null;
     }
 
-    const db = getDatabase();
-
-    // Create password_reset_tokens table if it doesn't exist
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS password_reset_tokens (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        token TEXT UNIQUE NOT NULL,
-        expires_at DATETIME NOT NULL,
-        used INTEGER NOT NULL DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES admin_users(id)
-      )
-    `);
+    await initializeSchema();
 
     // Generate token
     const token = Math.random().toString(36).substring(2) +
@@ -509,13 +425,10 @@ export function createPasswordResetToken(email: string): string | null {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiry
 
-    const stmt = db.prepare(`
+    await sql`
       INSERT INTO password_reset_tokens (user_id, token, expires_at)
-      VALUES (?, ?, ?)
-    `);
-
-    stmt.run(user.id, token, expiresAt.toISOString());
-    db.close();
+      VALUES (${user.id}, ${token}, ${expiresAt.toISOString()})
+    `;
 
     return token;
   } catch (error) {
@@ -527,48 +440,34 @@ export function createPasswordResetToken(email: string): string | null {
 // Validate and use password reset token
 export async function resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
   try {
-    const db = getDatabase();
+    await initializeSchema();
 
     // Find valid token
-    const tokenStmt = db.prepare(`
+    const tokenResult = await sql`
       SELECT user_id FROM password_reset_tokens
-      WHERE token = ?
-        AND expires_at > datetime('now')
-        AND used = 0
-    `);
+      WHERE token = ${token}
+        AND expires_at > CURRENT_TIMESTAMP
+        AND used = false
+    `;
 
-    const tokenData = tokenStmt.get(token) as { user_id: number } | undefined;
-
-    if (!tokenData) {
-      db.close();
+    if (tokenResult.rows.length === 0) {
       return false;
     }
+
+    const userId = tokenResult.rows[0].user_id;
 
     // Hash new password
     const passwordHash = await hashPassword(newPassword);
 
     // Update password
-    const updateStmt = db.prepare(`
-      UPDATE admin_users
-      SET password_hash = ?
-      WHERE id = ?
-    `);
-
-    updateStmt.run(passwordHash, tokenData.user_id);
+    await sql`UPDATE admin_users SET password_hash = ${passwordHash} WHERE id = ${userId}`;
 
     // Mark token as used
-    const markUsedStmt = db.prepare(`
-      UPDATE password_reset_tokens
-      SET used = 1
-      WHERE token = ?
-    `);
-
-    markUsedStmt.run(token);
+    await sql`UPDATE password_reset_tokens SET used = true WHERE token = ${token}`;
 
     // Delete all sessions for this user (force re-login)
-    db.prepare('DELETE FROM admin_sessions WHERE user_id = ?').run(tokenData.user_id);
+    await sql`DELETE FROM admin_sessions WHERE user_id = ${userId}`;
 
-    db.close();
     return true;
   } catch (error) {
     console.error('Error resetting password:', error);

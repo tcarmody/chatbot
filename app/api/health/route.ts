@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
+import { checkDatabaseConnection } from '@/lib/db';
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
   uptime: number;
   checks: {
-    database: 'ok' | 'error';
+    database: 'ok' | 'error' | 'unconfigured';
     anthropic: 'ok' | 'missing';
     hubspot: 'ok' | 'missing';
   };
@@ -21,12 +22,15 @@ export async function GET() {
     hubspot: process.env.HUBSPOT_ACCESS_TOKEN ? 'ok' : 'missing',
   };
 
-  // Check database connectivity
+  // Check database connectivity (Vercel Postgres)
   try {
-    const { default: Database } = await import('better-sqlite3');
-    const db = new Database('data/analytics.db', { readonly: true });
-    db.prepare('SELECT 1').get();
-    db.close();
+    // Only check if database URL is configured
+    if (process.env.POSTGRES_URL) {
+      const isConnected = await checkDatabaseConnection();
+      checks.database = isConnected ? 'ok' : 'error';
+    } else {
+      checks.database = 'unconfigured';
+    }
   } catch {
     checks.database = 'error';
   }
@@ -35,7 +39,7 @@ export async function GET() {
   let status: HealthStatus['status'] = 'healthy';
   if (checks.database === 'error' || checks.anthropic === 'missing') {
     status = 'unhealthy';
-  } else if (checks.hubspot === 'missing') {
+  } else if (checks.hubspot === 'missing' || checks.database === 'unconfigured') {
     status = 'degraded';
   }
 
