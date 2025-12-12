@@ -350,145 +350,115 @@ If you have existing JSON analytics data, you can migrate with a simple script. 
 
 ## Support Ticket System
 
-### Approach: Hybrid SQLite System with Migration Path
+### Approach: HubSpot CRM Integration
 
-**Decision**: Build a simple SQLite-based ticket system initially, with a clear path to migrate to a full-featured platform if needed.
+**Decision**: Use HubSpot's Tickets API for support ticket management instead of a custom SQLite-based system.
 
 **Rationale**:
-- **Alignment**: Uses existing SQLite infrastructure (same database as analytics)
-- **No external costs**: Free until outgrown, no per-ticket or per-agent fees
-- **Control**: Full control over features, UI, and integration with chatbot
-- **Fast implementation**: 2-3 hours vs. weeks of third-party integration
-- **Learn first**: Understand actual needs before committing to a platform
-- **Easy migration**: Can export data to Zendesk/Freshdesk later if needed
+- **Unified Customer Data**: HubSpot already manages all user contact and enrollment information, so tickets automatically link to existing customer records
+- **Single Source of Truth**: Support agents see complete customer history (enrollments, previous interactions, tickets) in one place
+- **Built-in Features**: HubSpot provides email notifications, workflows, automation, and reporting out of the box
+- **No Duplicate Data**: Avoid syncing customer data between separate systems
+- **Scalability**: HubSpot handles enterprise-scale ticket volumes without custom infrastructure
+- **Team Collaboration**: Native assignment, comments, and activity tracking for support teams
+
+**Why Not a Custom System?**
+- **Data Silos**: A separate ticket database would duplicate customer information already in HubSpot
+- **Manual Sync**: Would require building and maintaining sync logic between systems
+- **Missing Context**: Support agents would need to switch between systems to see full customer picture
+- **Feature Rebuilding**: Would duplicate functionality HubSpot already provides (workflows, notifications, reporting)
 
 **Current Implementation**:
-- **Database**: Extends `data/analytics.db` with `support_tickets` table
-- **Features**:
-  - Ticket creation form at `/tickets/new`
-  - Unique ticket numbers (format: `TICK-YYYYMMDD-XXXX`)
-  - Status tracking (open, in_progress, resolved, closed)
-  - Priority levels (low, medium, high)
-  - Category assignment matching FAQ categories
-  - Ticket lookup by ticket number at `/tickets/[ticketNumber]`
-  - Email-based ticket retrieval
-  - Optional conversation context (link tickets to chat history)
+- **Backend**: HubSpot Tickets API via custom client (`lib/hubspot.ts`)
+- **Authentication**: Private app access token with `tickets` scope
+- **Ticket ID**: HubSpot's native ticket ID serves as the ticket number
+- **Status Mapping**: HubSpot pipeline stages map to app statuses (open, in_progress, resolved, closed)
+- **Priority Mapping**: HubSpot priority values (LOW, MEDIUM, HIGH) map to app priorities
 
-**Ticket Schema**:
-```sql
-CREATE TABLE support_tickets (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  ticket_number TEXT UNIQUE NOT NULL,
-  user_email TEXT NOT NULL,
-  user_name TEXT,
-  subject TEXT NOT NULL,
-  description TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'open',
-  priority TEXT NOT NULL DEFAULT 'medium',
-  category TEXT,
-  conversation_context TEXT,  -- JSON of chat history
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-```
+**Features**:
+- ✅ Ticket creation via HubSpot API
+- ✅ Ticket retrieval by ID
+- ✅ Search tickets by user email
+- ✅ Status updates via pipeline stage changes
+- ✅ Priority tracking
+- ✅ Admin dashboard at `/admin/tickets` with filtering
+- ✅ Ticket search by email on homepage
+- ✅ Category and conversation context as custom properties
 
 **User Experience**:
 1. User tries chatbot first (instant answers)
 2. If chatbot can't help, user clicks link to create ticket
 3. User fills form with email, subject, description, priority, category
-4. System generates unique ticket number (e.g., `TICK-20241210-1234`)
-5. User redirected to ticket view page with status
-6. Ticket stored in SQLite, ready for support team review
+4. Ticket created in HubSpot, linked to existing contact if email matches
+5. User redirected to ticket view page with HubSpot ticket ID
+6. Support team manages ticket in HubSpot or via admin dashboard
+
+**HubSpot Custom Properties** (recommended):
+| Property | Type | Purpose |
+|----------|------|---------|
+| `user_email` | Single-line text | Ticket submitter's email |
+| `user_name` | Single-line text | Ticket submitter's name |
+| `category` | Single-line text | FAQ category (Billing, Technical, etc.) |
+| `conversation_context` | Multi-line text | Chat history JSON if ticket originated from chatbot |
+
+**Pipeline Stage Configuration**:
+```bash
+HUBSPOT_STAGE_OPEN=1            # "New" or "Open" stage
+HUBSPOT_STAGE_IN_PROGRESS=2     # "In Progress" stage
+HUBSPOT_STAGE_RESOLVED=3        # "Resolved" stage
+HUBSPOT_STAGE_CLOSED=4          # "Closed" stage
+```
+
+**Email Notifications**:
+- Configured via HubSpot Workflows (not application code)
+- Create workflows in HubSpot to send emails on ticket creation, status changes, etc.
+- Benefits: No code changes needed to modify notification logic, supports HubSpot's email templates
+
+**Admin Dashboard** (`/admin/tickets`):
+- **Real-time statistics**: Total, open, in progress, resolved, closed counts (from HubSpot)
+- **Filtering**: By status and priority with dropdown selectors
+- **Sortable table**: Ticket ID, subject, user, status, priority, created date
+- **Inline status updates**: Change status directly from table (updates HubSpot)
+- **Responsive design**: Works on desktop and mobile
 
 **Integration Points**:
 - Chatbot responses include link: "Still need help? [create a support ticket](/tickets/new)"
 - Homepage quick link: "Create Support Ticket" card
 - Ticket pages allow users to return to chatbot or create new tickets
 
-**Current Features** (Fully Implemented):
-- ✅ Ticket creation form with validation
-- ✅ Unique ticket number generation
-- ✅ Email notifications to support team (Resend)
-- ✅ Email notifications to users (confirmation + status changes)
-- ✅ Admin dashboard at `/admin/tickets` with filtering
-- ✅ Ticket search by email on homepage
-- ✅ File attachment support (database + file system)
-- ✅ Internal notes and comment threads
-- ✅ Status tracking with 4 states (open, in_progress, resolved, closed)
-- ✅ Priority levels (low, medium, high)
-- ✅ Category assignment matching FAQ categories
+**Benefits Over Custom SQLite System**:
+- **Customer 360 View**: Tickets automatically associated with HubSpot contacts
+- **Enrollment Context**: Support agents see user's course enrollments alongside tickets
+- **No Data Migration**: Leverage existing HubSpot data immediately
+- **Enterprise Features**: SLAs, automation, reporting without custom development
+- **Team Scalability**: HubSpot supports unlimited agents with proper tier
 
-**Phase 3 Features** (future enhancements):
-- Ticket assignment to specific team members
-- SLA tracking and auto-reminders
-- Advanced search (full-text search across descriptions)
-- Bulk operations (close multiple tickets, bulk status changes)
-- Ticket templates for common issues
-- Customer satisfaction ratings
-- Advanced analytics (resolution time, first response time)
+**HubSpot-Managed Features** (available in HubSpot, not rebuilt):
+- Ticket assignment to team members
+- SLA tracking and breach notifications
+- Email threading and replies
+- File attachments
+- Internal notes and comments
+- Automation workflows
+- Reporting and analytics
+- Mobile app for support team
 
-**When to Migrate to Third-Party Platform**:
-- Ticket volume exceeds 100+ per week consistently
-- Need multi-channel support (email, chat, phone integration)
-- Require advanced automation and workflows
-- Support team grows beyond 3-5 agents
-- Need mobile apps for support team
-- Require advanced reporting and analytics
+**Setup Requirements**:
+1. Create HubSpot Private App with `tickets` scope
+2. Configure `HUBSPOT_ACCESS_TOKEN` environment variable
+3. Optionally configure pipeline stage IDs if different from defaults
+4. Optionally create custom properties for additional metadata
 
-**Migration Options**:
-- **Freshdesk**: Free tier for up to 10 agents, good feature/cost balance
-- **Zendesk**: Industry standard, $19-99/agent/month, enterprise features
-- **Plain.com**: Modern, API-first, $29/user/month, beautiful UI
-- **Linear**: Developer-focused, $8/user/month, treat tickets as issues
-
-**Migration Strategy**:
-1. Export ticket data from SQLite to CSV
-2. Import into chosen platform
-3. Update API endpoints to point to new platform
-4. Keep SQLite as backup/archive for 6 months
-5. Optional: Maintain dual-write during transition period
-
-**Alternatives Considered**:
-- **Email-only system**: Simpler but no tracking or status updates
-- **Third-party from day 1**: More features but higher cost, slower to implement
-- **PostgreSQL tickets**: More powerful but requires separate database server
-
-**Email Notifications** (via Resend):
-- **To support team**: Notification when new ticket is created with all details
-- **To users**: Confirmation email with ticket number and tracking link
-- **To users**: Status change notifications (open → in_progress → resolved → closed)
-- **Configuration**: Requires `RESEND_API_KEY`, `FROM_EMAIL`, `SUPPORT_EMAIL` in .env
-- **Graceful degradation**: System works without email if API key not configured
-
-**Admin Dashboard** (`/admin/tickets`):
-- **Real-time statistics**: Total, open, in progress, resolved, closed counts
-- **Filtering**: By status and priority with dropdown selectors
-- **Sortable table**: Ticket number, subject, user, status, priority, created date
-- **Inline status updates**: Change status directly from table with dropdown
-- **Auto-refresh**: Stats and list update after status changes
-- **Responsive design**: Works on desktop and mobile
-
-**File Attachments**:
-- **Database schema**: `ticket_attachments` table tracks metadata
-- **File storage**: Physical files saved to `/data/uploads/` directory
-- **Filename format**: `{ticket_number}_{timestamp}_{random}{ext}`
-- **Metadata tracked**: Original name, file size, MIME type, upload timestamp
-- **Security**: Files named uniquely to prevent collisions
-- **APIs**: Add, get, and delete attachment functions
-
-**Comments & Notes**:
-- **Database schema**: `ticket_comments` table with internal/external flag
-- **Internal notes**: Staff-only comments (is_internal = true)
-- **Customer comments**: Visible to users (is_internal = false)
-- **Metadata tracked**: Author name/email, comment text, timestamp
-- **APIs**: Add, get, update, delete comment functions
-- **Chronological ordering**: Comments sorted by creation time
+**Documentation**: See [docs/hubspot-setup.md](docs/hubspot-setup.md) for detailed setup instructions.
 
 **Trade-offs**:
-- Still need to build UI for attachments and comments (backend ready)
-- No built-in video/screen recording (can link to Loom/etc.)
-- May need to migrate later vs. starting with scalable solution
-- Single application instance (file locking on high concurrency)
+- **HubSpot Dependency**: Requires HubSpot account and API access
+- **API Rate Limits**: 100 requests per 10 seconds (sufficient for most use cases)
+- **Custom Properties**: Some metadata requires creating custom HubSpot properties
+- **Learning Curve**: Team needs familiarity with HubSpot for full feature utilization
+
+**Previous Implementation** (deprecated):
+The original SQLite-based ticket system has been replaced. The `support_tickets`, `ticket_attachments`, and `ticket_comments` tables in the local database are no longer used for ticket management. Analytics data remains in SQLite.
 
 ---
 
@@ -662,7 +632,7 @@ CREATE TABLE admin_sessions (
 | LLM | Claude Haiku 4.5 | Cost-effective, fast, high-quality for customer service |
 | Knowledge Base | JSON with category filtering | Simple, version-controlled, token-efficient |
 | Analytics | SQLite (better-sqlite3) | Local, scalable, fast queries, no external dependencies |
-| Ticketing | SQLite (same database) | Free, controlled, chatbot integration, migration-ready |
+| Ticketing | HubSpot Tickets API | Unified customer data, built-in workflows, no data silos |
 | Markdown | react-markdown | LLM-friendly, clean rendering |
 | Hosting | Vercel (recommended) | Automatic scaling, edge network, simple deployment |
 
@@ -702,10 +672,11 @@ CREATE TABLE admin_sessions (
 ## Document History
 
 **Created**: December 2024
-**Last Updated**: December 10, 2024
-**Authors**: Tim (Project Owner), Claude Sonnet 4.5 (AI Assistant)
+**Last Updated**: December 11, 2024
+**Authors**: Tim (Project Owner), Claude (AI Assistant)
 
 ### Recent Updates
+- **Dec 11, 2024**: Migrated ticket system from SQLite to HubSpot Tickets API; removed Resend email integration (now handled via HubSpot workflows)
 - **Dec 10, 2024**: Added "Chatbot Response Strategy" section documenting the shift to focused, concise responses with engagement-oriented closings and minimal ticket escalation
 
 This document should be updated whenever significant architectural or design decisions are made or reconsidered.

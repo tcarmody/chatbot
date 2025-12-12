@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createTicket, getTicketByNumber, getTicketsByEmail } from '@/lib/tickets';
-import { sendTicketCreatedNotification, sendTicketConfirmationEmail } from '@/lib/email';
 
 // POST - Create a new support ticket
 export async function POST(req: NextRequest) {
@@ -24,8 +23,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the ticket
-    const ticketNumber = createTicket({
+    // Create the ticket in HubSpot
+    const ticketNumber = await createTicket({
       user_email: body.user_email,
       user_name: body.user_name,
       subject: body.subject,
@@ -35,31 +34,6 @@ export async function POST(req: NextRequest) {
       category: body.category,
       conversation_context: body.conversation_context,
     });
-
-    // Send email notifications (don't block on failure)
-    if (process.env.RESEND_API_KEY) {
-      // Send notification to support team
-      sendTicketCreatedNotification({
-        ticketNumber,
-        userEmail: body.user_email,
-        userName: body.user_name,
-        subject: body.subject,
-        description: body.description,
-        priority: body.priority || 'medium',
-        category: body.category,
-      }).catch(err => console.error('Failed to send support notification:', err));
-
-      // Send confirmation to user
-      sendTicketConfirmationEmail({
-        ticketNumber,
-        userEmail: body.user_email,
-        userName: body.user_name,
-        subject: body.subject,
-        description: body.description,
-        priority: body.priority || 'medium',
-        category: body.category,
-      }).catch(err => console.error('Failed to send user confirmation:', err));
-    }
 
     return NextResponse.json({
       success: true,
@@ -84,8 +58,8 @@ export async function GET(req: NextRequest) {
     const email = searchParams.get('email');
 
     if (ticketNumber) {
-      // Get single ticket by number
-      const ticket = getTicketByNumber(ticketNumber);
+      // Get single ticket by number (HubSpot ID)
+      const ticket = await getTicketByNumber(ticketNumber);
 
       if (!ticket) {
         return NextResponse.json(
@@ -97,7 +71,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ticket });
     } else if (email) {
       // Get all tickets for a user
-      const tickets = getTicketsByEmail(email);
+      const tickets = await getTicketsByEmail(email);
 
       return NextResponse.json({ tickets });
     } else {

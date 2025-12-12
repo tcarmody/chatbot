@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllTickets, getTicketStats, updateTicketStatus, getTicketByNumber } from '@/lib/tickets';
-import { sendTicketStatusChangeNotification } from '@/lib/email';
 import { requireAdmin } from '@/lib/admin-middleware';
 
 // GET - Get all tickets with optional filters
@@ -20,16 +19,16 @@ export async function GET(req: NextRequest) {
     const priority = searchParams.get('priority') || undefined;
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
-    const getStats = searchParams.get('stats') === 'true';
+    const getStatsParam = searchParams.get('stats') === 'true';
 
-    if (getStats) {
+    if (getStatsParam) {
       // Return statistics only
-      const stats = getTicketStats();
+      const stats = await getTicketStats();
       return NextResponse.json({ stats });
     }
 
     // Return tickets with pagination
-    const result = getAllTickets({
+    const result = await getAllTickets({
       status,
       priority,
       limit,
@@ -57,7 +56,7 @@ export async function PATCH(req: NextRequest) {
     );
   }
 
-  try{
+  try {
     const body = await req.json();
     const { ticket_number, status } = body;
 
@@ -78,7 +77,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Get ticket details before updating
-    const ticket = getTicketByNumber(ticket_number);
+    const ticket = await getTicketByNumber(ticket_number);
     if (!ticket) {
       return NextResponse.json(
         { error: 'Ticket not found' },
@@ -86,27 +85,14 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Update the status
-    const success = updateTicketStatus(ticket_number, status);
+    // Update the status in HubSpot
+    const success = await updateTicketStatus(ticket_number, status);
 
     if (!success) {
       return NextResponse.json(
         { error: 'Failed to update ticket status' },
         { status: 500 }
       );
-    }
-
-    // Send status change notification to user (don't block on failure)
-    if (process.env.RESEND_API_KEY && ticket.user_email) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      sendTicketStatusChangeNotification({
-        ticketNumber: ticket.ticket_number,
-        userEmail: ticket.user_email,
-        userName: ticket.user_name,
-        subject: ticket.subject,
-        newStatus: status,
-        ticketUrl: `${appUrl}/tickets/${ticket.ticket_number}`,
-      }).catch(err => console.error('Failed to send status change notification:', err));
     }
 
     return NextResponse.json({
