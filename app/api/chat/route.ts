@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import faqData from '@/data/faq.json';
 import { logAnalyticsEvent } from '@/lib/analytics';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
+import { chatLogger, logError } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -191,6 +192,14 @@ GENERALIZATION STRATEGY:
 
     // Log analytics event
     const responseTime = Date.now() - startTime;
+
+    chatLogger.info('Chat request completed', {
+      responseTime,
+      categories: relevantCategories,
+      faqCount: relevantFaqs.length,
+      tokens: { input: response.usage.input_tokens, output: response.usage.output_tokens },
+    });
+
     logAnalyticsEvent({
       timestamp: new Date().toISOString(),
       userMessage: message,
@@ -208,7 +217,7 @@ GENERALIZATION STRATEGY:
       usage: response.usage,
     });
   } catch (error) {
-    console.error('Error in chat API:', error);
+    logError(error as Error, { endpoint: '/api/chat', ip: clientIP });
     return NextResponse.json(
       { error: 'Failed to process chat request' },
       { status: 500 }
