@@ -9,12 +9,7 @@ describe('Health Check Endpoint', () => {
     // Mock environment
     process.env.ANTHROPIC_API_KEY = 'test_key';
     process.env.HUBSPOT_ACCESS_TOKEN = 'test_token';
-    process.env.POSTGRES_URL = 'postgres://test';
-
-    // Mock @vercel/postgres
-    vi.doMock('@vercel/postgres', () => ({
-      sql: vi.fn().mockResolvedValue({ rows: [{ 1: 1 }] }),
-    }));
+    process.env.DATABASE_URL = 'postgresql://test';
 
     // Mock the db module
     vi.doMock('@/lib/db', () => ({
@@ -34,7 +29,7 @@ describe('Health Check Endpoint', () => {
   it('should return degraded status when HubSpot token is missing', async () => {
     process.env.ANTHROPIC_API_KEY = 'test_key';
     delete process.env.HUBSPOT_ACCESS_TOKEN;
-    process.env.POSTGRES_URL = 'postgres://test';
+    process.env.DATABASE_URL = 'postgresql://test';
 
     vi.doMock('@/lib/db', () => ({
       checkDatabaseConnection: vi.fn().mockResolvedValue(true),
@@ -51,7 +46,7 @@ describe('Health Check Endpoint', () => {
   it('should return degraded status when database is unconfigured', async () => {
     process.env.ANTHROPIC_API_KEY = 'test_key';
     process.env.HUBSPOT_ACCESS_TOKEN = 'test_token';
-    delete process.env.POSTGRES_URL;
+    delete process.env.DATABASE_URL;
 
     vi.doMock('@/lib/db', () => ({
       checkDatabaseConnection: vi.fn().mockResolvedValue(false),
@@ -68,7 +63,7 @@ describe('Health Check Endpoint', () => {
   it('should include uptime in response', async () => {
     process.env.ANTHROPIC_API_KEY = 'test_key';
     process.env.HUBSPOT_ACCESS_TOKEN = 'test_token';
-    process.env.POSTGRES_URL = 'postgres://test';
+    process.env.DATABASE_URL = 'postgresql://test';
 
     vi.doMock('@/lib/db', () => ({
       checkDatabaseConnection: vi.fn().mockResolvedValue(true),

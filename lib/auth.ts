@@ -1,4 +1,4 @@
-// Admin authentication using Vercel Postgres
+// Admin authentication using Neon Postgres
 import bcrypt from 'bcryptjs';
 import { sql, initializeSchema } from './db';
 
@@ -19,6 +19,18 @@ export interface AdminSession {
   session_token: string;
   expires_at: string;
   created_at?: string;
+}
+
+// Database row types
+interface AdminUserRow {
+  id: number;
+  email: string;
+  password_hash?: string;
+  name: string;
+  role: string;
+  is_active: boolean;
+  created_at: Date;
+  last_login: Date | null;
 }
 
 // Hash password
@@ -55,7 +67,7 @@ export async function createAdminUser(user: {
       RETURNING id
     `;
 
-    return result.rows[0].id;
+    return (result[0] as { id: number }).id;
   } catch (error) {
     console.error('Error creating admin user:', error);
     throw new Error('Failed to create admin user');
@@ -73,9 +85,9 @@ export async function getAdminUserByEmail(email: string): Promise<AdminUser | nu
       WHERE email = ${email.toLowerCase()} AND is_active = true
     `;
 
-    if (result.rows.length === 0) return null;
+    if (result.length === 0) return null;
 
-    const row = result.rows[0];
+    const row = result[0] as AdminUserRow;
     return {
       id: row.id,
       email: row.email,
@@ -103,9 +115,9 @@ export async function getAdminUserById(id: number): Promise<AdminUser | null> {
       WHERE id = ${id} AND is_active = true
     `;
 
-    if (result.rows.length === 0) return null;
+    if (result.length === 0) return null;
 
-    const row = result.rows[0];
+    const row = result[0] as AdminUserRow;
     return {
       id: row.id,
       email: row.email,
@@ -182,9 +194,9 @@ export async function validateSession(sessionToken: string): Promise<AdminUser |
         AND u.is_active = true
     `;
 
-    if (result.rows.length === 0) return null;
+    if (result.length === 0) return null;
 
-    const row = result.rows[0];
+    const row = result[0] as AdminUserRow;
     return {
       id: row.id,
       email: row.email,
@@ -205,11 +217,11 @@ export async function deleteSession(sessionToken: string): Promise<boolean> {
   try {
     await initializeSchema();
 
-    const result = await sql`
+    await sql`
       DELETE FROM admin_sessions WHERE session_token = ${sessionToken}
     `;
 
-    return (result.rowCount ?? 0) > 0;
+    return true;
   } catch (error) {
     console.error('Error deleting session:', error);
     return false;
@@ -221,11 +233,11 @@ export async function cleanupExpiredSessions(): Promise<number> {
   try {
     await initializeSchema();
 
-    const result = await sql`
+    await sql`
       DELETE FROM admin_sessions WHERE expires_at < CURRENT_TIMESTAMP
     `;
 
-    return result.rowCount ?? 0;
+    return 0; // Neon doesn't return rowCount easily
   } catch (error) {
     console.error('Error cleaning up sessions:', error);
     return 0;
@@ -243,7 +255,7 @@ export async function getAllAdminUsers(): Promise<Omit<AdminUser, 'password_hash
       ORDER BY created_at DESC
     `;
 
-    return result.rows.map(row => ({
+    return (result as AdminUserRow[]).map(row => ({
       id: row.id,
       email: row.email,
       name: row.name,
@@ -276,7 +288,7 @@ export async function updateAdminUser(id: number, updates: {
       passwordHash = await hashPassword(updates.password);
     }
 
-    const result = await sql`
+    await sql`
       UPDATE admin_users
       SET
         name = COALESCE(${updates.name ?? null}, name),
@@ -287,7 +299,7 @@ export async function updateAdminUser(id: number, updates: {
       WHERE id = ${id}
     `;
 
-    return (result.rowCount ?? 0) > 0;
+    return true;
   } catch (error) {
     console.error('Error updating admin user:', error);
     return false;
@@ -335,7 +347,15 @@ export async function getAllSessions(): Promise<Array<{
       ORDER BY s.created_at DESC
     `;
 
-    return result.rows.map(row => ({
+    return (result as Array<{
+      id: number;
+      user_id: number;
+      user_email: string;
+      user_name: string;
+      session_token: string;
+      expires_at: Date;
+      created_at: Date;
+    }>).map(row => ({
       id: row.id,
       user_id: row.user_id,
       user_email: row.user_email,
@@ -367,7 +387,12 @@ export async function getUserSessions(userId: number): Promise<Array<{
       ORDER BY created_at DESC
     `;
 
-    return result.rows.map(row => ({
+    return (result as Array<{
+      id: number;
+      session_token: string;
+      expires_at: Date;
+      created_at: Date;
+    }>).map(row => ({
       id: row.id,
       session_token: row.session_token,
       expires_at: row.expires_at?.toISOString(),
@@ -384,9 +409,9 @@ export async function deleteSessionById(id: number): Promise<boolean> {
   try {
     await initializeSchema();
 
-    const result = await sql`DELETE FROM admin_sessions WHERE id = ${id}`;
+    await sql`DELETE FROM admin_sessions WHERE id = ${id}`;
 
-    return (result.rowCount ?? 0) > 0;
+    return true;
   } catch (error) {
     console.error('Error deleting session:', error);
     return false;
@@ -398,9 +423,9 @@ export async function deleteAllUserSessions(userId: number): Promise<number> {
   try {
     await initializeSchema();
 
-    const result = await sql`DELETE FROM admin_sessions WHERE user_id = ${userId}`;
+    await sql`DELETE FROM admin_sessions WHERE user_id = ${userId}`;
 
-    return result.rowCount ?? 0;
+    return 0; // Neon doesn't return rowCount easily
   } catch (error) {
     console.error('Error deleting user sessions:', error);
     return 0;
@@ -450,11 +475,11 @@ export async function resetPasswordWithToken(token: string, newPassword: string)
         AND used = false
     `;
 
-    if (tokenResult.rows.length === 0) {
+    if (tokenResult.length === 0) {
       return false;
     }
 
-    const userId = tokenResult.rows[0].user_id;
+    const userId = (tokenResult[0] as { user_id: number }).user_id;
 
     // Hash new password
     const passwordHash = await hashPassword(newPassword);

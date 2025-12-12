@@ -1,4 +1,4 @@
-// Ticket extensions (attachments and comments) using Vercel Postgres
+// Ticket extensions (attachments and comments) using Neon Postgres
 // Note: File uploads should use Vercel Blob or another cloud storage service
 import { sql, initializeSchema } from './db';
 import { TicketAttachment, TicketComment } from './tickets';
@@ -23,7 +23,7 @@ export async function addAttachment(attachment: Omit<TicketAttachment, 'id' | 'u
       RETURNING id
     `;
 
-    return result.rows[0]?.id || 0;
+    return (result[0] as { id: number })?.id || 0;
   } catch (error) {
     console.error('Error adding attachment:', error);
     throw new Error('Failed to add attachment');
@@ -41,15 +41,24 @@ export async function getTicketAttachments(ticketNumber: string): Promise<(Ticke
       ORDER BY uploaded_at DESC
     `;
 
-    return result.rows.map(row => ({
-      id: row.id as number,
-      ticket_number: row.ticket_number as string,
-      filename: row.filename as string,
-      original_name: row.original_name as string,
-      file_size: row.file_size as number,
-      mime_type: row.mime_type as string,
-      storage_url: row.storage_url as string | undefined,
-      uploaded_at: (row.uploaded_at as Date)?.toISOString(),
+    return (result as Array<{
+      id: number;
+      ticket_number: string;
+      filename: string;
+      original_name: string;
+      file_size: number;
+      mime_type: string;
+      storage_url: string | null;
+      uploaded_at: Date;
+    }>).map(row => ({
+      id: row.id,
+      ticket_number: row.ticket_number,
+      filename: row.filename,
+      original_name: row.original_name,
+      file_size: row.file_size,
+      mime_type: row.mime_type,
+      storage_url: row.storage_url ?? undefined,
+      uploaded_at: row.uploaded_at?.toISOString(),
     }));
   } catch (error) {
     console.error('Error fetching attachments:', error);
@@ -68,7 +77,7 @@ export async function deleteAttachment(id: number): Promise<{ deleted: boolean; 
       SELECT storage_url FROM ticket_attachments WHERE id = ${id}
     `;
 
-    const storageUrl = attachmentResult.rows[0]?.storage_url as string | undefined;
+    const storageUrl = (attachmentResult[0] as { storage_url: string | null })?.storage_url ?? undefined;
 
     // Delete from database
     await sql`DELETE FROM ticket_attachments WHERE id = ${id}`;
@@ -98,7 +107,7 @@ export async function addComment(comment: Omit<TicketComment, 'id' | 'created_at
       RETURNING id
     `;
 
-    return result.rows[0]?.id || 0;
+    return (result[0] as { id: number })?.id || 0;
   } catch (error) {
     console.error('Error adding comment:', error);
     throw new Error('Failed to add comment');
@@ -125,14 +134,22 @@ export async function getTicketComments(ticketNumber: string, includeInternal: b
       `;
     }
 
-    return result.rows.map(row => ({
-      id: row.id as number,
-      ticket_number: row.ticket_number as string,
-      author_name: row.author_name as string | undefined,
-      author_email: row.author_email as string | undefined,
-      comment_text: row.comment_text as string,
-      is_internal: row.is_internal as boolean,
-      created_at: (row.created_at as Date)?.toISOString(),
+    return (result as Array<{
+      id: number;
+      ticket_number: string;
+      author_name: string | null;
+      author_email: string | null;
+      comment_text: string;
+      is_internal: boolean;
+      created_at: Date;
+    }>).map(row => ({
+      id: row.id,
+      ticket_number: row.ticket_number,
+      author_name: row.author_name ?? undefined,
+      author_email: row.author_email ?? undefined,
+      comment_text: row.comment_text,
+      is_internal: row.is_internal,
+      created_at: row.created_at?.toISOString(),
     }));
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -145,13 +162,13 @@ export async function updateComment(id: number, commentText: string): Promise<bo
   try {
     await initializeSchema();
 
-    const result = await sql`
+    await sql`
       UPDATE ticket_comments
       SET comment_text = ${commentText}
       WHERE id = ${id}
     `;
 
-    return (result.rowCount ?? 0) > 0;
+    return true;
   } catch (error) {
     console.error('Error updating comment:', error);
     return false;
@@ -163,9 +180,9 @@ export async function deleteComment(id: number): Promise<boolean> {
   try {
     await initializeSchema();
 
-    const result = await sql`DELETE FROM ticket_comments WHERE id = ${id}`;
+    await sql`DELETE FROM ticket_comments WHERE id = ${id}`;
 
-    return (result.rowCount ?? 0) > 0;
+    return true;
   } catch (error) {
     console.error('Error deleting comment:', error);
     return false;

@@ -1,4 +1,4 @@
-// Audit logging using Vercel Postgres
+// Audit logging using Neon Postgres
 import { sql, initializeSchema } from './db';
 
 export interface AuditLog {
@@ -35,7 +35,7 @@ export async function logAudit(log: Omit<AuditLog, 'id' | 'created_at'>): Promis
       RETURNING id
     `;
 
-    return result.rows[0]?.id || 0;
+    return (result[0] as { id: number })?.id || 0;
   } catch (error) {
     console.error('Error logging audit:', error);
     return 0;
@@ -65,7 +65,7 @@ export async function getAuditLogs(filters?: {
         SELECT COUNT(*) as count FROM audit_logs
         WHERE user_id = ${filters.user_id} AND action = ${filters.action} AND resource_type = ${filters.resource_type}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs
@@ -73,13 +73,13 @@ export async function getAuditLogs(filters?: {
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else if (filters?.user_id && filters?.action) {
       const countResult = await sql`
         SELECT COUNT(*) as count FROM audit_logs
         WHERE user_id = ${filters.user_id} AND action = ${filters.action}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs
@@ -87,13 +87,13 @@ export async function getAuditLogs(filters?: {
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else if (filters?.user_id && filters?.resource_type) {
       const countResult = await sql`
         SELECT COUNT(*) as count FROM audit_logs
         WHERE user_id = ${filters.user_id} AND resource_type = ${filters.resource_type}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs
@@ -101,13 +101,13 @@ export async function getAuditLogs(filters?: {
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else if (filters?.action && filters?.resource_type) {
       const countResult = await sql`
         SELECT COUNT(*) as count FROM audit_logs
         WHERE action = ${filters.action} AND resource_type = ${filters.resource_type}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs
@@ -115,53 +115,53 @@ export async function getAuditLogs(filters?: {
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else if (filters?.user_id) {
       const countResult = await sql`
         SELECT COUNT(*) as count FROM audit_logs WHERE user_id = ${filters.user_id}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs WHERE user_id = ${filters.user_id}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else if (filters?.action) {
       const countResult = await sql`
         SELECT COUNT(*) as count FROM audit_logs WHERE action = ${filters.action}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs WHERE action = ${filters.action}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else if (filters?.resource_type) {
       const countResult = await sql`
         SELECT COUNT(*) as count FROM audit_logs WHERE resource_type = ${filters.resource_type}
       `;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs WHERE resource_type = ${filters.resource_type}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     } else {
       const countResult = await sql`SELECT COUNT(*) as count FROM audit_logs`;
-      total = Number(countResult.rows[0]?.count || 0);
+      total = Number((countResult[0] as { count: string })?.count || 0);
 
       const logsResult = await sql`
         SELECT * FROM audit_logs
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-      logs = logsResult.rows.map(mapAuditRow);
+      logs = (logsResult as Record<string, unknown>[]).map(mapAuditRow);
     }
 
     return { logs, total };
@@ -199,7 +199,7 @@ export async function getUserRecentActivity(userId: number, limit: number = 10):
       LIMIT ${limit}
     `;
 
-    return result.rows.map(mapAuditRow);
+    return (result as Record<string, unknown>[]).map(mapAuditRow);
   } catch (error) {
     console.error('Error fetching user activity:', error);
     return [];
@@ -218,14 +218,14 @@ export async function getAuditStats(): Promise<{
 
     // Total actions
     const totalResult = await sql`SELECT COUNT(*) as count FROM audit_logs`;
-    const total_actions = Number(totalResult.rows[0]?.count || 0);
+    const total_actions = Number((totalResult[0] as { count: string })?.count || 0);
 
     // Actions today
     const todayResult = await sql`
       SELECT COUNT(*) as count FROM audit_logs
       WHERE DATE(created_at) = CURRENT_DATE
     `;
-    const actions_today = Number(todayResult.rows[0]?.count || 0);
+    const actions_today = Number((todayResult[0] as { count: string })?.count || 0);
 
     // Top actions
     const topActionsResult = await sql`
@@ -235,8 +235,8 @@ export async function getAuditStats(): Promise<{
       ORDER BY count DESC
       LIMIT 5
     `;
-    const top_actions = topActionsResult.rows.map(row => ({
-      action: row.action as string,
+    const top_actions = (topActionsResult as Array<{ action: string; count: string }>).map(row => ({
+      action: row.action,
       count: Number(row.count),
     }));
 
@@ -246,7 +246,7 @@ export async function getAuditStats(): Promise<{
       FROM audit_logs
       WHERE DATE(created_at) = CURRENT_DATE
     `;
-    const active_users_today = Number(activeUsersResult.rows[0]?.count || 0);
+    const active_users_today = Number((activeUsersResult[0] as { count: string })?.count || 0);
 
     return {
       total_actions,

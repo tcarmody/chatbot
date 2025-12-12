@@ -1,11 +1,22 @@
-// Vercel Postgres database connection and schema initialization
-import { sql } from '@vercel/postgres';
+// Neon Postgres database connection and schema initialization
+import { neon } from '@neondatabase/serverless';
+
+// Create SQL query function from connection string
+function getSQL() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  return neon(databaseUrl);
+}
 
 // Schema initialization - run once on first connection
 let schemaInitialized = false;
 
 export async function initializeSchema() {
   if (schemaInitialized) return;
+
+  const sql = getSQL();
 
   try {
     // Analytics events table
@@ -139,6 +150,7 @@ export async function initializeSchema() {
 // Health check for database connection
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
+    const sql = getSQL();
     await sql`SELECT 1`;
     return true;
   } catch {
@@ -146,5 +158,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
   }
 }
 
-// Export the sql function for use in other modules
-export { sql };
+// Export a function to get SQL for use in other modules
+export function sql(strings: TemplateStringsArray, ...values: unknown[]) {
+  return getSQL()(strings, ...values);
+}

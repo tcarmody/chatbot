@@ -20,11 +20,11 @@ async function main() {
   console.log('╚════════════════════════════════════════════╝\n');
 
   // Check for database configuration
-  if (!process.env.POSTGRES_URL) {
-    console.log('⚠️  POSTGRES_URL environment variable is not set.');
-    console.log('   Make sure to set up Vercel Postgres and configure the connection string.\n');
+  if (!process.env.DATABASE_URL) {
+    console.log('⚠️  DATABASE_URL environment variable is not set.');
+    console.log('   Make sure to set up Neon Postgres and configure the connection string.\n');
     console.log('   For local development, add to .env.local:');
-    console.log('   POSTGRES_URL=postgres://...\n');
+    console.log('   DATABASE_URL=postgresql://user:pass@host/db?sslmode=require\n');
     rl.close();
     return;
   }

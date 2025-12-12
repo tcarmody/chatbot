@@ -22,10 +22,10 @@ export async function GET() {
     hubspot: process.env.HUBSPOT_ACCESS_TOKEN ? 'ok' : 'missing',
   };
 
-  // Check database connectivity (Vercel Postgres)
+  // Check database connectivity (Neon Postgres)
   try {
     // Only check if database URL is configured
-    if (process.env.POSTGRES_URL) {
+    if (process.env.DATABASE_URL) {
       const isConnected = await checkDatabaseConnection();
       checks.database = isConnected ? 'ok' : 'error';
     } else {

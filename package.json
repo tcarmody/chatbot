@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@neondatabase/serverless": "^1.0.2",
     "@sentry/nextjs": "^10.30.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/bcryptjs": "^2.4.6",
-    "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^3.0.3",
     "next": "16.0.8",
     "next-auth": "^5.0.0-beta.30",

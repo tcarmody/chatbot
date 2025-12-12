@@ -1,4 +1,4 @@
-// Analytics tracking using Vercel Postgres
+// Analytics tracking using Neon Postgres
 import { sql, initializeSchema } from './db';
 
 export interface AnalyticsEvent {
@@ -45,12 +45,12 @@ export async function getAnalyticsSummary() {
 
     // Total queries
     const totalResult = await sql`SELECT COUNT(*) as count FROM analytics_events`;
-    const totalQueries = Number(totalResult.rows[0]?.count || 0);
+    const totalQueries = Number((totalResult[0] as { count: string })?.count || 0);
 
     // Category usage
     const eventsResult = await sql`SELECT detected_categories FROM analytics_events`;
     const categoryCount: { [key: string]: number } = {};
-    eventsResult.rows.forEach(event => {
+    (eventsResult as { detected_categories: string }[]).forEach(event => {
       const categories = JSON.parse(event.detected_categories) as string[];
       categories.forEach(category => {
         categoryCount[category] = (categoryCount[category] || 0) + 1;
@@ -60,7 +60,7 @@ export async function getAnalyticsSummary() {
     // Common queries (first 50 chars)
     const queriesResult = await sql`SELECT user_message FROM analytics_events`;
     const queryCount: { [key: string]: number } = {};
-    queriesResult.rows.forEach(event => {
+    (queriesResult as { user_message: string }[]).forEach(event => {
       const query = event.user_message.substring(0, 50).toLowerCase();
       queryCount[query] = (queryCount[query] || 0) + 1;
     });
@@ -69,8 +69,8 @@ export async function getAnalyticsSummary() {
     const avgResponseTimeResult = await sql`
       SELECT AVG(response_time) as avg FROM analytics_events WHERE response_time IS NOT NULL
     `;
-    const avgResponseTime = avgResponseTimeResult.rows[0]?.avg
-      ? Math.round(Number(avgResponseTimeResult.rows[0].avg))
+    const avgResponseTime = (avgResponseTimeResult[0] as { avg: string })?.avg
+      ? Math.round(Number((avgResponseTimeResult[0] as { avg: string }).avg))
       : 0;
 
     // Token usage
@@ -80,8 +80,9 @@ export async function getAnalyticsSummary() {
         COALESCE(SUM(output_tokens), 0) as total_output
       FROM analytics_events
     `;
-    const totalInputTokens = Number(tokenStatsResult.rows[0]?.total_input || 0);
-    const totalOutputTokens = Number(tokenStatsResult.rows[0]?.total_output || 0);
+    const tokenRow = tokenStatsResult[0] as { total_input: string; total_output: string };
+    const totalInputTokens = Number(tokenRow?.total_input || 0);
+    const totalOutputTokens = Number(tokenRow?.total_output || 0);
 
     return {
       totalQueries,

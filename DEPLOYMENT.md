@@ -5,12 +5,13 @@ This guide explains how to deploy the chatbot application to Vercel.
 ## Prerequisites
 
 - A [Vercel account](https://vercel.com/signup)
+- A [Neon account](https://neon.tech) (free tier available)
 - Your code pushed to GitHub, GitLab, or Bitbucket
 - API keys for required services
 
-## Database: Vercel Postgres
+## Database: Neon Postgres
 
-This application uses **Vercel Postgres** for data storage, which is fully compatible with Vercel's serverless environment.
+This application uses **Neon Postgres** for data storage. Neon is a serverless Postgres provider that works seamlessly with Vercel's serverless functions.
 
 ### What's Stored in Postgres
 
@@ -21,13 +22,18 @@ This application uses **Vercel Postgres** for data storage, which is fully compa
 | Audit Logs | `audit_logs` | Admin activity logs |
 | Ticket Extensions | `ticket_attachments`, `ticket_comments` | Ticket metadata |
 
-### Setting Up Vercel Postgres
+### Setting Up Neon Postgres
 
-1. Go to your Vercel project dashboard
-2. Navigate to **Storage** tab
-3. Click **Create Database** → **Postgres**
-4. Choose a region close to your deployment
-5. The connection strings will be automatically added to your environment variables
+1. Go to [neon.tech](https://neon.tech) and sign up (free)
+2. Click **Create Project**
+3. Choose a project name and region (choose closest to your Vercel deployment)
+4. Copy the connection string from the dashboard
+5. Add it as `DATABASE_URL` in your Vercel environment variables
+
+**Free tier includes:**
+- 0.5 GB storage
+- 190 compute hours/month
+- Autoscaling and auto-suspend
 
 The database schema is automatically created on first use - no manual migration needed.
 
@@ -42,21 +48,7 @@ Configure these in Vercel Dashboard → Project → Settings → Environment Var
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `ANTHROPIC_API_KEY` | Claude API key from [Anthropic Console](https://console.anthropic.com/) | `sk-ant-api03-...` |
-
-### Database Variables (Auto-configured)
-
-When you create a Vercel Postgres database, these are automatically set:
-
-| Variable | Description |
-|----------|-------------|
-| `POSTGRES_URL` | Main connection string |
-| `POSTGRES_PRISMA_URL` | Prisma-compatible URL |
-| `POSTGRES_URL_NO_SSL` | Connection without SSL |
-| `POSTGRES_URL_NON_POOLING` | Direct connection |
-| `POSTGRES_USER` | Database username |
-| `POSTGRES_HOST` | Database host |
-| `POSTGRES_PASSWORD` | Database password |
-| `POSTGRES_DATABASE` | Database name |
+| `DATABASE_URL` | Neon Postgres connection string | `postgresql://user:pass@host/db?sslmode=require` |
 
 ### Optional Variables
 
@@ -84,7 +76,17 @@ When you create a Vercel Postgres database, these are automatically set:
 
 ## Deployment Steps
 
-### Step 1: Prepare Your Repository
+### Step 1: Create Neon Database
+
+1. Go to [neon.tech](https://neon.tech) and sign in
+2. Click **New Project**
+3. Enter a project name (e.g., `chatbot`)
+4. Select a region close to your users
+5. Click **Create Project**
+6. On the dashboard, find the **Connection string** and copy it
+   - Make sure to select "Pooled connection" for serverless
+
+### Step 2: Prepare Your Repository
 
 1. Ensure all changes are committed and pushed:
    ```bash
@@ -100,20 +102,11 @@ When you create a Vercel Postgres database, these are automatically set:
    data/
    ```
 
-### Step 2: Import Project to Vercel
+### Step 3: Import Project to Vercel
 
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Click **Import** next to your repository
 3. Select the repository containing this project
-
-### Step 3: Create Vercel Postgres Database
-
-1. After import, go to **Storage** tab
-2. Click **Create Database** → **Postgres**
-3. Name your database (e.g., `chatbot-db`)
-4. Select region (choose same as your deployment)
-5. Click **Create**
-6. The environment variables are automatically linked
 
 ### Step 4: Configure Project Settings
 
@@ -128,7 +121,10 @@ On the configuration screen:
 ### Step 5: Add Environment Variables
 
 1. Expand the **Environment Variables** section
-2. Add each variable from the tables above
+2. Add each variable:
+   - `ANTHROPIC_API_KEY` - Your Claude API key
+   - `DATABASE_URL` - The Neon connection string from Step 1
+   - Any other optional variables you need
 3. For `NEXT_PUBLIC_APP_URL`, use your Vercel domain:
    - `https://your-project.vercel.app` (default)
    - Or your custom domain once configured
@@ -147,10 +143,16 @@ On the configuration screen:
 
 After deployment, create an admin user to access the dashboard:
 
+**Option 1: Using Vercel CLI (recommended)**
 1. Install Vercel CLI: `npm i -g vercel`
 2. Link your project: `vercel link`
 3. Pull environment variables: `vercel env pull .env.local`
 4. Run setup script: `npm run setup-admin`
+
+**Option 2: Direct database access**
+1. Go to your Neon dashboard
+2. Open the SQL Editor
+3. Run the SQL to create an admin user (hash password with bcrypt first)
 
 ### Custom Domain (Optional)
 
@@ -258,9 +260,14 @@ Enable Vercel Analytics for additional monitoring:
 - Add the environment variable in Vercel dashboard
 - Redeploy after adding variables
 
+**"DATABASE_URL environment variable is not set"**
+- Add the Neon connection string to Vercel environment variables
+- Make sure to redeploy after adding
+
 **Database connection errors**
-- Verify Vercel Postgres is linked to your project
-- Check that `POSTGRES_URL` is set in environment variables
+- Verify the connection string is correct
+- Check that you're using the pooled connection URL
+- Ensure SSL mode is enabled (`?sslmode=require`)
 
 **Ticket creation fails**
 - Verify HubSpot access token is valid
@@ -276,16 +283,20 @@ The chat API typically responds in 2-5 seconds, well within limits.
 
 ---
 
-## Local Development with Vercel Postgres
+## Local Development
 
-To develop locally with the production database:
+To develop locally:
 
+1. Copy `.env.local.example` to `.env.local`
+2. Fill in your environment variables:
+   - Get `DATABASE_URL` from your Neon dashboard
+   - Get `ANTHROPIC_API_KEY` from Anthropic console
+3. Run `npm run dev`
+
+For production database access locally:
 1. Install Vercel CLI: `npm i -g vercel`
 2. Link your project: `vercel link`
 3. Pull environment variables: `vercel env pull .env.local`
-4. Run development server: `npm run dev`
-
-Alternatively, for isolated local development, you can use a local PostgreSQL instance and update `.env.local` with its connection string.
 
 ---
 
@@ -296,10 +307,11 @@ Alternatively, for isolated local development, you can use a local PostgreSQL in
 - **Hobby (Free)**: 100GB bandwidth, suitable for low traffic
 - **Pro ($20/month)**: Higher limits, team features
 
-### Vercel Postgres
+### Neon Postgres
 
-- **Free tier**: 256MB storage, 60 compute hours/month
-- **Pro**: Higher limits included with Vercel Pro
+- **Free tier**: 0.5GB storage, 190 compute hours/month
+- **Launch ($19/month)**: 10GB storage, 300 compute hours
+- **Scale**: Usage-based pricing
 
 ### Anthropic API
 
@@ -323,7 +335,7 @@ Before going live:
 - [ ] Admin dashboard is protected with authentication
 - [ ] CORS is handled by Next.js (same-origin only)
 - [ ] Sentry DSN is for production project (not development)
-- [ ] Vercel Postgres is in same region as deployment
+- [ ] Database connection uses SSL (`?sslmode=require`)
 
 ---
 
@@ -336,6 +348,7 @@ Before going live:
 | Run tests | `npm test` |
 | Setup admin | `npm run setup-admin` |
 | Vercel dashboard | `vercel.com/dashboard` |
+| Neon dashboard | `console.neon.tech` |
 | Redeploy | Push to main branch |
 | View logs | Vercel Dashboard → Deployments → Functions |
 | Pull env vars | `vercel env pull .env.local` |
