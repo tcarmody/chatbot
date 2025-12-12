@@ -1,0 +1,1523 @@
+{
+  "catalog_info": {
+    "title": "DeepLearning.AI Course Catalog for B2B",
+    "last_updated": "2025-09-10",
+    "total_courses": 120,
+    "note_1": "Additional programs are launched almost weekly, check www.deeplearning.ai/courses for the most updated list.",
+    "note_2": "For Short Courses - learner hours are calculated as the duration of video, since hands-on labs are often run in parallel to watching the videos."
+  },
+  "courses_by_partner": {
+    "DeepLearning.AI (Independent)": [
+      {
+        "id": 1,
+        "name": "Deep Learning",
+        "launch_date": "2017-08-08",
+        "short_name": "DLS",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 125.0,
+        "description": "The Deep Learning Specialization is a foundational program that will help you understand the capabilities, challenges, and consequences of deep learning and prepare you to participate in the development of leading-edge AI technology. In this Specialization, you will build and train neural network architectures such as Convolutional Neural Networks, Recurrent Neural Networks, LSTMs, Transformers, and learn how to make them better with strategies such as Dropout, BatchNorm, Xavier/He initialization, and more. Get ready to master theoretical concepts and their industry applications using Python and TensorFlow and tackle real-world cases such as speech recognition, music synthesis, chatbots, machine translation, natural language processing, and more.",
+        "partner": null
+      },
+      {
+        "id": 2,
+        "name": "AI For Everyone",
+        "launch_date": "2019-02-28",
+        "short_name": "AI4E",
+        "format": "Course",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 5.0,
+        "description": "AI is not only for engineers. If you want your organization to become better at using AI, this is the course to tell everyone--especially your non-technical colleagues--to take. In this course, you will learn the meaning behind common AI terminology, including neural networks, machine learning, deep learning, and data science; what AI realistically can--and cannot--do; how to spot opportunities to apply AI to problems in your own organization; what it feels like to build machine learning and data science projects; how to work with an AI team and build an AI strategy in your company; how to navigate ethical and societal discussions surrounding AI. Though this course is largely non-technical, engineers can also take this course to learn the business aspects of AI.",
+        "partner": null
+      },
+      {
+        "id": 3,
+        "name": "TensorFlow Developer Professional Certificate",
+        "launch_date": "2019-03-06",
+        "short_name": "TF1",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 83.0,
+        "description": "TensorFlow is one of the most in-demand and popular open-source deep learning frameworks available today. The DeepLearning.AI TensorFlow Developer Professional Certificate program teaches you applied machine learning skills with TensorFlow so you can build and train powerful models. In this hands-on, four-course Professional Certificate program, you'll learn the necessary tools to build scalable AI-powered applications with TensorFlow. After finishing this program, you'll be able to apply your new TensorFlow skills to a wide range of problems and projects. ",
+        "partner": null
+      },
+      {
+        "id": 4,
+        "name": "TensorFlow: Data and Deployment",
+        "launch_date": "2019-03-06",
+        "short_name": "TF2",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 51.0,
+        "description": "Continue developing your skills in TensorFlow as you learn to navigate through a wide range of deployment scenarios and discover new ways to use data more effectively when training your machine learning models. In this four-course Specialization, you'll learn how to get your machine learning models into the hands of real people on all kinds of devices. Start by understanding how to train and run machine learning models in browsers and in mobile applications. Learn how to leverage built-in datasets with just a few lines of code, learn about data pipelines with TensorFlow data services, use APIs to control data splitting, process all types of unstructured data, and retrain deployed models with user data while maintaining data privacy.  Apply your knowledge in various deployment scenarios and get introduced to TensorFlow Serving, TensorFlow, Hub, TensorBoard, and more.",
+        "partner": null
+      },
+      {
+        "id": 5,
+        "name": "AI for Medicine",
+        "launch_date": "2020-05-29",
+        "short_name": "AI4M",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 71.0,
+        "description": "AI is transforming the practice of medicine. It's helping doctors diagnose patients more accurately, make predictions about patients' future health, and recommend better treatments. This three-course Specialization will give you practical experience in applying machine learning to concrete problems in medicine.",
+        "partner": null
+      },
+      {
+        "id": 6,
+        "name": "Natural Language Processing",
+        "launch_date": "2020-06-16",
+        "short_name": "NLP",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 110.0,
+        "description": "Natural Language Processing (NLP) is a subfield of linguistics, computer science, and artificial intelligence that uses algorithms to interpret and manipulate human language. This Specialization will equip you with machine learning basics and state-of-the-art deep learning techniques needed to build cutting-edge NLP systems.",
+        "partner": null
+      },
+      {
+        "id": 7,
+        "name": "Generative Adversarial Networks",
+        "launch_date": "2020-09-29",
+        "short_name": "GANs",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 82.0,
+        "description": "Generative Adversarial Networks (GANs) are powerful machine learning models capable of generating realistic image, video, and voice outputs. Rooted in game theory, GANs have wide-spread application: from improving cybersecurity by fighting against adversarial attacks and anonymizing data to preserve privacy to generating state-of-the-art images, colorizing black and white images, increasing image resolution, creating avatars, turning 2D images to 3D, and more",
+        "partner": null
+      },
+      {
+        "id": 8,
+        "name": "TensorFlow: Advanced Techniques",
+        "launch_date": "2020-12-09",
+        "short_name": "TF3",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 90.0,
+        "description": "Expand your knowledge of the Functional API and build exotic non-sequential model types. Learn how to optimize training in different environments with multiple processors and chip types and get introduced to advanced computer vision scenarios such as object detection, image segmentation, and interpreting convolutions. Explore generative deep learning including the ways AIs can create new content from Style Transfer to Auto Encoding, VAEs, and GANs. This Specialization is for software and machine learning engineers with a foundational understanding of TensorFlow who are looking to expand their knowledge and skill set by learning advanced TensorFlow features to build powerful models.",
+        "partner": null
+      },
+      {
+        "id": 9,
+        "name": "Machine Learning in Production",
+        "launch_date": "2021-05-11",
+        "short_name": "MLEP",
+        "format": "Course",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 10.0,
+        "description": "In this Machine Learning in Production course, you will build intuition about designing a production ML system end-to-end: project scoping, data needs, modeling strategies, and deployment patterns and technologies. You will learn strategies for addressing common challenges in production like establishing a model baseline, addressing concept drift, and performing error analysis. You'll follow a framework for developing, deploying, and continuously improving a productionized ML application.",
+        "partner": null
+      },
+      {
+        "id": 11,
+        "name": "Mathematics for Machine Learning and Data Science",
+        "launch_date": "2023-01-24",
+        "short_name": "M4ML",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 93.0,
+        "description": "Many machine learning engineers and data scientists need help with mathematics, and even experienced practitioners can feel held back by a lack of math skills. This Specialization uses innovative pedagogy in mathematics to help you learn quickly and intuitively, with courses that use easy-to-follow visualizations to help you see how the math behind machine learning actually works. As a learner in this program, you'll need basic to intermediate Python programming skills to be successful.",
+        "partner": null
+      },
+      {
+        "id": 24,
+        "name": "How Diffusion Models Work",
+        "launch_date": "2023-05-31",
+        "short_name": "Diffusion",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 36,
+        "learner_hours": 1.0,
+        "description": "Learn to build diffusion models from scratch, gaining deep familiarity with the diffusion process and underlying models. Acquire practical coding skills through labs on sampling, training diffusion models, building neural networks for noise prediction, and adding context for personalized image generation. By course end, you'll have a foundational model for further exploration in diffusion-based generative AI. Hands-on examples and Jupyter notebooks facilitate seamless experimentation with course concepts.",
+        "partner": null
+      },
+      {
+        "id": 36,
+        "name": "Generative AI for Everyone",
+        "launch_date": "2023-10-31",
+        "short_name": "GENAI4E",
+        "format": "Course",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 4.0,
+        "description": "Instructed by AI pioneer Andrew Ng, Generative AI for Everyone offers his unique perspective on empowering you and your work with generative AI. Andrew will guide you through how generative AI works and what it can (and can't) do. It includes hands-on exercises where you'll learn to use generative AI to help in day-to-day work and receive tips on effective prompt engineering, as well as learning how to go beyond prompting for more advanced uses of AI.",
+        "partner": null
+      },
+      {
+        "id": 71,
+        "name": "Data Engineering",
+        "launch_date": "2024-09-16",
+        "short_name": "DE",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 100.0,
+        "description": "The DeepLearning.AI Data Engineering Professional Certificate is a comprehensive online program for aspiring data engineers and other data practitioners looking to start or grow their careers. Throughout this program, you'll learn the foundations of data engineering while gaining hands-on experience designing and implementing data architectures using AWS and open-source tools. You'll acquire the fundamental practices and gain intuition on the core principles to think, act, and function like an effective data engineer in the real world. Taught by industry expert Joe Reis, co-author of the best-selling book Fundamentals of Data Engineering, this certificate equips you with the skills and knowledge to excel in a high-demand field, focusing on ingesting, transforming, storing, and serving data for analytics and machine learning use cases to drive organizational and business objectives.",
+        "partner": null
+      },
+      {
+        "id": 72,
+        "name": "Generative AI for Software Development",
+        "launch_date": "2024-09-25",
+        "short_name": "GenAI4SD",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 32.0,
+        "description": "This DeepLearning.AI Skills Certificate, led by former Google AI lead Laurence Moroney, teaches software developers how to integrate Generative AI tools into their day-to-day workflows. Over three courses, learners will explore how LLMs can help them complete their individual work, improve communication and collaboration within and across teams, and how LLMs can assist with big picture tasks like application and database design. Specific developer tasks covered in the course include reviewing and anlayzing code, refactoring code to meet requirements, writing documentation and test cases, managing dependencies, and designing software architectures and databases. Through practical, hands-on projects, learners will see how to integrate LLMs into their development process and leverage these models to enhance productivity and innovation. ",
+        "partner": null
+      },
+      {
+        "id": 90,
+        "name": "Data Analytics ",
+        "launch_date": "2025-03-18",
+        "short_name": "DAG",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": "1,454",
+        "learner_hours": 155.0,
+        "description": "The Data Analytics Professional Certificate, led by industry leader Sean Barnes, equips you with the skills to manage the entire data lifecycle, from defining problems to delivering insights. You'll learn to use large language models as a thought partner, accelerating tasks like simulation modeling, formula debugging, and data visualization. Course examples comes from real-world use cases, building practical and immediately useful skills. Whether you're a software engineer working with data pipelines, a marketer or business analyst extracting insights, or building a career in data analysis, you'll gain the foundation to excel in the data economy. This program blends core statistical methods with AI-assisted workflows, perfect for beginner data professionals or experienced practitioners looking for new techniques. ",
+        "partner": null
+      },
+      {
+        "id": 111,
+        "name": "Agentic AI",
+        "launch_date": "2025-09-29",
+        "short_name": "ADP-C1",
+        "format": "Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 184.2,
+        "learner_hours": 8.2,
+        "description": "Build agentic AI systems that take action through iterative, multi-step workflows. In this course taught by Andrew Ng, you'll gain a fundamental understanding and practical knowledge to develop production-ready agentic applications, from design patterns to deployment and evaluation.",
+        "partner": null
+      },
+      {
+        "id": 114,
+        "name": "PyTorch for Deep Learning",
+        "launch_date": "2025-10-28",
+        "short_name": "PyTorch",
+        "format": "Professional Certificate",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 480.6,
+        "learner_hours": 80,
+        "description": "You'll learn through hands-on projects that mirror the challenges faced by deep learning engineers: designing efficient architectures, applying transfer learning and fine-tuning to pretrained models, using interpretability techniques to understand model behavior, and preparing optimized, portable models with ONNX and experiment tracking tools like MLflow. Along the way, you'll gain experience with techniques used across modern AI applications, including pruning and quantization.",
+        "partner": null
+      },
+      {
+        "id": 121,
+        "name": "Retrieval Augmented Generation",
+        "launch_date": "2025-07-15",
+        "short_name": "lf-RAG-C1",
+        "format": "Course",
+        "platform": "Coursera",
+        "video_minutes": 263.4,
+        "learner_hours": 35,
+        "description": "This course teaches you to build Retrieval Augmented Generation (RAG) systems that enhance large language models by connecting them to external knowledge bases. Through five hands-on modules, you'll learn core components like retrievers, vector databases, and evaluation techniques. You'll learn core principles and develop practical skills building RAG pipelines from prototypes to production-ready systems.",
+        "partner": null
+      },
+      {
+        "id": 122,
+        "name": "Pydantic for LLM Workflows",
+        "launch_date": "2025-07-30",
+        "short_name": "Pydantic-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 80.8,
+        "learner_hours": 1.5,
+        "description": "This course teaches how to structure and validate data in LLM applications. You'll learn to move beyond free-form responses to generate structured outputs that integrate with other system components. The course covers Pydantic basics, input validation, API integration, and tool-calling, enabling you to build applications with reliable, structured data flow.",
+        "partner": null
+      }
+    ],
+    "Stanford University": [
+      {
+        "id": 10,
+        "name": "Machine Learning",
+        "launch_date": "2022-07-27",
+        "short_name": "MLS",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 94.0,
+        "description": "This beginner-friendly program will teach you the fundamentals of machine learning and how to use these techniques to build real-world AI applications. It provides a broad introduction to modern machine learning, including supervised learning (multiple linear regression, logistic regression, neural networks, and decision trees), unsupervised learning (clustering, dimensionality reduction, recommender systems), and some of the best practices used in Silicon Valley for artificial intelligence and machine learning innovation (evaluating and tuning models, taking a data-centric approach to improving performance, and more.)",
+        "partner": "Stanford University"
+      }
+    ],
+    "OpenAI": [
+      {
+        "id": 12,
+        "name": "ChatGPT Prompt Engineering for Developers",
+        "launch_date": "2023-04-27",
+        "short_name": "OpenAI-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 90.5,
+        "learner_hours": 2.0,
+        "description": "Learn to use a large language model (LLM) via the OpenAI API to build innovative applications. Understand how LLMs work, best practices for prompt engineering, and how to use LLM APIs for tasks like summarizing, inferring, transforming text, and expanding content. Master effective prompt writing, systematic prompt engineering, and build a custom chatbot. Gain hands-on experience with examples in a Jupyter notebook environment.",
+        "partner": "OpenAI"
+      },
+      {
+        "id": 14,
+        "name": "Building Systems with the ChatGPT API",
+        "launch_date": "2023-05-31",
+        "short_name": "OpenAI-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 105.8,
+        "learner_hours": 2.0,
+        "description": "Learn to automate complex workflows using the ChatGPT API by building chains of prompts and integrating Python code with completions and new prompts. Develop a customer service chatbot and apply skills to classify user queries, ensure query safety, and process multi-step reasoning tasks. Hands-on examples and Jupyter notebooks facilitate seamless experimentation with course concepts.",
+        "partner": "OpenAI"
+      },
+      {
+        "id": 80,
+        "name": "Collaborative Writing and Coding with OpenAI Canvas",
+        "launch_date": "2024-12-11",
+        "short_name": "OpenAI-C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 50.3,
+        "learner_hours": 1.0,
+        "description": "Discover the innovative OpenAI Canvas with the course \"Collaborative Writing and Coding with OpenAI Canvas\" led by Karina Nguyen. This side-by-side workspace improves writing and coding workflows by allowing seamless collaboration with ChatGPT, offering a dual workspace for joint editing and refinement. Learn to enhance your projects through interactive lessons on feedback integration, automation tools, and practical applications like coding from images and creating video games. Understand the model's training and design to unlock Canvas's full potential, making your creative process more efficient and enjoyable.",
+        "partner": "OpenAI"
+      },
+      {
+        "id": 81,
+        "name": "Reasoning with o1",
+        "launch_date": "2024-12-18",
+        "short_name": "OpenAI-C4",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 70.8,
+        "learner_hours": 1.5,
+        "description": "Discover the capabilities of OpenAI's o1 model in the \"Reasoning with o1\" course, co-created with OpenAI and led by Colin Jarvis. This course covers the o1 model's exceptional abstract reasoning abilities across various domains, including law and STEM, and its use of reinforcement learning and 'chain-of-thought' prompting for improved task performance. You'll explore task suitability, advanced prompting principles, orchestrating multi-step tasks with o1, coding challenges, image understanding, and meta-prompting techniques to refine prompts for enhanced outcomes.",
+        "partner": "OpenAI"
+      }
+    ],
+    "LangChain": [
+      {
+        "id": 13,
+        "name": "LangChain for LLM Application Development",
+        "launch_date": "2023-05-31",
+        "short_name": "LangChain",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 98.2,
+        "learner_hours": 2.0,
+        "description": "This course helps you expand the capabilities of language models using the LangChain framework. You'll learn to work with models, prompts, and parsers; manage LLM memories to store conversations; create operation sequences with chains; and apply LLMs to proprietary data for question answering. Additionally, you'll learn to evaluate your LLM applications and explore using LLMs as reasoning agents. LangChain simplifies the development of advanced LLM-powered applications, enabling you to build powerful AI solutions efficiently and effectively.",
+        "partner": "LangChain"
+      },
+      {
+        "id": 19,
+        "name": "LangChain: Chat with Your Data",
+        "launch_date": "2023-07-05",
+        "short_name": "LangChain-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 69,
+        "learner_hours": 1.5,
+        "description": "Learn to build a chatbot using LangChain, focusing on Retrieval Augmented Generation (RAG) and responding to queries based on document content. Master document loading, splitting, embeddings, and vector store integrations. Grasp advanced retrieval techniques, build a one-pass question-answering solution, and track pertinent information from conversations. Create practical applications to interact with your data using LangChain and LLMs.",
+        "partner": "LangChain"
+      },
+      {
+        "id": 26,
+        "name": "Functions, Tools and Agents with LangChain",
+        "launch_date": "2023-10-25",
+        "short_name": "LangChain-C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 104.9,
+        "learner_hours": 2.0,
+        "description": "Stay ahead of the evolving LLM landscape by exploring advancements like ChatGPT's function calling and building a conversational agent using LangChain Expression Language (LCEL). Learn to generate structured outputs, use LCEL for customizing chains and agents, apply function calling for tagging and data extraction, and understand tool selection and routing with LangChain tools. Enhance and build your applications with these new capabilities.",
+        "partner": "LangChain"
+      },
+      {
+        "id": 34,
+        "name": "Build LLM Apps with LangChain.js",
+        "launch_date": "2024-01-10",
+        "short_name": "LangChain-C4",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 65.2,
+        "learner_hours": 1.5,
+        "description": "This course teaches JavaScript developers to build powerful LLM apps using LangChain.js. Learn to use LangChain's abstractions, understand retrieval augmented generation (RAG), and create a basic conversational retrieval system for chatbots. Expand your web development toolkit and build context-aware applications with JavaScript and LLMs.",
+        "partner": "LangChain"
+      },
+      {
+        "id": 54,
+        "name": "AI Agents in LangGraph",
+        "launch_date": "2024-06-05",
+        "short_name": "LangChain-C5 (LangGraph)",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 85.6,
+        "learner_hours": 1.5,
+        "description": "Learn to build controllable agents using LangGraph and Python. Create an agent from scratch, then rebuild it with LangGraph, understanding its components. Explore agentic search for enhanced data retrieval. Implement persistence for state management, incorporate human-in-the-loop, and develop an essay-writing agent. Gain skills to create flow-based, controllable agents using LangGraph.",
+        "partner": "LangChain, Tavily"
+      },
+      {
+        "id": 89,
+        "name": "Long-Term Agentic Memory With LangGraph",
+        "launch_date": "2025-03-14",
+        "short_name": "LangChain-C6",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 64.9,
+        "learner_hours": 1.5,
+        "description": "Learn to build an agent with long-term memory using LangGraph by creating a personal email assistant that responds, ignores, or notifies users. You'll implement three memory types—semantic, episodic, and procedural—while developing tools for writing, scheduling, and storing user information. The course covers memory mechanisms, preference learning, and system prompt optimization to create agents that maintain context across interactions.",
+        "partner": "LangChain"
+      }
+    ],
+    "AWS": [
+      {
+        "id": 16,
+        "name": "Generative AI with Large Language Models",
+        "launch_date": "2023-06-28",
+        "short_name": "GAIA",
+        "format": "Course",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 16.0,
+        "description": "In Generative AI with Large Language Models (LLMs), you'll learn the fundamentals of how LLMs work, and how to deploy them in real-world applications. This is a technical course with hands-on labs that covers the basics of LLM pretraining, finetuning, and model optimizations such as Reinforcement Learning with Human Feedback (RLHF).  ",
+        "partner": "AWS"
+      },
+      {
+        "id": 38,
+        "name": "Serverless LLM apps with Amazon Bedrock",
+        "launch_date": "2024-02-14",
+        "short_name": "AWS",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 130,
+        "learner_hours": 2.5,
+        "description": "This course teaches you to deploy LLM-based applications using serverless technology. Learn to summarize audio files by pairing an LLM with an Automatic Speech Recognition (ASR) model in an event-driven system. Use Amazon Bedrock and Transcribe for transcription and summarization, enable logging for monitoring and security, and deploy the automated workflow with AWS Lambda. Gain skills to quickly build and deploy serverless LLM applications.",
+        "partner": "AWS"
+      },
+      {
+        "id": 75,
+        "name": "Serverless Agentic Workflows with Amazon Bedrock",
+        "launch_date": "2024-10-16",
+        "short_name": "AWS Agents C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 94.7,
+        "learner_hours": 2.0,
+        "description": "This course will teach you to build and deploy scalable serverless applications using Amazon Bedrock, focusing on creating responsible AI agents. Learn to integrate tools, execute code, and apply guardrails for managing tasks and protecting data. Through hands-on examples, you'll design a customer service bot, ensuring rapid deployment and responsible operation with serverless technology.",
+        "partner": "AWS"
+      }
+    ],
+    "Microsoft AI for Good Lab": [
+      {
+        "id": 17,
+        "name": "AI for Good",
+        "launch_date": "2023-06-29",
+        "short_name": "AI4G",
+        "format": "Professional Certificate",
+        "platform": "Coursera",
+        "video_minutes": null,
+        "learner_hours": 33.0,
+        "description": "The AI for Good Specialization showcases how AI can be part of the solution when it comes to addressing some of the world's biggest challenges in areas like public health, climate change, and disaster management. Throughout the courses, you'll hear from experts working on AI for Good initiatives aimed at addressing social and environmental issues. By combining human and machine intelligence, real-world datasets, best practices around data privacy, and ethical considerations, you'll develop the knowledge and fundamental skills to tackle your own AI for good projects.",
+        "partner": "Microsoft AI for Good Lab"
+      }
+    ],
+    "Hugging Face": [
+      {
+        "id": 20,
+        "name": "Building Generative AI Applications with Gradio",
+        "launch_date": "2023-07-27",
+        "short_name": "HuggingFace-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 49.1,
+        "learner_hours": 1.0,
+        "description": "Learn to build generative AI applications with Gradio. Create user-friendly apps for text summarization, image captioning, and image generation using diffusion models. Combine these functionalities and develop an interface to chat with an open-source LLM like Falcon. Gain practical knowledge to quickly build and validate interactive AI apps and demos.",
+        "partner": "Hugging Face"
+      },
+      {
+        "id": 40,
+        "name": "Open Source Models with Hugging Face",
+        "launch_date": "2024-03-06",
+        "short_name": "Hugging Face C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 121.9,
+        "learner_hours": 2.5,
+        "description": "This course empowers developers to innovate using open-source models from Hugging Face Hub for NLP, audio, image, and multimodal tasks. Learn to create chatbots, translate languages, summarize text, convert audio to text, perform zero-shot audio classification, generate audio narrations, and implement visual tasks. Share your AI apps via Gradio and Hugging Face Spaces.",
+        "partner": "Hugging Face"
+      },
+      {
+        "id": 45,
+        "name": "Quantization Fundamentals With Hugging Face",
+        "launch_date": "2024-04-15",
+        "short_name": "Hugging Face C2-1 Quantization",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 64.2,
+        "learner_hours": 1.5,
+        "description": "This course focuses on compressing generative AI models to enhance efficiency and accessibility. Learn to use the Quanto library for linear quantization of open source models and apply downcasting with the Transformers library to reduce model sizes. By course end, you'll master quantization techniques to optimize your AI models for various devices, including smartphones and edge devices.",
+        "partner": "Hugging Face"
+      },
+      {
+        "id": 48,
+        "name": "Quantization in Depth",
+        "launch_date": "2024-05-06",
+        "short_name": "Hugging Face C2-2 Quantization",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 131.5,
+        "learner_hours": 2.5,
+        "description": "In this course, you will learn to shrink model weights to a quarter of their original size while maintaining performance. Implement and customize linear quantization in PyTorch, compressing weights from 32 bits to 8 bits and even 2 bits. Explore asymmetric and symmetric modes, measure quantization error, and build a general-purpose quantizer. This course provides a foundation for advanced quantization methods.",
+        "partner": "Hugging Face"
+      },
+      {
+        "id": 94,
+        "name": "Building Code Agents with Hugging Face smolagents",
+        "launch_date": "2025-04-23",
+        "short_name": "Hugging Face-C5",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 43.9,
+        "learner_hours": 1.0,
+        "description": "This course guides you in creating code agents using smolagents, a lightweight open-source framework in Hugging Face. Unlike tool-calling agents, code agents consolidate multiple function calls into a single block for efficient execution. You'll learn about the evolution and advantages of agentic systems, how to safely delploy code agents using a constrained Python interpreter and sandbox, and build a multi-agent systems that organize online information into interactive reports. By the end of this course, you'll be ready to build, run, and optimize code agents for real-world use.",
+        "partner": "Hugging Face"
+      }
+    ],
+    "Weights & Biases": [
+      {
+        "id": 21,
+        "name": "Evaluating and Debugging Generative AI Models Using Weights and Biases",
+        "launch_date": "2023-08-02",
+        "short_name": "W&B",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 50.1,
+        "learner_hours": 1.0,
+        "description": "This course introduces Machine Learning Operations tools, focusing on the Weights & Biases platform to manage data, track experiments, and collaborate. Learn to instrument Jupyter notebooks, manage hyperparameters, log metrics, version datasets and models, and trace LLM interactions. Boost productivity and achieve breakthrough results with a systematic workflow.",
+        "partner": "Weights & Biases"
+      }
+    ],
+    "Cohere": [
+      {
+        "id": 22,
+        "name": "Large Language Models with Semantic Search",
+        "launch_date": "2023-08-16",
+        "short_name": "Cohere-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 72.7,
+        "learner_hours": 1.5,
+        "description": "This course teaches leveraging large language models (LLMs) to enhance search capabilities on content-rich websites. Learn key concepts including dense retrieval for improved relevance and reranking for faster, more effective searches. Learn to implement basic keyword search, enhance it with reranking, and use embeddings for semantic search. Gain hands-on practice and learn to integrate LLM-powered search into your projects.",
+        "partner": "Cohere"
+      }
+    ],
+    "AMD, formerly Lamini": [
+      {
+        "id": 23,
+        "name": "Finetuning Large Language Models",
+        "launch_date": "2023-08-23",
+        "short_name": "FineTuning",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 85.8,
+        "learner_hours": 1.5,
+        "description": "Learn to finetune large language models, understanding when to apply finetuning, preparing your data, and training and evaluating an LLM on it. Finetuning updates the neural network weights, allowing the model to learn style, form, and incorporate new knowledge, improving results beyond prompt engineering and Retrieval Augmented Generation.",
+        "partner": "AMD, formerly Lamini"
+      },
+      {
+        "id": 65,
+        "name": "Improving the Accuracy of LLM Applications",
+        "launch_date": "2024-08-14",
+        "short_name": "Lamini C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 101.4,
+        "learner_hours": 2.0,
+        "description": "Many developers have experienced frustration with inconsistent results when working with LLM applications. This course offers a systematic approach to enhance the accuracy and reliability of your LLM applications. In this course you will build an SQL agent, add evaluation metrics to measure performance, and use prompt engineering and self-reflection to make the model perform better. Finally, you will fine-tune the model with techniques like LoRA and memory tuning that embeds facts in model weights to reduce hallucinations. You will use Llama's family of open-source models",
+        "partner": "AMD, formerly Lamini, Meta"
+      },
+      {
+        "id": 115,
+        "name": "Fine-tuning and Reinforcement Learning for LLMs: Intro to Post-Training ",
+        "launch_date": "2025-10-28",
+        "short_name": "Post-training",
+        "format": "Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 268.8,
+        "learner_hours": 13.3,
+        "description": "Learn to align and optimize LLMs for real-world applications through post-training. In this course, created in partnership with AMD, you'll learn how to apply fine-tuning and reinforcement learning techniques to shape model behavior, improve reasoning, and make LLMs safer and more reliable.",
+        "partner": "AMD"
+      }
+    ],
+    "Microsoft": [
+      {
+        "id": 24,
+        "name": "How Business Thinkers Can Start Building AI Plugins With Semantic Kernel",
+        "launch_date": "2023-08-29",
+        "short_name": "Microsoft-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 76.6,
+        "learner_hours": 1.5,
+        "description": "This course teaches you to build applications using Microsoft's open-source orchestrator, Semantic Kernel. You'll learn to develop prompts, semantic functions, and use LLMs for planning. Upon completion, you can create sophisticated business applications, leverage LLM building blocks, and utilize Semantic Kernel to ensure your integrations are up-to-date with AI advancements.",
+        "partner": "Microsoft"
+      },
+      {
+        "id": 55,
+        "name": "Building Your Own Database Agent",
+        "launch_date": "2024-06-13",
+        "short_name": "Azure / OpenAI C1\n(Microsoft-C2)",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 62.7,
+        "learner_hours": 1.5,
+        "description": "Develop an AI agent that interacts with databases using natural language, simplifying querying and extracting insights. Learn to customize knowledge with Azure OpenAI Service, deploy instances, and set up orchestration engines like LangChain. Load and analyze CSV data, translate natural language to SQL, and use function calling for efficient queries. Gain practical experience to implement similar systems for accessible data interaction and analysis.",
+        "partner": "Microsoft"
+      }
+    ],
+    "Google Cloud": [
+      {
+        "id": 25,
+        "name": "Understanding and Applying Text Embeddings",
+        "launch_date": "2023-09-06",
+        "short_name": "GC-c1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 77,
+        "learner_hours": 1.5,
+        "description": "The Vertex AI Text-Embeddings API course teaches you to generate and use text embeddings for classification, outlier detection, text clustering, and semantic search. You'll learn about embedding properties, measuring semantic similarity, and modifying LLM text generation. Additionally, you'll explore using ScaNN for efficient semantic search and building Q&A systems.",
+        "partner": "Google Cloud"
+      },
+      {
+        "id": 31,
+        "name": "Reinforcement Learning from Human Feedback",
+        "launch_date": "2023-12-13",
+        "short_name": "Google Cloud C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 76.3,
+        "learner_hours": 1.5,
+        "description": "This course teaches Reinforcement Learning from Human Feedback (RLHF) to align LLMs with human values and preferences. Learn the RLHF training process, explore \"preference\" and \"prompt\" datasets, and use Google Cloud Pipeline Components Library to fine-tune the Llama 2 model. Assess the tuned LLM by comparing loss curves and using the \"Side-by-Side (SxS)\" method.",
+        "partner": "Google Cloud"
+      },
+      {
+        "id": 35,
+        "name": "LLMOps",
+        "launch_date": "2024-01-17",
+        "short_name": "Google Cloud C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 82,
+        "learner_hours": 1.5,
+        "description": "This course guides you through the LLMOps pipeline for pre-processing training data and adapting a supervised tuning pipeline to train and deploy custom LLMs. Learn to retrieve and transform data, version models, configure and execute tuning pipelines, and monitor safety scores. Practice with BigQuery, Kubeflow Pipelines, and Google Cloud, and create a Python coding Q&A chatbot.",
+        "partner": "Google Cloud"
+      },
+      {
+        "id": 57,
+        "name": "Carbon Aware Computing for GenAI Developers",
+        "launch_date": "2024-06-26",
+        "short_name": "GC C5: Carbon",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 98.3,
+        "learner_hours": 2.0,
+        "description": "Learn to perform model training and inference with low-carbon energy in the cloud. Measure environmental impact, optimize clean electricity use, and query real-time electricity grid data for power breakdown and carbon intensity. Train models in low-carbon regions, retrieve carbon footprint measurements, and use Google Cloud tools. Utilize ElectricityMaps API for global electricity grid information and run jobs in low-carbon data centers. Make carbon-aware decisions as a developer.",
+        "partner": "Google Cloud"
+      },
+      {
+        "id": 67,
+        "name": "Large Multimodal Model Prompting with Gemini",
+        "launch_date": "2024-08-28",
+        "short_name": "GCP C4 Gemini",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 116.3,
+        "learner_hours": 2.0,
+        "description": "Multimodal models like Gemini are pushing the boundaries of what's possible by unifying traditionally siloed data modalities. With Gemini, you can build applications that seamlessly understand and reason across text, images, and videos, enabling a new class of intelligent systems.  In this course,  you'll learn prompt engineering techniques to guide Gemini's behavior and optimize its performance for diverse use cases, from creative story generation to analytical report writing. And you'll discover how to integrate Gemini with external APIs and databases using function calling, with the ability to infuse your applications with real-time data and dynamic content.",
+        "partner": "Google Cloud"
+      },
+      {
+        "id": 112,
+        "name": "Building Live Voice Agents with Google's ADK",
+        "launch_date": "2025-10-15",
+        "short_name": "Google-C6",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 75.27,
+        "learner_hours": 1.25,
+        "description": "This course teaches you how to create real-time conversational agents with Google's open source Agent Development Kit (ADK). You'll start with a simple voice assistant and advance to multi-agent workflows, structured outputs, guardrails, and review methods to deploy to production on Google Cloud, culminating in a podcast agent that researches, writes, and produces audio episodes.",
+        "partner": "Google"
+      }
+    ],
+    "Google": [
+      {
+        "id": 26,
+        "name": "Pair Programming with a Large Language Model",
+        "launch_date": "2023-09-27",
+        "short_name": "Laurence-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 64.8,
+        "learner_hours": 1.5,
+        "description": "This course on AI pair programming teaches you to use LLMs to enhance, debug, and document code. Gain hands-on experience with Google's PaLM API. Learn to simplify and improve code, write test cases, debug and refactor code, and explain complex code in any language.",
+        "partner": "Google"
+      }
+    ],
+    "Weaviate": [
+      {
+        "id": 28,
+        "name": "Vector Databases: from Embeddings to Applications",
+        "launch_date": "2023-11-08",
+        "short_name": "Weaviate",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 55.9,
+        "learner_hours": 1.0,
+        "description": "Learn what embeddings are and how embedding models work. Learn when it is best to apply a vector database to your application. Understand vector databases and use them to develop RAG applications. Build efficient, practical applications including hybrid and multilingual searches for diverse industries. Explore algorithms like Hierarchical Navigable Small World (HNSW) for fast searches through vast datasets.",
+        "partner": "Weaviate"
+      },
+      {
+        "id": 50,
+        "name": "Building Multimodal Search and RAG",
+        "launch_date": "2024-05-13",
+        "short_name": "Weaviate C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 83,
+        "learner_hours": 1.5,
+        "description": "Learn to build multimodal search and RAG systems by incorporating multimedia like images, audio, and video into LLM prompts. Train multimodal models through contrastive learning, implement any-to-any multimodal search, and understand visual instruction tuning. Develop end-to-end multimodal RAG systems and multi-vector recommender systems for insightful analysis and recommendations across different data types.",
+        "partner": "Weaviate"
+      }
+    ],
+    "WhyLabs": [
+      {
+        "id": 29,
+        "name": "Quality and Safety for LLM Applications",
+        "launch_date": "2023-11-15",
+        "short_name": "WhyLabs",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 119.6,
+        "learner_hours": 2.0,
+        "description": "This course focuses on addressing safety and quality in LLM applications. Learn to identify hallucinations with SelfCheckGPT, detect jailbreaks using sentiment analysis and toxicity detection models, and identify data leakage with entity recognition and vector similarity analysis. Build a monitoring system to evaluate app safety and security, incorporating passive monitoring by labelling production data and active monitoring to detect bad prompts before they are sent to an LLM. Customize these evaluation tools to ensure the robustness of your LMM application.",
+        "partner": "WhyLabs"
+      }
+    ],
+    "Llama Index, TruEra (acquired by Snowflake)": [
+      {
+        "id": 30,
+        "name": "Building and Evaluating Advanced RAG Applications",
+        "launch_date": "2023-11-29",
+        "short_name": "Llama Index (+ TruEra )",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 115,
+        "learner_hours": 2.0,
+        "description": "This course on Retrieval Augmented Generation (RAG) covers integrating LLMs with proprietary data. Learn advanced retrieval methods like sentence-window and auto-merging retrieval, along with techniques for evaluation and experiment tracking. Explore the RAG triad—Context Relevance, Groundedness, and Answer Relevance—to assess the relevance and truthfulness of LLM responses. Learn how to systematically iterate and improve your RAG systems.",
+        "partner": "Llama Index, TruEra (acquired by Snowflake)"
+      }
+    ],
+    "Chroma": [
+      {
+        "id": 32,
+        "name": "Advanced Retrieval for AI with Chroma",
+        "launch_date": "2024-01-03",
+        "short_name": "ChromaDB",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 53,
+        "learner_hours": 1.0,
+        "description": "This course focuses on improving the relevancy of information in IR and RAG. Learn advanced techniques such as Query Expansion, where LLMs expand queries with related concepts and potential answers, Cross-encoder reranking to select the most relevant results, and Training and utilizing Embedding Adapters to reshape embeddings for better retrieval outcomes.",
+        "partner": "Chroma"
+      }
+    ],
+    "CircleCI": [
+      {
+        "id": 36,
+        "name": "Automated Testing for LLMOps",
+        "launch_date": "2024-01-24",
+        "short_name": "CircleCI",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 52.7,
+        "learner_hours": 1.0,
+        "description": "This course teaches you to create a continuous integration (CI) workflow for evaluating LLM applications. Learn to write robust LLM evaluations to address issues like hallucinations and harmful output, build a CI workflow for automatic evaluation of changes, and orchestrate evaluations at different development stages. Enhance efficiency, catch issues early, and focus on building new features for faster product iteration.",
+        "partner": "CircleCI"
+      }
+    ],
+    "Pinecone": [
+      {
+        "id": 37,
+        "name": "Building Applications with Vector Databases",
+        "launch_date": "2024-01-31",
+        "short_name": "Pinecone",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 73.8,
+        "learner_hours": 1.5,
+        "description": "This course explores the versatile use of vector databases to build a variety of applications beyond Retrieval Augmented Generation (RAG). Learn to create six applications: Semantic Search using the Quora dataset, RAG with Wikipedia, a Recommender System for news acrticles, Hybrid Search using images and text with a fashion dataset, Facial Similarity comparison using family images, and Anomaly Detection in network logs. Gain practical skills and ideas for leveraging vector databases in diverse projects.",
+        "partner": "Pinecone"
+      }
+    ],
+    "Meta": [
+      {
+        "id": 39,
+        "name": "Prompt Engineering with Llama 2 & 3",
+        "launch_date": "2024-02-28",
+        "short_name": "Meta Llama-2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 113.3,
+        "learner_hours": 2.0,
+        "description": "This course teaches best practices for prompting and building applications with Llama 2 and Llama 3 models. Learn to interact with these models via API, use them as personal assistants, and experiment with advanced prompt engineering techniques. Treat Code Llama as a pair programming partner and ensure safe use with Llama Guard. Download free model versions and join the open-source community.",
+        "partner": "Meta"
+      },
+      {
+        "id": 74,
+        "name": "Introducing Multimodal Llama 3.2",
+        "launch_date": "2024-10-09",
+        "short_name": "Meta C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 79.9,
+        "learner_hours": 1.5,
+        "description": "This course focuses on the new vision capabilities that Llama 3.2 brings to the Llama family. You will learn how to use the new features, from image classification and vision reasoning to tool use. You will learn the details of the Llama 3.2 prompting format, tokenization, and built-in as well as custom tool calling. You will also learn about the Llama Stack, a standardized interface for building AI applications.",
+        "partner": "Meta"
+      },
+      {
+        "id": 100,
+        "name": "Building with Llama 4",
+        "launch_date": "2025-06-18",
+        "short_name": "Meta-C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 62.1,
+        "learner_hours": 1.5,
+        "description": "Learn about Meta's Llama 4 in this course by Amit Sangani. Explore new models Maverick and Scout with long-context and multi-modal capabilities. Build apps, optimize prompts, and generate datasets using the Mixture-of-Experts architecture. Gain insights into Llama 4's functionalities, including image reasoning and NLP across 12 languages, vital for GenAI development.",
+        "partner": "Meta"
+      }
+    ],
+    "Neo4j": [
+      {
+        "id": 41,
+        "name": "Knowledge Graphs for RAG",
+        "launch_date": "2024-03-13",
+        "short_name": "Neo4j-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 114,
+        "learner_hours": 2.0,
+        "description": "This course shows how knowledge graphs can be combined with LLMs to build powerful RAG applications. You'll learn how to set up a knowledge graph that represents a large, multi-part document (in this case an SEC filing) and then integrate a vector index representing the document text into the graph. By taking advantage of both similarity-based retrieval and the data relationships in the graph structure, you can provide richer to LLMs and improve the relevancy and accuracy of their responses.",
+        "partner": "Neo4j"
+      },
+      {
+        "id": 107,
+        "name": "Agentic Knowledge Graph Construction",
+        "launch_date": "2025-08-27",
+        "short_name": "Neo4j-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 198.1,
+        "learner_hours": 3.5,
+        "description": "Learn to automate the creation of knowledge graphs with agents using the Agent Development Kit (ADK). This course guides you in transforming structured and unstructured data into a cohesive knowledge graph. You'll develop an agentic system to determine user objectives, propose data transformations, and design graph schemas, ultimately improving retrieval system precision.",
+        "partner": "Neo4j"
+      }
+    ],
+    "Predibase": [
+      {
+        "id": 42,
+        "name": "Efficiently Serving LLMs",
+        "launch_date": "2024-03-18",
+        "short_name": "Predibase-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 151.8,
+        "learner_hours": 3.0,
+        "description": "Learn to efficiently serve large language models (LLMs) and understand performance trade-offs for applications serving many users. Explore key optimizations, including working with multiple fine-tuned models, auto-regressive text generation, KV caching, continuous batching, and model quantization. Understand LoRA adapters and batching techniques. Get hands-on with Predibase's LoRAX framework inference server to implement and benchmark these optimizations, enhancing the performance and efficiency of your LLM-powered applications.",
+        "partner": "Predibase"
+      },
+      {
+        "id": 97,
+        "name": "Reinforcement Fine-Tuning LLMs With GRPO",
+        "launch_date": "2025-05-21",
+        "short_name": "Predibase-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 83.7,
+        "learner_hours": 1.5,
+        "description": "This course covers Reinforcement Fine-Tuning (RFT) for LLMs using GRPO. It focuses on adapting models to handle complex tasks by building effective reward functions built with code. Learn to evaluate tasks and prevent reward hacking, enhance model reasoning without large datasets or subjective feedback, and provide a solid foundation for advancing your LLM skills.\n",
+        "partner": "Predibase"
+      }
+    ],
+    "LlamaIndex": [
+      {
+        "id": 43,
+        "name": "JavaScript RAG Web Apps with LlamaIndex",
+        "launch_date": "2024-03-27",
+        "short_name": "LlamaIndex C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 36.3,
+        "learner_hours": 1.0,
+        "description": "Learn to build full-stack Retrieval Augment Generation (RAG) web applications in JavaScript. Develop an intelligent agent for running queries, and build a full-stack web app from backend API server to interactive React frontend. Master tools for interacting with multiple data sources, implementing persistent chat, and streaming responses. Create a user-friendly web app using the create-llama command line tool from LlamaIndex, enabling real-time data interaction.",
+        "partner": "LlamaIndex"
+      },
+      {
+        "id": 49,
+        "name": "Building Agentic RAG with LlamaIndex",
+        "launch_date": "2024-05-08",
+        "short_name": "LlamaIndex C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 46.5,
+        "learner_hours": 1.0,
+        "description": "Learn to build agentic RAG frameworks for research agents skilled in tool use, reasoning, and decision-making with data. Develop a router to execute queries, add tool calling, and create multi-step research assistants. Extend capabilities to handle multiple documents, allowing you to navigate, summarize, and compare information. Practice debugging and enhance data engagement and analysis.",
+        "partner": "LlamaIndex"
+      },
+      {
+        "id": 88,
+        "name": "Event-Driven Agentic Document Workflows",
+        "launch_date": "2025-03-05",
+        "short_name": "Llamaindex-C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 59.2,
+        "learner_hours": 1.0,
+        "description": "This course teaches you to automate document processing with event-driven agentic workflows. Learn to build, query, and interact with AI agents for efficient PDF form filling, incorporating human feedback and multimodal capabilities. Learn to create effective workflows for accurate document completion, enhancing productivity and reducing manual processing errors.",
+        "partner": "LlamaIndex"
+      }
+    ],
+    "Giskard": [
+      {
+        "id": 44,
+        "name": "Red Teaming LLM Applications",
+        "launch_date": "2024-04-03",
+        "short_name": "Giskard C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 79.9,
+        "learner_hours": 1.5,
+        "description": "This course teaches you to test and find vulnerabilities in LLM applications to enhance their safety. Learn to attack chatbot applications using prompt injections, understand security failures, and mitigate risks like legal liability and service disruptions. Gain hands-on experience with manual and automated red-teaming methods, and apply these techniques to improve your LLM application's robustness and security.",
+        "partner": "Giskard"
+      }
+    ],
+    "Unstructured": [
+      {
+        "id": 46,
+        "name": "Preprocessing Unstructured Data for LLM Applications",
+        "launch_date": "2024-04-10",
+        "short_name": "Unstructured",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 70.4,
+        "learner_hours": 1.5,
+        "description": "This course teaches techniques for processing diverse unstructured data to enhance a RAG system's performance. Learn to preprocess and normalize data from Excel, Word, PowerPoint, PDF, and EPUB files into a common JSON format enriched with metadata. Gain skills in document image analysis techniques and build a versatile RAG bot capable of ingesting various document types.",
+        "partner": "Unstructured"
+      }
+    ],
+    "Mistral AI": [
+      {
+        "id": 47,
+        "name": "Getting Started with Mistral",
+        "launch_date": "2024-04-22",
+        "short_name": "Mistral AI C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 52.8,
+        "learner_hours": 1.0,
+        "description": "This course teaches you to use Mistral AI's open source and commercial models, including Mixtral 8x7B and 8x22B. Learn to select the right model for tasks of varying complexity, utilize effective prompting techniques, and implement function calling and JSON mode. Build a basic RAG system and a chat interface for document interaction. By course end, you'll proficiently leverage Mistral AI's models.",
+        "partner": "Mistral AI"
+      }
+    ],
+    "Comet": [
+      {
+        "id": 48,
+        "name": "Prompt Engineering for Vision Models",
+        "launch_date": "2024-04-29",
+        "short_name": "Comet-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 82.3,
+        "learner_hours": 1.5,
+        "description": "This course teaches prompt engineering for vision models, including Meta's Segment Anything Model (SAM), OWL-ViT(Open-World Localization-Vision Transformer), and Stable Diffusion 2.0. Learn to prompt for image generation, segmentation, and object detection, and use DreamBooth for fine-tuning. Explore in-painting techniques and use Comet for experiment tracking and optimization. Gain skills in mastering visual prompt engineering workflows and effectively managing computer vision projects.",
+        "partner": "Comet"
+      }
+    ],
+    "CrewAI": [
+      {
+        "id": 51,
+        "name": "Multi AI Agent Systems with crewAI",
+        "launch_date": "2024-05-15",
+        "short_name": "CrewAI: Agents",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 161,
+        "learner_hours": 3.0,
+        "description": "Learn to design effective AI agents and organize crews to automate six common business processes. Explore multi-agent system components like role-playing, memory, tools, task focus, error handling, and cooperation. Use the open-source framework, crewAI, to build agent crews for tasks such as resume tailoring, technical writing, customer support, outreach campaigns, event planning, and financial analysis.",
+        "partner": "CrewAI"
+      },
+      {
+        "id": 76,
+        "name": "Practical Multi AI Agents and Advanced Use Cases with crewAI",
+        "launch_date": "2024-10-23",
+        "short_name": "crewAI C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 163.7,
+        "learner_hours": 3.0,
+        "description": "In this course, you'll learn to build practical apps with multi-agent systems, covering the basics of tasks, agents, and crews, and diving into advanced topics like integration, complex agent setups, and performance optimization. You'll develop skills in creating automated project planning, sales pipelines, customer support analysis, and content creation, with hands-on experience from starting projects to production. The course includes a bonus interview with Jacob Wilson from PWC on deploying these technologies in real-world scenarios.",
+        "partner": "crewAI"
+      },
+      {
+        "id": 117,
+        "name": "Design, Develop, and Deploy Multi-Agent Systems with CrewAI",
+        "launch_date": "2025-11-11",
+        "short_name": "LF-CrewAI-C1",
+        "format": "Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 368.4,
+        "learner_hours": 20,
+        "description": "Learn how to build multi-agent systems that automate complex, end-to-end workflows. You'll create intelligent agent teams that plan, reason, and collaborate using tools, memory, and guardrails, and learn how to scale them for production. Across four modules, you'll build practical applications including an automated code reviewer, a meeting co-pilot, and a deep researcher, each showcasing real-world design patterns for agent collaboration.",
+        "partner": "CrewAI"
+      }
+    ],
+    "Qualcomm": [
+      {
+        "id": 52,
+        "name": "Introduction to on-device AI",
+        "launch_date": "2024-05-21",
+        "short_name": "Qualcomm C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 61,
+        "learner_hours": 1.5,
+        "description": "Learn to deploy AI on devices like smartphones, IoT devices, and AR/VR headsets. Explore benefits such as reduced latency, enhanced efficiency, and privacy preservation. Understand neural network graph capture, on-device compilation, and hardware acceleration. Convert pretrained models for on-device use, deploy real-time models, test performance, and quantize models for efficiency.",
+        "partner": "Qualcomm"
+      }
+    ],
+    "Microsoft, Penn State University": [
+      {
+        "id": 53,
+        "name": "AI Agentic Design Patterns with AutoGen",
+        "launch_date": "2024-05-29",
+        "short_name": "AutoGen (Microsoft) + Penn State",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 43,
+        "learner_hours": 1.0,
+        "description": "Learn to build and customize multi-agent systems using AutoGen for complex tasks. Create multi-agent conversations, fun customer onboarding experiences, high-quality blog posts using nested chats, conversational chess games, and coding agents for financial analysis. Develop collaborative systems for generating and refining code, and detailed stock performance reports. Gain hands-on experience with AutoGen's core components and four agentic design patterns, including the ConversableAgent for multi-agent conversations, agent reflection framework for nested chat verification, tool use in nested chats for tasks like chess game, and planning agents for executing complex tasks.",
+        "partner": "Microsoft, Penn State University"
+      }
+    ],
+    "NexusFlow": [
+      {
+        "id": 56,
+        "name": "Function-Calling and Data Extraction with LLMs",
+        "launch_date": "2024-06-20",
+        "short_name": "NexusFlow C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 60,
+        "learner_hours": 1.0,
+        "description": "Learn function-calling and structured data extraction to build advanced LLM applications. Use NexusRavenV2-13B for forming prompts, executing multiple function calls, and accessing web services via OpenAPI. Extract structured data from natural language inputs. Develop applications to process customer service transcripts, automate data entry, and enhance search and recommendation systems with structured data.",
+        "partner": "NexusFlow"
+      },
+      {
+        "id": 102,
+        "name": "Post-training of LLMs",
+        "launch_date": "2025-07-09",
+        "short_name": "Banghua-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 77.0,
+        "learner_hours": 1.5,
+        "description": "This course, led by Banghua Zhu, covers transforming language models through post-training, focusing on Supervised Fine-Tuning, Direct Preference Optimization, and Online Reinforcement Learning. Gain hands-on experience with tools like HuggingFace, explore concepts, build pipelines, and apply techniques to enhance LLM behavior for tasks such as instruction-following and improving task-specific accuracy.",
+        "partner": "NexusFlow, University of Washington"
+      }
+    ],
+    "MongoDB": [
+      {
+        "id": 58,
+        "name": "Prompt Compression and Query Optimization",
+        "launch_date": "2024-07-10",
+        "short_name": "MongoDB C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 99.1,
+        "learner_hours": 2.0,
+        "description": "Learn to integrate traditional database features with vector search for optimizing large-scale RAG applications. Apply prefiltering, postfiltering, projection, reranking, and prompt compression techniques to your search pipeline. Implement vector search using MongoDB, develop multi-stage aggregation pipelines, refine search results with metadata, streamline outputs, and improve retrieval relevance. Gain hands-on experience optimizing efficiency, security, query speed, and cost in RAG applications.",
+        "partner": "MongoDB"
+      }
+    ],
+    "UpStage": [
+      {
+        "id": 59,
+        "name": "Pretraining LLMs",
+        "launch_date": "2024-07-17",
+        "short_name": "UpStage",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 81,
+        "learner_hours": 1.5,
+        "description": "Learn to pretrain large language models (LLMs) from scratch and continue pretraining existing models using vast text datasets. Understand when pretraining is the best option for your project, and the costs associated with pretraining models, and how to pretrain models using the open source Hugging Face framework. Gain skills in data clearning and preparation, model configuration and setup for training (including existing models you want to train further), and evaluating the performance of LLMs for using open source benchmarking tools.",
+        "partner": "UpStage"
+      }
+    ],
+    "Flower": [
+      {
+        "id": 60,
+        "name": "Federated Learning Part 1",
+        "launch_date": "2024-07-24",
+        "short_name": "Flower.dev C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 68.15,
+        "learner_hours": 1.5,
+        "description": "This course focuses on Federated Learning and how it enables you to train AI models on distributed data using the Flower framework. You'll build federated learning systems and learn the federated training process, system customization, data privacy, and bandwidth management. By working with distributed datasets, you'll see how local training and central aggregation improve global models while preserving data privacy. This course serves as a perfect segue into the follow-up course on Federated Fine-Tuning of LLMs with Private Data.",
+        "partner": "Flower"
+      },
+      {
+        "id": 61,
+        "name": "Federated Learning Part 2",
+        "launch_date": "2024-07-24",
+        "short_name": "Flower.dev C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 108.2,
+        "learner_hours": 2.0,
+        "description": "This course focuses on federated fine-tuning of large language models (LLMs) with private data using the Flower framework. Learn to fine-tune pre-trained LLMs across multiple organizations or devices without directly accessing private data. Explore tuning federated systems, enhancing privacy with Differential Privacy (DP) and Parameter-Efficient Fine-Tuning (PEFT), and managing computational resources. Gain practical skills in effectively using federated LLM fine-tuning for handling private data.",
+        "partner": "Flower"
+      }
+    ],
+    "Vectara ": [
+      {
+        "id": 62,
+        "name": "Embedding Models: from Architecture to Implementation\n",
+        "launch_date": "2024-07-31",
+        "short_name": "Vectara C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 50.4,
+        "learner_hours": 1.0,
+        "description": "This course goes into the details of the architecture and capabilities of embedding models, which are used in many AI applications to capture the meaning of words and sentences. By the end of this course, you will understand word, sentence, and cross-encoder embedding models, and how transformer-based models like BERT are trained and used in semantic search. You will also learn how to train dual encoder models with contrastive loss and evaluate their impact on retrieval in a RAG pipeline.",
+        "partner": "Vectara "
+      }
+    ],
+    "Haystack": [
+      {
+        "id": 66,
+        "name": "Building AI Applications With Haystack",
+        "launch_date": "2024-08-21",
+        "short_name": "Haystack C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 85,
+        "learner_hours": 1.5,
+        "description": "In this course you will learn how to use Haystack, a high-level orchestration framework that helps ensure your applications are flexible, extendible, and maintainable, even as the technology stack changes, user needs arise, and new features are added. Throughout the course, you will develop several projects, including a RAG app, a news summarization app, a chat agent with function calling, and a self-reflecting agent with loops.",
+        "partner": "Haystack"
+      }
+    ],
+    "Intel": [
+      {
+        "id": 70,
+        "name": "Multimodal RAG: Chat with Videos",
+        "launch_date": "2024-09-11",
+        "short_name": "Intel C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 61.1,
+        "learner_hours": 1.5,
+        "description": "This course teaches you how to build an interactive system for querying video content using multimodal AI. You'll learn to create a sophisticated question-answering system that processes, understands, and interacts with complex multimodal data. Throughout the course, you'll explore the concept of multimodal semantic space and its importance in AI, gaining hands-on experience with state-of-the-art models and technologies. You'll learn to use the BridgeTower model for embedding image-caption pairs, implement video processing pipelines using Whisper and LLaVA, and construct efficient vector stores with LanceDB. By the end of the course, you'll have built a complete multimodal RAG system capable of processing video content, retrieving relevant segments based on text queries, and generating contextual responses.",
+        "partner": "Intel"
+      }
+    ],
+    "Qdrant": [
+      {
+        "id": 73,
+        "name": "Retrieval Optimization: From Tokenization to Vector Quantization",
+        "launch_date": "2024-10-02",
+        "short_name": "Qdrant C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 92.4,
+        "learner_hours": 2.0,
+        "description": "This course focuses on optimizing the first step in a RAG pipeline—the retrieval. You'll see how different tokenization techniques, like Byte-Pair Encoding, WordPiece, and Unigram, work and how they affect search relevancy.\n\nYou will learn several quality metrics to help with optimizing the retrieval. You'll also learn how to optimize the speed and relevance of Hierarchical Navigable Small Worlds (HNSW) approximate nearest-neighbor search—an algorithm used by most vector databases. Finally, you would use different vector quantization techniques to enhance memory usage and search speed.",
+        "partner": "Qdrant"
+      },
+      {
+        "id": 120,
+        "name": "Multi-vector Image Retrieval",
+        "launch_date": "2025-12-10",
+        "short_name": "Qdrant-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 93.53,
+        "learner_hours": 2.0,
+        "description": "Build advanced image retrieval systems using multi-vector techniques. Learn ColPali for patch-level image search, apply optimization methods to reduce memory usage, use MUVERA to speed up search, and deploy production multi-modal RAG systems that accurately retrieve complex visual documents.\n",
+        "partner": "Qdrant"
+      }
+    ],
+    "Letta": [
+      {
+        "id": 77,
+        "name": "LLMs as Operating Systems: Agent Memory",
+        "launch_date": "2024-11-07\n(Updated: 04-30-2025)",
+        "short_name": "MemGPT C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 82.3,
+        "learner_hours": 1.5,
+        "description": "This course will teach you to build LLM-based applications with advanced memory management, using techniques from MemGPT to control, store, and retrieve context as conversations evolve. You'll create agents with persistent memory, learn to manage memory with the Letta framework, and design multi-agent collaborations that extend beyond typical context limits, improving application efficiency and responsiveness.",
+        "partner": "Letta"
+      }
+    ],
+    "Guardrails AI": [
+      {
+        "id": 78,
+        "name": "Safe and reliable AI via guardrails",
+        "launch_date": "2024-11-13",
+        "short_name": "GuardrailsAI-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 85.1,
+        "learner_hours": 1.5,
+        "description": "This course teaches how to deploy safe, reliable, and production-ready LLM-powered applications by installing guardrails, which are safety mechanisms and validation tools. These ensure applications are safe, reliable, and free from common failures like hallucinations or revealing sensitive information. Participants will learn to build and implement these guardrails, using a RAG-powered customer service chatbot for a pizzeria as a practical example, covering mitigation of various failure modes and integration of pre-built guardrails from the GuardrailsAI hub.",
+        "partner": "Guardrails AI"
+      }
+    ],
+    "Together": [
+      {
+        "id": 79,
+        "name": "Building an AI-Powered Game",
+        "launch_date": "2024-11-20",
+        "short_name": "Together-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 56.1,
+        "learner_hours": 1.0,
+        "description": "This course guides you through developing a LLM-based game. You'll learn hierarichal content generation that allows you to build a vast amount of content that is consistent using simple prompt engineering, build a game with a Gradio UI, and implement safety features with Llama Guard. By the end, you'll have crafted a playable, AI-driven game, enhancing your AI development skills and creating something to share with friends.",
+        "partner": "Together"
+      }
+    ],
+    "AI21": [
+      {
+        "id": 82,
+        "name": "Build Long-Context AI Apps with Jamba",
+        "launch_date": "2025-01-08",
+        "short_name": "AI21",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 64.0,
+        "learner_hours": 1.5,
+        "description": "The course \"Build Long-Context AI Apps with Jamba\" teaches the use of the Jamba model, a blend of transformer and Mamba architectures, for processing long contexts efficiently. Developed by AI21 Labs and led by experts Chen Wang and Chen Almagor, the Jamba model combines Mamba's computational efficiency with the transformer's attention mechanism to help with the output quality. Participants will learn about Jamba's architecture, training, and application in building long-context AI applications, including RAG apps, through practical examples and the AI21SDK.",
+        "partner": "AI21"
+      }
+    ],
+    "Anthropic": [
+      {
+        "id": 83,
+        "name": "Building Towards Computer Use with Anthropic",
+        "launch_date": "2025-01-22",
+        "short_name": "Anthropic-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 96.1,
+        "learner_hours": 2.0,
+        "description": "This course is led by Colt Steele from Anthropic, unveils a groundbreaking skill enabling models to use computers interactively. This course delves into Anthropic's models and the foundational elements leading to Computer Use, which incorporates image reasoning and tool use, allowing an AI assistant to operate a computer like a human. It covers API use, multimodal prompting, prompt caching, and tool use, culminating in creating an AI assistant capable of computer tasks. The course covers Anthropic's AI research approach, AI safety, and practical applications, culminating in a comprehensive demo of Computer Use.",
+        "partner": "Anthropic"
+      },
+      {
+        "id": 96,
+        "name": "MCP: Build Rich-Context AI Apps with Anthropic",
+        "launch_date": "2025-05-14",
+        "short_name": "Anthropic-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 98.8,
+        "learner_hours": 2.0,
+        "description": "Learn Anthropic's Model Context Protocol (MCP), an open standard that simplifies connecting AI applications to external sources - tools, resources, and prompts. This hands-on training teaches you to build MCP-compatible chatbots, develop servers exposing tools and resources, and reduce fragmentation in AI development across teams and industries.",
+        "partner": "Anthropic "
+      },
+      {
+        "id": 105,
+        "name": "Claude Code: A Highly Agentic Coding Assistant",
+        "launch_date": "2025-08-06",
+        "short_name": "Anthropic-C3",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 110.9,
+        "learner_hours": 2.0,
+        "description": "This course, taught by Elie Schoppik in partnership with Anthropic, covers best practices for using Claude Code—a highly agentic AI coding assistant. Learn to coordinate multiple Claude sessions, provide effective context, plan and test features, integrate with GitHub, and apply these skills to projects like a RAG chatbot, Jupyter notebook, and web app.",
+        "partner": "Anthropic-C1"
+      }
+    ],
+    "Jay Alammar & Maarten Grootendorst": [
+      {
+        "id": 84,
+        "name": "How Transformer LLMs Work",
+        "launch_date": "2025-02-05",
+        "short_name": "HandsOnLlm-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 85.5,
+        "learner_hours": 1.5,
+        "description": "This course is developed with Jay Alammar and Maarten Grootendorst, authors of 'Hands-On Large Language Models.' Dive into the transformer architecture behind LLMs, a pivotal development in generative AI, first introduced in the 2017 paper 'Attention Is All You Need.' Learn the mechanics of transformer networks through easy-to-understand explanations and code examples. The course covers the evolution of language representation, tokenization, transformer blocks, and their application in current LLMs. By the end, gain a thorough understanding of LLM processing and application development.",
+        "partner": "Jay Alammar & Maarten Grootendorst"
+      }
+    ],
+    "Josh Starmer, StatQuest": [
+      {
+        "id": 85,
+        "name": "Attention in Transformers: Concepts and Code in PyTorch",
+        "launch_date": "2025-02-12",
+        "short_name": "JoshStarmer-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 66.9,
+        "learner_hours": 1.5,
+        "description": "This course, in collaboration with StatQuest and led by Josh Starmer, explains the attention mechanism foundational to transformers, which power sophisticated language models like ChatGPT. It delves into the development of attention, detailing self-attention, masked self-attention, and the encoder-decoder architecture. Participants will engage with PyTorch to implement these concepts, gain insights into the mathematical underpinnings and key components like Query, Key, and Value matrices, and enhance their skills in building scalable AI applications.",
+        "partner": "Josh Starmer, StatQuest"
+      }
+    ],
+    "Arize AI": [
+      {
+        "id": 86,
+        "name": "Evaluating AI Agents",
+        "launch_date": "2025-02-19",
+        "short_name": "Arize-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 136.2,
+        "learner_hours": 2.5,
+        "description": "This course teaches a systematic approach to enhancing AI agent performance. Led by John Gilhuly and Aman Khan, this course covers the development and evaluation of AI agents, such as shopping or coding assistants. It emphasizes structured evaluations of each component and end-to-end performance, using observability, appropriate evaluators, and metrics to refine and improve agent functionality systematically. Participants will learn to build, observe, and iteratively enhance their AI agents.",
+        "partner": "Arize AI"
+      }
+    ],
+    "Windsurf": [
+      {
+        "id": 87,
+        "name": "Build Apps with Windsurf's AI Coding Agents",
+        "launch_date": "2025-02-26",
+        "short_name": "Codeium-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 70.2,
+        "learner_hours": 1.5,
+        "description": "Explore the transformative world of AI-assisted coding with this course, focusing on Windsurf's collaborative AI coding agents Learn to build applications, from simple to complex, enhance coding efficiency, and tackle debugging and refactoring with AI. Gain insights into agentic workflows, multimodal capabilities, and practical skills to accelerate and enrich your development process, making coding faster and more enjoyable.",
+        "partner": "Windsurf"
+      }
+    ],
+    "Replit": [
+      {
+        "id": 91,
+        "name": "Vibe Coding 101 with Replit",
+        "launch_date": "2025-03-26",
+        "short_name": "Replit-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 94.8,
+        "learner_hours": 2.0,
+        "description": "This course will teach you to build web applications with AI coding agents using Replit. You'll learn effective collaboration strategies and deployment techniques. The course covers creating two web apps from scratch. By the end, you'll develop practical skills in AI-assisted coding.",
+        "partner": "Replit"
+      }
+    ],
+    "DotTxt": [
+      {
+        "id": 92,
+        "name": "Getting Structured LLM Output",
+        "launch_date": "2025-04-02",
+        "short_name": "DoxTxt-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 71.4,
+        "learner_hours": 1.5,
+        "description": "This course will teach you to generate structured outputs from large language models. You'll learn multiple techniques for converting natural language into consistent, programmable data. The course covers how to generate structured outputs with vendor-provided APIs, re-prompting libraries, and constrained decoding methods. By the end, you'll build practical skills for creating LLM applications that generate structured outputs.",
+        "partner": "DotTxt"
+      }
+    ],
+    "AGI Inc": [
+      {
+        "id": 93,
+        "name": "Building AI Browser Agents",
+        "launch_date": "2025-04-17",
+        "short_name": "MultiOn-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 57.2,
+        "learner_hours": 1.0,
+        "description": "Learn to create AI agents that navigate websites autonomously with Div and Naman Garg from AGI Inc. The course covers how browser agents interpret visual and structural data to perform online tasks. You'll build agents that interact with websites, execute multi-step actions, and implement self-correction through frameworks like AgentQ.",
+        "partner": "AGI Inc"
+      }
+    ],
+    "LiveKit, RealAvatar.ai": [
+      {
+        "id": 95,
+        "name": "Building AI Voice Agents for Production",
+        "launch_date": "2025-05-07",
+        "short_name": "LiveKit-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 50.3,
+        "learner_hours": 1.0,
+        "description": "Learn to create low-latency conversational voice AI agentst for production, leveraging technologies from LiveKit and ElevenLabs. The course covers voice agent fundamentals, using a voice pipeline that goes from speech-to-text to LLM and back to text-to-speech, and explore architecture, networking, and deployment strategies. You'll build and deploy scalable voice agents, managing latency and optimizing performance for real-time, human-like interactions.",
+        "partner": "LiveKit, RealAvatar.ai"
+      }
+    ],
+    "Databricks": [
+      {
+        "id": 98,
+        "name": "DSPy: Build and Optimize Agentic Apps",
+        "launch_date": "2025-06-04",
+        "short_name": "Databricks-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 49.7,
+        "learner_hours": 1.0,
+        "description": "Learn to build and optimize AI applications using the DSPy framework, focusing on tasks like document automation and decision-making. Master modular blocks, MLflow tracing, DSPy Optimizer, and create efficient, adaptable applications without complex prompt tuning. The course covers DSPy's flexibility, model-agnostic development, debugging, and improving program quality with examples like a sentiment analyzer and Wikipedia RAG agent.",
+        "partner": "Databricks"
+      },
+      {
+        "id": 113,
+        "name": "Governing AI Agents",
+        "launch_date": "2025-10-22",
+        "short_name": "Databricks-C2",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 90.17,
+        "learner_hours": 1.5,
+        "description": "In this course, you'll learn to build safe, governed AI agents on Databricks. You'll apply the four pillars of governance (lifecycle management, risk management, security, and observability) using Unity Catalog and MLflow. Through hands-on labs, you'll implement access controls, data masking, evaluation, and deployment with full traceability and auditability.\n",
+        "partner": "Databricks"
+      }
+    ],
+    "Astronomer": [
+      {
+        "id": 99,
+        "name": "Orchestrating Workflows for GenAI Applications",
+        "launch_date": "2025-06-11",
+        "short_name": "Astronomer-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 83.9,
+        "learner_hours": 1.5,
+        "description": "Learn to build and automate a robust Retrieval Augmented Generation (RAG) pipeline with Airflow 3.0. The course covers how to develop and schedule AI tasks, create parallel processing with dynamic task mapping, and apply orchestration principles to enhance scalability and efficiency, ensuring reliable production-ready performance in generative AI applications.",
+        "partner": "Astronomer"
+      }
+    ],
+    "IBM ": [
+      {
+        "id": 101,
+        "name": "ACP: Agent Communication Protocol",
+        "launch_date": "2025-06-25",
+        "short_name": "IBM-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 103.0,
+        "learner_hours": 2.0,
+        "description": "In collaboration with IBM Research's BeeAI, this course teaches you the Agent Communication Protocol (ACP), streamlining communication between agents across teams. You'll learn to connect and manage agents using ACP, build and manage workflows, and integrate platforms like BeeAI. By course end, you'll create ACP-compliant agents that collaborate seamlessly across different frameworks.",
+        "partner": "IBM "
+      }
+    ],
+    "Snowflake": [
+      {
+        "id": 106,
+        "name": "Fast Prototyping of GenAI Apps with Streamlit",
+        "launch_date": "2025-08-12",
+        "short_name": "FastProto-C1",
+        "format": "Course",
+        "platform": "Coursera",
+        "video_minutes": 206.4,
+        "learner_hours": 9,
+        "description": "Learn to rapidly prototype GenAI applications by turning Python scripts into interactive Streamlit apps running in Snowflake. Master iterative development, prompt engineering, and RAG techniques to build data-grounded chatbots. Deploy prototypes to Snowflake or Streamlit Community Cloud for real-time feedback—no extensive coding experience required.",
+        "partner": "Snowflake"
+      },
+      {
+        "id": 110,
+        "name": "Building and Evaluating Data Agents",
+        "launch_date": "2025-09-24",
+        "short_name": "Snowflake-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 119.7,
+        "learner_hours": 2.0,
+        "description": "In this course, you'll design multi-agent workflows that connect to data sources, analyze information, and generate insights. The course emphasizes observability and evaluation, teaching how to measure agent performance with goal–plan–action (GPA) alignment and use LLM-as-a-judge techniques for both offline and real-time feedback to improve reliability.",
+        "partner": "Snowflake"
+      }
+    ],
+    "SAP": [
+      {
+        "id": 108,
+        "name": "Knowledge Graphs for AI Agent: API Discovery",
+        "launch_date": "2025-09-10",
+        "short_name": "SAP-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 74.7,
+        "learner_hours": 1.5,
+        "description": "Build a knowledge graph from API specifications and business process data, then use it to drive API discovery and execution. You'll implement semantic retrieval and add business-process edges to surface required endpoints and their order. Finally, build an agent that retrieves API metadata and executes real tasks in the correct sequence.",
+        "partner": "SAP"
+      }
+    ],
+    "Box": [
+      {
+        "id": 109,
+        "name": "Build AI Apps with MCP Server: Working with Box Files",
+        "launch_date": "2025-09-17",
+        "short_name": "Box-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 36.6,
+        "learner_hours": 1.0,
+        "description": "Build an LLM-powered invoice app that extracts fields directly in Box. Start with a local prototype, then switch to the Box MCP server to call built-in tools and process files in place, with no downloads or custom OCR. Finally, evolve the solution into a three-agent system (files, extraction, orchestrator) using A2A and Google's ADK for scaling.",
+        "partner": "Box"
+      }
+    ],
+    "Project Jupyter": [
+      {
+        "id": 116,
+        "name": "Jupyter AI: AI Coding in Notebooks",
+        "launch_date": "2025-11-03",
+        "short_name": "JupyterAI-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 44.3,
+        "learner_hours": 1.0,
+        "description": "Learn AI-assisted coding in Jupyter notebooks using Jupyter AI, an open-source framework purpose-built for notebook environments. Generate code through an integrated chat interface, debug errors, and build practical applications including a book research assistant and stock market analysis workflow. Master context management techniques to help the LLM generate accurate code for specialized APIs, even those it wasn't trained on.",
+        "partner": "Project Jupyter"
+      }
+    ],
+    "Redis": [
+      {
+        "id": 118,
+        "name": "Semantic Caching for AI Agents",
+        "launch_date": "2025-11-19",
+        "short_name": "Redis-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 74.82,
+        "learner_hours": 1.0,
+        "description": "Make your AI agents faster and more cost-effective with semantic caching. Learn to build caches that understand query meaning (not just exact matches), measure performance, optimize its effectiveness with techniques like using cross-encoders and LLM verification.\n",
+        "partner": "Redis"
+      }
+    ],
+    "E2B": [
+      {
+        "id": 119,
+        "name": "Building Coding Agents with Tool Execution",
+        "launch_date": "2025-12-03",
+        "short_name": "E2B-C1",
+        "format": "Short Course",
+        "platform": "DeepLearning.AI",
+        "video_minutes": 60.13,
+        "learner_hours": 1.0,
+        "description": "Build AI agents that write and execute code to accomplish complex tasks. Learn to run agent-generated code safely in sandboxed cloud environments, create data analysis agents, and deploy agents that build full-stack web applications.",
+        "partner": "E2B"
+      }
+    ]
+  }
+}
