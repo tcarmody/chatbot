@@ -16,11 +16,16 @@ const sentryWebpackPluginOptions = {
   // Upload source maps only in production
   disableSourceMapUpload: process.env.NODE_ENV !== 'production',
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-
   // Hide source maps from generated client bundles
   hideSourceMaps: true,
+
+  // Webpack-specific options (new format)
+  webpack: {
+    // Automatically tree-shake Sentry logger statements to reduce bundle size
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 };
 
 // Only wrap with Sentry if DSN is configured
@@ -51,12 +56,13 @@ export default withSentryConfig(exportedConfig, {
   // side errors will fail.
   tunnelRoute: "/monitoring",
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
-  automaticVercelMonitors: true
+  // Webpack-specific options (new format)
+  webpack: {
+    // Automatically tree-shake Sentry logger statements to reduce bundle size
+    treeshake: {
+      removeDebugLogging: true,
+    },
+    // Enables automatic instrumentation of Vercel Cron Monitors
+    automaticVercelMonitors: true,
+  },
 });
