@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import faqData from '@/data/faq.json';
+import courseCatalog from '@/deeplearning-ai-course-catalog.json';
 import { logAnalyticsEvent } from '@/lib/analytics';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 import { chatLogger, logError } from '@/lib/logger';
@@ -31,9 +32,19 @@ export async function POST(req: NextRequest) {
     const detectRelevantCategories = (userMessage: string): string[] => {
       const messageLower = userMessage.toLowerCase();
       const categoryKeywords: { [key: string]: string[] } = {
+        'Courses & Programs': [
+          'course', 'courses', 'program', 'programs', 'catalog', 'specialization',
+          'learning path', 'curriculum', 'what courses', 'which course', 'recommend',
+          'beginner', 'intermediate', 'advanced', 'llm', 'genai', 'machine learning',
+          'deep learning', 'ai', 'chatgpt', 'langchain', 'tensorflow', 'pytorch',
+          'rag', 'agent', 'agents', 'nlp', 'computer vision', 'transformers',
+          'partner', 'instructor', 'taught by', 'duration', 'hours', 'certificate program',
+          'professional certificate', 'short course', 'available', 'offer', 'openai',
+          'google', 'meta', 'aws', 'microsoft', 'hugging face', 'anthropic'
+        ],
         'Certificates & Course Completion': [
           'certificate', 'accomplishment', 'completion', 'finish', 'complete',
-          'short course', 'pdf', 'download certificate', 'credential'
+          'pdf', 'download certificate', 'credential'
         ],
         'Account & Profile Management': [
           'account', 'profile', 'password', 'reset', 'login', 'sign in',
@@ -46,7 +57,7 @@ export async function POST(req: NextRequest) {
         ],
         'Membership Support': [
           'pro', 'membership', 'free', 'trial', 'subscribe', 'upgrade',
-          'downgrade', 'beginner', 'programming', 'time commit', 'course'
+          'downgrade', 'programming', 'time commit'
         ],
         'Billing & Payments': [
           'billing', 'payment', 'refund', 'price', 'cost', 'receipt',
@@ -80,12 +91,52 @@ export async function POST(req: NextRequest) {
     );
 
     // Build the knowledge base context from filtered FAQs
-    const knowledgeBase = relevantFaqs
+    const faqKnowledgeBase = relevantFaqs
       .map(
         (faq) =>
           `Q: ${faq.question}\nA: ${faq.answer}\nCategory: ${faq.category}`
       )
       .join('\n\n');
+
+    // Build course catalog knowledge base if relevant
+    let courseCatalogKnowledgeBase = '';
+    if (relevantCategories.includes('Courses & Programs')) {
+      // Build a searchable course catalog
+      const coursesByPartner: { [key: string]: any[] } = {};
+
+      // Organize courses by partner for better context
+      for (const [partner, courses] of Object.entries(courseCatalog.courses_by_partner)) {
+        if (Array.isArray(courses) && courses.length > 0) {
+          coursesByPartner[partner] = courses;
+        }
+      }
+
+      // Create a comprehensive course listing
+      const courseEntries: string[] = [];
+
+      for (const [partner, courses] of Object.entries(coursesByPartner)) {
+        courses.forEach((course: any) => {
+          const partnerName = partner === 'DeepLearning.AI (Independent)' ? 'DeepLearning.AI' : partner;
+          courseEntries.push(
+            `Course: ${course.name}
+Format: ${course.format}
+Partner: ${partnerName}
+Platform: ${course.platform}
+Learner Hours: ${course.learner_hours || 'N/A'}
+Launch Date: ${course.launch_date}
+Description: ${course.description}`
+          );
+        });
+      }
+
+      courseCatalogKnowledgeBase = `\n\nCOURSE CATALOG (${courseCatalog.catalog_info.total_courses} courses available):
+Last Updated: ${courseCatalog.catalog_info.last_updated}
+
+${courseEntries.join('\n\n---\n\n')}`;
+    }
+
+    // Combine knowledge bases
+    const knowledgeBase = faqKnowledgeBase + courseCatalogKnowledgeBase;
 
     // System prompt for the customer service chatbot
     const systemPrompt = `You are a helpful customer service assistant for an AI education company similar to DeepLearning.AI. Your role is to assist users with questions about courses, enrollment, pricing, certificates, and technical support.
@@ -94,6 +145,15 @@ Use the following knowledge base to answer questions directly and concisely. Ans
 
 KNOWLEDGE BASE:
 ${knowledgeBase}
+
+COURSE CATALOG GUIDANCE:
+- When users ask about courses, recommend specific courses from the catalog that match their interests
+- Focus on course name, format, partner, and a brief description from the catalog
+- If asked about a topic (e.g., "LLM courses"), search the catalog descriptions for relevant keywords
+- Limit recommendations to 3-5 most relevant courses unless they ask for more
+- Include learner hours to help them understand time commitment
+- Mention the platform (Coursera or DeepLearning.AI) where they can access the course
+- Professional Certificates are comprehensive multi-course programs; Short Courses are 1-3 hour quick learning modules
 
 CORE PRINCIPLES:
 - Answer the specific question asked - nothing more
