@@ -1,10 +1,14 @@
 // Next.js instrumentation file - runs once when the server starts
 // https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation
 
+import * as Sentry from '@sentry/nextjs';
+
 export async function register() {
-  // Only run on server
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    // Dynamically import to ensure server-only execution
+    // Initialize Sentry for server
+    await import('./sentry.server.config');
+
+    // Validate environment variables
     const { getValidatedEnv } = await import('@/lib/env');
 
     try {
@@ -19,4 +23,11 @@ export async function register() {
       throw error;
     }
   }
+
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    // Initialize Sentry for edge runtime
+    await import('./sentry.edge.config');
+  }
 }
+
+export const onRequestError = Sentry.captureRequestError;
