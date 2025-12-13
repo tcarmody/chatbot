@@ -350,115 +350,90 @@ If you have existing JSON analytics data, you can migrate with a simple script. 
 
 ## Support Ticket System
 
-### Approach: HubSpot CRM Integration
+### Approach: HubSpot Forms (External)
 
-**Decision**: Use HubSpot's Tickets API for support ticket management instead of a custom SQLite-based system.
+**Decision**: Use HubSpot Forms for support ticket creation instead of a custom in-app form with API integration.
 
 **Rationale**:
-- **Unified Customer Data**: HubSpot already manages all user contact and enrollment information, so tickets automatically link to existing customer records
-- **Single Source of Truth**: Support agents see complete customer history (enrollments, previous interactions, tickets) in one place
-- **Built-in Features**: HubSpot provides email notifications, workflows, automation, and reporting out of the box
-- **No Duplicate Data**: Avoid syncing customer data between separate systems
-- **Scalability**: HubSpot handles enterprise-scale ticket volumes without custom infrastructure
-- **Team Collaboration**: Native assignment, comments, and activity tracking for support teams
-
-**Why Not a Custom System?**
-- **Data Silos**: A separate ticket database would duplicate customer information already in HubSpot
-- **Manual Sync**: Would require building and maintaining sync logic between systems
-- **Missing Context**: Support agents would need to switch between systems to see full customer picture
-- **Feature Rebuilding**: Would duplicate functionality HubSpot already provides (workflows, notifications, reporting)
+- **Zero Maintenance**: HubSpot maintains the form UI, validation, and submission handling
+- **Automatic Contact Association**: Forms automatically create/update HubSpot contacts and link tickets
+- **Marketing Integration**: Full tracking, attribution, and workflow triggers
+- **File Uploads**: Native support for attachments without custom implementation
+- **Email Notifications**: Built-in confirmation emails and team notifications
+- **Workflows**: Form submissions can trigger any HubSpot workflow
+- **A/B Testing**: HubSpot supports form variants for optimization
 
 **Current Implementation**:
-- **Backend**: HubSpot Tickets API via custom client (`lib/hubspot.ts`)
-- **Authentication**: Private app access token with `tickets` scope
-- **Ticket ID**: HubSpot's native ticket ID serves as the ticket number
-- **Status Mapping**: HubSpot pipeline stages map to app statuses (open, in_progress, resolved, closed)
-- **Priority Mapping**: HubSpot priority values (LOW, MEDIUM, HIGH) map to app priorities
-
-**Features**:
-- ✅ Ticket creation via HubSpot API
-- ✅ Ticket retrieval by ID
-- ✅ Search tickets by user email
-- ✅ Status updates via pipeline stage changes
-- ✅ Priority tracking
-- ✅ Admin dashboard at `/admin/tickets` with filtering
-- ✅ Ticket search by email on homepage
-- ✅ Category and conversation context as custom properties
+- **Form URL**: External HubSpot form (e.g., `https://share.hsforms.com/...`)
+- **User Flow**: Chatbot links open HubSpot form in new tab
+- **Ticket Management**: Support team uses HubSpot directly
+- **No Custom API**: Removed `/api/tickets` and `/tickets/new` routes
 
 **User Experience**:
 1. User tries chatbot first (instant answers)
-2. If chatbot can't help, user clicks link to create ticket
-3. User fills form with email, subject, description, priority, category
-4. Ticket created in HubSpot, linked to existing contact if email matches
-5. User redirected to ticket view page with HubSpot ticket ID
-6. Support team manages ticket in HubSpot or via admin dashboard
+2. If chatbot can't help, user clicks "create a support ticket" link
+3. HubSpot form opens in new tab (branded with HubSpot's form styling)
+4. User fills form; HubSpot handles validation
+5. Ticket created in HubSpot, contact auto-created/matched
+6. User sees HubSpot confirmation page
+7. Support team manages ticket entirely in HubSpot
 
-**HubSpot Custom Properties** (recommended):
-| Property | Type | Purpose |
-|----------|------|---------|
-| `user_email` | Single-line text | Ticket submitter's email |
-| `user_name` | Single-line text | Ticket submitter's name |
-| `category` | Single-line text | FAQ category (Billing, Technical, etc.) |
-| `conversation_context` | Multi-line text | Chat history JSON if ticket originated from chatbot |
-
-**Pipeline Stage Configuration**:
+**Configuration**:
 ```bash
-HUBSPOT_STAGE_OPEN=1            # "New" or "Open" stage
-HUBSPOT_STAGE_IN_PROGRESS=2     # "In Progress" stage
-HUBSPOT_STAGE_RESOLVED=3        # "Resolved" stage
-HUBSPOT_STAGE_CLOSED=4          # "Closed" stage
+# Environment variable for form URL
+HUBSPOT_FORM_URL=https://share.hsforms.com/1EsdrWJXnR5WYr8BdPryuVg3hul4
 ```
 
-**Email Notifications**:
-- Configured via HubSpot Workflows (not application code)
-- Create workflows in HubSpot to send emails on ticket creation, status changes, etc.
-- Benefits: No code changes needed to modify notification logic, supports HubSpot's email templates
+**Chatbot Integration**:
+The chatbot system prompt includes the HubSpot form URL:
+```
+"I don't have information about that. You can [create a support ticket](https://share.hsforms.com/...) and our team will help you."
+```
 
-**Admin Dashboard** (`/admin/tickets`):
-- **Real-time statistics**: Total, open, in progress, resolved, closed counts (from HubSpot)
-- **Filtering**: By status and priority with dropdown selectors
-- **Sortable table**: Ticket ID, subject, user, status, priority, created date
-- **Inline status updates**: Change status directly from table (updates HubSpot)
-- **Responsive design**: Works on desktop and mobile
+**HubSpot Form Features Used**:
+- Email field (required, auto-links to contact)
+- Subject/description fields
+- Priority dropdown
+- Category dropdown
+- File upload (optional)
+- GDPR consent checkbox (if needed)
+- Redirect URL after submission
 
-**Integration Points**:
-- Chatbot responses include link: "Still need help? [create a support ticket](/tickets/new)"
-- Homepage quick link: "Create Support Ticket" card
-- Ticket pages allow users to return to chatbot or create new tickets
-
-**Benefits Over Custom SQLite System**:
-- **Customer 360 View**: Tickets automatically associated with HubSpot contacts
-- **Enrollment Context**: Support agents see user's course enrollments alongside tickets
-- **No Data Migration**: Leverage existing HubSpot data immediately
-- **Enterprise Features**: SLAs, automation, reporting without custom development
-- **Team Scalability**: HubSpot supports unlimited agents with proper tier
-
-**HubSpot-Managed Features** (available in HubSpot, not rebuilt):
-- Ticket assignment to team members
-- SLA tracking and breach notifications
-- Email threading and replies
-- File attachments
-- Internal notes and comments
-- Automation workflows
-- Reporting and analytics
-- Mobile app for support team
-
-**Setup Requirements**:
-1. Create HubSpot Private App with `tickets` scope
-2. Configure `HUBSPOT_ACCESS_TOKEN` environment variable
-3. Optionally configure pipeline stage IDs if different from defaults
-4. Optionally create custom properties for additional metadata
-
-**Documentation**: See [docs/hubspot-setup.md](docs/hubspot-setup.md) for detailed setup instructions.
+**Benefits Over Custom API Integration**:
+| Aspect | Custom API | HubSpot Forms |
+|--------|-----------|---------------|
+| Maintenance | You maintain | HubSpot maintains |
+| Contact linking | Manual API calls | Automatic |
+| Marketing tracking | None | Full attribution |
+| File uploads | Custom implementation | Built-in |
+| Email notifications | Custom or workflows | Built-in |
+| Form validation | Custom code | HubSpot handles |
+| A/B testing | Not available | Built-in |
 
 **Trade-offs**:
-- **HubSpot Dependency**: Requires HubSpot account and API access
-- **API Rate Limits**: 100 requests per 10 seconds (sufficient for most use cases)
-- **Custom Properties**: Some metadata requires creating custom HubSpot properties
-- **Learning Curve**: Team needs familiarity with HubSpot for full feature utilization
+- **UX Disruption**: User leaves your site (opens new tab)
+- **Branding**: Form uses HubSpot styling, not your app's design
+- **No Conversation Context**: Can't automatically pass chat history to ticket
+- **URL Tracking Params**: Long URLs with HubSpot tracking cookies
+- **Less Control**: Can't customize submission behavior in code
+
+**When to Reconsider**:
+- If seamless in-app UX is critical
+- If you need to pass conversation context to tickets programmatically
+- If HubSpot form branding conflicts with your design requirements
+- If you need custom post-submission logic in your app
 
 **Previous Implementation** (deprecated):
-The original SQLite-based ticket system has been replaced. The `support_tickets`, `ticket_attachments`, and `ticket_comments` tables in the local database are no longer used for ticket management. Analytics data remains in SQLite.
+The custom ticket system (`/tickets/new`, `/api/tickets`, `lib/hubspot.ts` API client, `lib/tickets.ts`) has been replaced with HubSpot Forms. The admin dashboard at `/admin/tickets` is also deprecated—use HubSpot's native ticket management instead.
+
+**Files to Remove/Deprecate**:
+- `app/tickets/new/page.tsx` - Custom ticket form
+- `app/tickets/[id]/page.tsx` - Ticket view page
+- `app/api/tickets/route.ts` - Ticket API
+- `app/api/admin/tickets/route.ts` - Admin ticket API
+- `app/admin/tickets/page.tsx` - Admin dashboard
+- `lib/tickets.ts` - Ticket service layer
+- `lib/hubspot.ts` - HubSpot API client (no longer needed for tickets)
 
 ---
 
@@ -672,10 +647,11 @@ CREATE TABLE admin_sessions (
 ## Document History
 
 **Created**: December 2024
-**Last Updated**: December 11, 2024
+**Last Updated**: December 13, 2024
 **Authors**: Tim (Project Owner), Claude (AI Assistant)
 
 ### Recent Updates
+- **Dec 13, 2024**: Switched from custom HubSpot API integration to HubSpot Forms for ticket creation; deprecated custom ticket routes and admin dashboard
 - **Dec 11, 2024**: Migrated ticket system from SQLite to HubSpot Tickets API; removed Resend email integration (now handled via HubSpot workflows)
 - **Dec 10, 2024**: Added "Chatbot Response Strategy" section documenting the shift to focused, concise responses with engagement-oriented closings and minimal ticket escalation
 

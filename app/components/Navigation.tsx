@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   MessageSquare,
-  TicketIcon,
   BarChart3,
   Settings,
   Menu,
@@ -13,32 +12,23 @@ import {
   Home,
   Users,
   LogOut,
-  ChevronDown,
+  ExternalLink,
 } from 'lucide-react';
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  children?: { label: string; href: string }[];
+  external?: boolean;
 }
 
 const publicNavItems: NavItem[] = [
   { label: 'Home', href: '/', icon: <Home className="w-4 h-4" /> },
   { label: 'Support', href: '/', icon: <MessageSquare className="w-4 h-4" /> },
-  {
-    label: 'Tickets',
-    href: '/tickets/new',
-    icon: <TicketIcon className="w-4 h-4" />,
-    children: [
-      { label: 'Create Ticket', href: '/tickets/new' },
-      { label: 'My Tickets', href: '/tickets/list' },
-    ],
-  },
+  { label: 'Create Ticket', href: 'https://share.hsforms.com/1EsdrWJXnR5WYr8BdPryuVg3hul4', icon: <ExternalLink className="w-4 h-4" />, external: true },
 ];
 
 const adminNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/admin/tickets', icon: <TicketIcon className="w-4 h-4" /> },
   { label: 'Analytics', href: '/analytics', icon: <BarChart3 className="w-4 h-4" /> },
   { label: 'Sessions', href: '/admin/sessions', icon: <Users className="w-4 h-4" /> },
 ];
@@ -50,13 +40,12 @@ interface NavigationProps {
 
 export default function Navigation({ variant = 'public', showAdminLink = true }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
 
   const navItems = variant === 'admin' ? adminNavItems : publicNavItems;
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
+    if (href === '/' || href.startsWith('http')) return pathname === href;
     return pathname.startsWith(href);
   };
 
@@ -82,62 +71,37 @@ export default function Navigation({ variant = 'public', showAdminLink = true }:
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
-              <div key={item.label} className="relative">
-                {item.children ? (
-                  <div
-                    className="relative"
-                    onMouseEnter={() => setOpenDropdown(item.label)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
-                    <button
-                      className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(item.href)
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {item.icon}
-                      <span>{item.label}</span>
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
-                    {openDropdown === item.label && (
-                      <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            className={`block px-4 py-2 text-sm transition-colors ${
-                              pathname === child.href
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </Link>
-                )}
-              </div>
+              item.external ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </a>
+              ) : (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive(item.href)
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              )
             ))}
 
             {/* Admin Link for public nav */}
             {variant === 'public' && showAdminLink && (
               <Link
-                href="/admin/tickets"
+                href="/admin/sessions"
                 className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 <Settings className="w-4 h-4" />
@@ -171,47 +135,38 @@ export default function Navigation({ variant = 'public', showAdminLink = true }:
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-1">
               {navItems.map((item) => (
-                <div key={item.label}>
-                  {item.children ? (
-                    <>
-                      <div className="px-3 py-2 text-sm font-medium text-gray-500">
-                        {item.label}
-                      </div>
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center space-x-2 px-6 py-2 text-sm font-medium transition-colors ${
-                            pathname === child.href
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          <span>{child.label}</span>
-                        </Link>
-                      ))}
-                    </>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(item.href)
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  )}
-                </div>
+                item.external ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </a>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive(item.href)
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                )
               ))}
 
               {variant === 'public' && showAdminLink && (
                 <Link
-                  href="/admin/tickets"
+                  href="/admin/sessions"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                 >
