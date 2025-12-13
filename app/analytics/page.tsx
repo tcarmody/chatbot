@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/app/components/Navigation';
 import { SkeletonStats, SkeletonCard } from '@/app/components/Skeleton';
-import { RefreshCw, LogOut, MessageSquare, Clock, Coins, Zap } from 'lucide-react';
+import { RefreshCw, LogOut, MessageSquare, Clock, Coins, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AnalyticsSummary {
   totalQueries: number;
@@ -20,12 +20,20 @@ interface AnalyticsSummary {
   };
 }
 
+interface ClusterQuestion {
+  message: string;
+  timestamp: string;
+}
+
 export default function AnalyticsPage() {
   const router = useRouter();
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
+  const [expandedCluster, setExpandedCluster] = useState<string | null>(null);
+  const [clusterQuestions, setClusterQuestions] = useState<ClusterQuestion[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -76,6 +84,38 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClusterClick = async (clusterName: string) => {
+    if (expandedCluster === clusterName) {
+      setExpandedCluster(null);
+      setClusterQuestions([]);
+      return;
+    }
+
+    setExpandedCluster(clusterName);
+    setLoadingQuestions(true);
+
+    try {
+      const response = await fetch(`/api/analytics/cluster?cluster=${encodeURIComponent(clusterName)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setClusterQuestions(data.questions);
+      }
+    } catch (err) {
+      console.error('Failed to fetch cluster questions:', err);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
   };
 
   if (loading) {
@@ -207,22 +247,56 @@ export default function AnalyticsPage() {
           {/* Query Clusters */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Question Topics</h2>
-            <p className="text-sm text-gray-500 mb-4">Similar questions grouped by topic</p>
+            <p className="text-sm text-gray-500 mb-4">Click a topic to view individual questions</p>
             <div className="space-y-3">
               {analytics.queryClusters.map((item, index) => (
                 <div key={index}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-700">{item.cluster}</span>
-                    <span className="text-sm font-medium text-gray-900">{item.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-indigo-500 h-2 rounded-full"
-                      style={{
-                        width: `${(item.count / analytics.totalQueries) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
+                  <button
+                    onClick={() => handleClusterClick(item.cluster)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-700 flex items-center gap-1 hover:text-indigo-600 transition-colors">
+                        {expandedCluster === item.cluster ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                        {item.cluster}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">{item.count}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-indigo-500 h-2 rounded-full"
+                        style={{
+                          width: `${(item.count / analytics.totalQueries) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </button>
+
+                  {/* Expanded questions list */}
+                  {expandedCluster === item.cluster && (
+                    <div className="mt-2 ml-5 border-l-2 border-indigo-200 pl-3">
+                      {loadingQuestions ? (
+                        <div className="py-2 text-sm text-gray-500">Loading questions...</div>
+                      ) : clusterQuestions.length > 0 ? (
+                        <ul className="space-y-2 py-2">
+                          {clusterQuestions.map((q, qIndex) => (
+                            <li key={qIndex} className="text-sm">
+                              <span className="text-gray-700">&quot;{q.message}&quot;</span>
+                              <span className="text-gray-400 text-xs ml-2">
+                                {formatDate(q.timestamp)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="py-2 text-sm text-gray-500">No questions found</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

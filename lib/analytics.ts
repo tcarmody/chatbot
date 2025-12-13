@@ -70,6 +70,31 @@ export async function logAnalyticsEvent(event: AnalyticsEvent) {
   }
 }
 
+// Get questions for a specific cluster
+export async function getQuestionsForCluster(clusterName: string) {
+  try {
+    await initializeSchema();
+
+    const queriesResult = await sql`SELECT user_message, timestamp FROM analytics_events ORDER BY timestamp DESC`;
+    const questions: { message: string; timestamp: string }[] = [];
+
+    (queriesResult as { user_message: string; timestamp: string }[]).forEach(event => {
+      const clusters = classifyQuery(event.user_message);
+      if (clusters.includes(clusterName)) {
+        questions.push({
+          message: event.user_message,
+          timestamp: event.timestamp,
+        });
+      }
+    });
+
+    return questions;
+  } catch (error) {
+    console.error('Error getting questions for cluster:', error);
+    return [];
+  }
+}
+
 // Get analytics summary
 export async function getAnalyticsSummary() {
   try {
