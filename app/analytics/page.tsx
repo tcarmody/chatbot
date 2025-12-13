@@ -9,7 +9,7 @@ import { RefreshCw, LogOut, MessageSquare, Clock, Coins, Zap } from 'lucide-reac
 interface AnalyticsSummary {
   totalQueries: number;
   categoryUsage: { category: string; count: number }[];
-  topQueries: { query: string; count: number }[];
+  queryClusters: { cluster: string; count: number }[];
   avgResponseTime: number;
   totalInputTokens: number;
   totalOutputTokens: number;
@@ -204,18 +204,25 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Top Queries */}
+          {/* Query Clusters */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Top Queries</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Question Topics</h2>
+            <p className="text-sm text-gray-500 mb-4">Similar questions grouped by topic</p>
             <div className="space-y-3">
-              {analytics.topQueries.map((item, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <span className="text-sm text-gray-700 truncate flex-1 mr-4">
-                    {item.query}...
-                  </span>
-                  <span className="text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-full">
-                    {item.count}
-                  </span>
+              {analytics.queryClusters.map((item, index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-gray-700">{item.cluster}</span>
+                    <span className="text-sm font-medium text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-indigo-500 h-2 rounded-full"
+                      style={{
+                        width: `${(item.count / analytics.totalQueries) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
                 </div>
               ))}
             </div>
