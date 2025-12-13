@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const summary = getAnalyticsSummary();
+    const summary = await getAnalyticsSummary();
 
     if (!summary) {
       return NextResponse.json(

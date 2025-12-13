@@ -10,7 +10,7 @@ export async function requireAdmin(req: NextRequest) {
     return null;
   }
 
-  const user = validateSession(sessionToken);
+  const user = await validateSession(sessionToken);
 
   if (!user) {
     // Clear invalid cookie
