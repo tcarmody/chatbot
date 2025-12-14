@@ -1,46 +1,79 @@
 # AI Customer Service Chatbot
 
-A customer service chatbot demo for an AI education company, powered by Claude Haiku 4.5 and built with Next.js.
+An AI-powered customer service chatbot for DeepLearning.AI, built with Next.js and Claude Haiku. The chatbot answers common questions about courses, certificates, billing, and account management using a curated knowledge base.
 
 ## Features
 
-- 💬 Real-time chat interface with Claude Haiku 4.5
-- 📚 FAQ knowledge base for common questions
-- 🎨 Clean, professional UI inspired by DeepLearning.AI
-- ⚡ Built for high-volume with Next.js and streaming support
-- 🔄 Conversation history tracking
+- **AI-Powered Responses**: Uses Claude Haiku 4.5 for fast, accurate answers
+- **Smart FAQ Matching**: Category-based filtering reduces token usage by 50-70%
+- **Admin Dashboard**: View analytics, session management, and usage metrics
+- **Question Topic Clustering**: Groups similar questions into actionable insights
+- **HubSpot Integration**: Seamless ticket creation for issues the chatbot can't resolve
+- **Real-time Analytics**: Track queries, response times, token usage, and costs
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **LLM**: Claude Haiku 4.5 (Anthropic)
+- **Database**: Neon Postgres (serverless)
+- **Deployment**: Vercel
+- **Error Tracking**: Sentry (optional)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ installed
-- An Anthropic API key ([get one here](https://console.anthropic.com/))
+- Node.js 18+
+- npm or yarn
+- Anthropic API key ([get one here](https://console.anthropic.com/))
+- Neon Postgres database ([create free at neon.tech](https://neon.tech))
 
 ### Installation
 
-1. Install dependencies:
-```bash
-npm install
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/tcarmody/chatbot.git
+   cd chatbot
+   ```
 
-2. Set up your environment variables:
-```bash
-cp .env.local.example .env.local
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-3. Add your Anthropic API key to `.env.local`:
-```
-ANTHROPIC_API_KEY=your_actual_api_key_here
-```
+3. **Set up environment variables**
+   ```bash
+   cp .env.local.example .env.local
+   ```
 
-### Running the Development Server
+   Edit `.env.local` with your credentials:
+   ```bash
+   # Required
+   ANTHROPIC_API_KEY=your_api_key_here
+   DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 
-```bash
-npm run dev
-```
+   # Optional
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   NEXT_PUBLIC_SENTRY_DSN=your_sentry_dsn
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the chatbot in action.
+4. **Create an admin user**
+   ```bash
+   npm run setup-admin
+   ```
+   Follow the prompts to create your first admin account.
+
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open the app**
+   - Chatbot: http://localhost:3000
+   - Admin Login: http://localhost:3000/admin/login
+   - Analytics: http://localhost:3000/analytics (requires login)
 
 ## Project Structure
 
@@ -48,79 +81,110 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the c
 chatbot/
 ├── app/
 │   ├── api/
-│   │   └── chat/
-│   │       └── route.ts          # API endpoint for chat with Claude
-│   ├── components/
-│   │   └── ChatBot.tsx            # Main chatbot UI component
-│   └── page.tsx                   # Home page with chatbot
+│   │   ├── analytics/      # Analytics API endpoints
+│   │   ├── admin/          # Admin auth endpoints
+│   │   ├── chat/           # Chat API (LLM integration)
+│   │   └── health/         # Health check endpoint
+│   ├── admin/              # Admin pages (login, sessions)
+│   ├── analytics/          # Analytics dashboard
+│   └── components/         # React components
+├── lib/
+│   ├── analytics.ts        # Analytics tracking & clustering
+│   ├── auth.ts             # Admin authentication
+│   ├── db.ts               # Database connection & schema
+│   ├── faqs.ts             # FAQ knowledge base
+│   └── admin-middleware.ts # Auth middleware
 ├── data/
-│   └── faq.json                   # FAQ knowledge base
-└── .env.local                     # Environment variables (API key)
+│   └── faqs.json           # FAQ knowledge base data
+├── scripts/
+│   └── setup-admin.ts      # Admin user creation script
+└── public/                 # Static assets
 ```
 
-## Customizing the Knowledge Base
+## Configuration
 
-Edit the `data/faq.json` file to add, remove, or modify FAQs:
+### Environment Variables
 
-```json
-{
-  "faqs": [
-    {
-      "id": 1,
-      "category": "Courses",
-      "question": "Your question here?",
-      "answer": "Your answer here."
-    }
-  ]
-}
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ANTHROPIC_API_KEY` | Yes | API key for Claude |
+| `DATABASE_URL` | Yes | Neon Postgres connection string |
+| `NEXT_PUBLIC_APP_URL` | No | Application URL (default: http://localhost:3000) |
+| `NEXT_PUBLIC_SENTRY_DSN` | No | Sentry DSN for error tracking |
+| `SENTRY_DSN` | No | Server-side Sentry DSN |
+
+### FAQ Knowledge Base
+
+FAQs are stored in `data/faqs.json` and organized by category:
+- Account & Profile Management
+- Certificates & Course Completion
+- Billing & Payments
+- Membership Support
+- Technical Issues & Course Access
+
+To add or modify FAQs, edit the JSON file directly. Changes take effect on the next server restart.
+
+## Admin Features
+
+### Analytics Dashboard (`/analytics`)
+
+- Total query count
+- Average response time
+- Token usage and estimated costs
+- Category breakdown
+- Question topic clustering with drill-down
+
+### Session Management (`/admin/sessions`)
+
+- View active admin sessions
+- Monitor login activity
+
+## Scripts
+
+```bash
+# Development
+npm run dev           # Start dev server
+npm run build         # Build for production
+npm run start         # Start production server
+
+# Testing
+npm run test          # Run tests
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run tests with coverage
+
+# Admin
+npm run setup-admin   # Create admin user
+
+# Linting
+npm run lint          # Run ESLint
 ```
 
-The chatbot will automatically use the updated knowledge base on the next request.
+## Deployment
 
-## Scaling for Production
+### Vercel (Recommended)
 
-For high-volume production deployment:
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
 
-1. **Deploy to Vercel**: Click the button below or run `vercel deploy`
-   - Automatic scaling and edge network
-   - Built-in monitoring
+### Other Platforms
 
-2. **Add Rate Limiting**: Implement rate limiting middleware to prevent abuse
+The app can be deployed to any platform that supports Next.js. Ensure you:
+- Set all required environment variables
+- Configure the build command: `npm run build`
+- Configure the start command: `npm run start`
 
-3. **Upgrade Knowledge Base**: Consider migrating to a vector database (Pinecone, Weaviate) for:
-   - Semantic search across large FAQ databases
-   - Better context retrieval with RAG (Retrieval Augmented Generation)
+## Architecture Decisions
 
-4. **Add Analytics**: Track usage, popular questions, and user satisfaction
+For detailed architecture and design decisions, see [DOCTRINE.md](./DOCTRINE.md).
 
-5. **Implement Caching**: Cache common responses to reduce API costs
-
-## Technology Stack
-
-- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes
-- **LLM**: Claude Haiku 4.5 (via Anthropic SDK)
-- **Knowledge Base**: JSON (easily upgradeable to vector DB)
-
-## Architecture & Design Decisions
-
-For detailed documentation on why specific technologies and design patterns were chosen, see [DOCTRINE.md](DOCTRINE.md).
-
-This document covers:
-- Architecture decisions (why Next.js, full-stack approach)
-- LLM selection rationale (why Claude Haiku 4.5)
-- Knowledge base strategy (JSON vs vector database)
-- Visual design & UX choices
-- Scaling and migration paths
-
-**For maintainers and contributors**: Please review DOCTRINE.md before making significant architectural changes.
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Key decisions:
+- **Claude Haiku 4.5**: Optimized for speed and cost in customer service
+- **Category-based FAQ filtering**: Reduces token usage without semantic search complexity
+- **HubSpot Forms**: External forms for ticket creation (zero maintenance)
+- **Neon Postgres**: Serverless database for analytics and user management
 
 ## License
 
-MIT
+Private project for DeepLearning.AI.
