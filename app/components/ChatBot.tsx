@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Copy, Check, Send, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Copy, Check, Send, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -14,20 +14,59 @@ interface Message {
   feedback?: 'positive' | 'negative' | null;
 }
 
+// Storage key for localStorage
+const STORAGE_KEY = 'chatbot_conversation';
+
+// Default greeting message
+const DEFAULT_GREETING: Message = {
+  role: 'assistant',
+  content: 'Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.',
+  timestamp: new Date(),
+};
+
 export default function ChatBot() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: 'Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([DEFAULT_GREETING]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Convert timestamp strings back to Date objects
+        const restored = parsed.map((msg: Message & { timestamp: string }) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+        setMessages(restored);
+      }
+    } catch (err) {
+      console.error('Failed to load conversation from localStorage:', err);
+    }
+    setIsHydrated(true);
+  }, []);
+
+  // Save conversation to localStorage when messages change
+  useEffect(() => {
+    if (!isHydrated) return; // Don't save until we've loaded
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (err) {
+      console.error('Failed to save conversation to localStorage:', err);
+    }
+  }, [messages, isHydrated]);
+
+  // Start a new conversation
+  const startNewChat = () => {
+    setMessages([{ ...DEFAULT_GREETING, timestamp: new Date() }]);
+  };
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -141,9 +180,21 @@ export default function ChatBot() {
   return (
     <div className="flex flex-col h-[600px] max-w-3xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4">
-        <h2 className="text-xl font-semibold">Customer Support</h2>
-        <p className="text-sm text-blue-100">We're here to help!</p>
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 flex justify-between items-start">
+        <div>
+          <h2 className="text-xl font-semibold">Customer Support</h2>
+          <p className="text-sm text-blue-100">We're here to help!</p>
+        </div>
+        {messages.length > 1 && (
+          <button
+            onClick={startNewChat}
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 rounded transition-colors"
+            title="Start new conversation"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>New Chat</span>
+          </button>
+        )}
       </div>
 
       {/* Messages */}
