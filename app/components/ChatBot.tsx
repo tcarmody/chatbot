@@ -3,12 +3,15 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Copy, Check, Send } from 'lucide-react';
+import { Copy, Check, Send, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  id?: string; // Unique ID for feedback tracking
+  userMessage?: string; // The user message this response is answering (for assistant messages)
+  feedback?: 'positive' | 'negative' | null;
 }
 
 export default function ChatBot() {
@@ -22,6 +25,7 @@ export default function ChatBot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +44,27 @@ export default function ChatBot() {
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+    }
+  };
+
+  const submitFeedback = async (messageId: string, feedback: 'positive' | 'negative', userMessage: string, assistantResponse: string) => {
+    setFeedbackSubmitting(messageId);
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId, userMessage, assistantResponse, feedback }),
+      });
+
+      if (response.ok) {
+        setMessages(prev => prev.map(msg =>
+          msg.id === messageId ? { ...msg, feedback } : msg
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to submit feedback:', err);
+    } finally {
+      setFeedbackSubmitting(null);
     }
   };
 
@@ -84,9 +109,19 @@ export default function ChatBot() {
 
       const data = await response.json();
 
+      // Generate a unique ID for feedback tracking
+      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
       setMessages([
         ...newMessages,
-        { role: 'assistant', content: data.response, timestamp: new Date() },
+        {
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date(),
+          id: messageId,
+          userMessage: userMessage,
+          feedback: null,
+        },
       ]);
     } catch (error) {
       console.error('Error:', error);
@@ -140,17 +175,48 @@ export default function ChatBot() {
               <div className={`flex items-center gap-2 mt-1 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <span className="text-xs text-gray-400">{formatTime(message.timestamp)}</span>
                 {message.role === 'assistant' && (
-                  <button
-                    onClick={() => copyToClipboard(message.content, index)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
-                    title="Copy to clipboard"
-                  >
-                    {copiedIndex === index ? (
-                      <Check className="w-3 h-3 text-green-500" />
-                    ) : (
-                      <Copy className="w-3 h-3 text-gray-400" />
+                  <>
+                    <button
+                      onClick={() => copyToClipboard(message.content, index)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
+                      title="Copy to clipboard"
+                    >
+                      {copiedIndex === index ? (
+                        <Check className="w-3 h-3 text-green-500" />
+                      ) : (
+                        <Copy className="w-3 h-3 text-gray-400" />
+                      )}
+                    </button>
+                    {/* Feedback buttons - only show for messages with IDs (not the initial greeting) */}
+                    {message.id && (
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => submitFeedback(message.id!, 'positive', message.userMessage!, message.content)}
+                          disabled={feedbackSubmitting === message.id}
+                          className={`p-1 rounded transition-colors ${
+                            message.feedback === 'positive'
+                              ? 'text-green-500 bg-green-50'
+                              : 'text-gray-400 hover:bg-gray-200 hover:text-green-500'
+                          }`}
+                          title="Helpful"
+                        >
+                          <ThumbsUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => submitFeedback(message.id!, 'negative', message.userMessage!, message.content)}
+                          disabled={feedbackSubmitting === message.id}
+                          className={`p-1 rounded transition-colors ${
+                            message.feedback === 'negative'
+                              ? 'text-red-500 bg-red-50'
+                              : 'text-gray-400 hover:bg-gray-200 hover:text-red-500'
+                          }`}
+                          title="Not helpful"
+                        >
+                          <ThumbsDown className="w-3 h-3" />
+                        </button>
+                      </div>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </div>

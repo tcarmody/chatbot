@@ -139,6 +139,22 @@ export async function initializeSchema() {
     await sql`CREATE INDEX IF NOT EXISTS idx_comments_ticket ON ticket_comments(ticket_number)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_comments_created ON ticket_comments(created_at)`;
 
+    // Response feedback table
+    await sql`
+      CREATE TABLE IF NOT EXISTS response_feedback (
+        id SERIAL PRIMARY KEY,
+        message_id TEXT UNIQUE NOT NULL,
+        user_message TEXT NOT NULL,
+        assistant_response TEXT NOT NULL,
+        feedback TEXT NOT NULL CHECK (feedback IN ('positive', 'negative')),
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create index for feedback
+    await sql`CREATE INDEX IF NOT EXISTS idx_feedback_created ON response_feedback(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_feedback_type ON response_feedback(feedback)`;
+
     schemaInitialized = true;
     console.log('Database schema initialized successfully');
   } catch (error) {

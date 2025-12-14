@@ -138,13 +138,30 @@ ${courseEntries.join('\n\n---\n\n')}`;
     // Combine knowledge bases
     const knowledgeBase = faqKnowledgeBase + courseCatalogKnowledgeBase;
 
-    // System prompt for the customer service chatbot
-    const systemPrompt = `You are a helpful customer service assistant for an AI education company similar to DeepLearning.AI. Your role is to assist users with questions about courses, enrollment, pricing, certificates, and technical support.
+    // Build messages array with conversation history
+    const messages: Anthropic.MessageParam[] = [];
+
+    // Add conversation history if it exists
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      conversationHistory.forEach((msg: { role: string; content: string }) => {
+        messages.push({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+        });
+      });
+    }
+
+    // Add the current user message
+    messages.push({
+      role: 'user',
+      content: message,
+    });
+
+    // Build system prompt with caching
+    // The static instructions are cached, while the dynamic knowledge base is not
+    const staticInstructions = `You are a helpful customer service assistant for an AI education company similar to DeepLearning.AI. Your role is to assist users with questions about courses, enrollment, pricing, certificates, and technical support.
 
 Use the following knowledge base to answer questions directly and concisely. Answer only what the user asks - don't provide extra information they didn't request.
-
-KNOWLEDGE BASE:
-${knowledgeBase}
 
 COURSE CATALOG GUIDANCE:
 - When users ask about courses, recommend specific courses from the catalog that match their interests
@@ -240,30 +257,26 @@ GENERALIZATION STRATEGY:
 - Don't refuse to answer just because the user mentioned a specific name - extract the general question and answer it
 - Only say you don't have information if there's truly NO relevant information in your knowledge base`;
 
-    // Build messages array with conversation history
-    const messages: Anthropic.MessageParam[] = [];
+    // Dynamic knowledge base content (changes per request based on detected categories)
+    const dynamicKnowledgeBase = `KNOWLEDGE BASE:
+${knowledgeBase}`;
 
-    // Add conversation history if it exists
-    if (conversationHistory && Array.isArray(conversationHistory)) {
-      conversationHistory.forEach((msg: { role: string; content: string }) => {
-        messages.push({
-          role: msg.role as 'user' | 'assistant',
-          content: msg.content,
-        });
-      });
-    }
-
-    // Add the current user message
-    messages.push({
-      role: 'user',
-      content: message,
-    });
-
-    // Call Claude Haiku 4.5
+    // Call Claude Haiku 4.5 with prompt caching
+    // Static instructions are cached to reduce token costs on repeated queries
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 1024,
-      system: systemPrompt,
+      system: [
+        {
+          type: 'text',
+          text: staticInstructions,
+          cache_control: { type: 'ephemeral' },
+        },
+        {
+          type: 'text',
+          text: dynamicKnowledgeBase,
+        },
+      ],
       messages: messages,
     });
 
@@ -274,11 +287,20 @@ GENERALIZATION STRATEGY:
     // Log analytics event
     const responseTime = Date.now() - startTime;
 
+    // Extract cache usage from response (if available)
+    const cacheCreationTokens = (response.usage as any).cache_creation_input_tokens ?? 0;
+    const cacheReadTokens = (response.usage as any).cache_read_input_tokens ?? 0;
+
     chatLogger.info('Chat request completed', {
       responseTime,
       categories: relevantCategories,
       faqCount: relevantFaqs.length,
-      tokens: { input: response.usage.input_tokens, output: response.usage.output_tokens },
+      tokens: {
+        input: response.usage.input_tokens,
+        output: response.usage.output_tokens,
+        cacheCreation: cacheCreationTokens,
+        cacheRead: cacheReadTokens,
+      },
     });
 
     logAnalyticsEvent({
