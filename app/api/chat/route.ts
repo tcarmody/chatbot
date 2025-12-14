@@ -10,6 +10,35 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Context window optimization settings
+const MAX_CONVERSATION_MESSAGES = 20; // Keep last N messages
+
+// Truncate conversation history to manage context window
+function optimizeConversationHistory(
+  history: Array<{ role: string; content: string }>,
+): Array<{ role: string; content: string }> {
+  if (!history || history.length <= MAX_CONVERSATION_MESSAGES) {
+    return history;
+  }
+
+  // Keep the most recent messages
+  const recentMessages = history.slice(-MAX_CONVERSATION_MESSAGES);
+
+  // If we had to truncate, add a context note at the beginning
+  const truncatedCount = history.length - MAX_CONVERSATION_MESSAGES;
+  const contextNote = {
+    role: 'user',
+    content: `[Note: ${truncatedCount} earlier messages in this conversation have been summarized. The conversation has been ongoing.]`,
+  };
+
+  // Ensure we start with a user message (required by Claude API)
+  if (recentMessages[0]?.role === 'assistant') {
+    return [contextNote, ...recentMessages];
+  }
+
+  return recentMessages;
+}
+
 export async function POST(req: NextRequest) {
   // Rate limiting
   const clientIP = getClientIP(req);
@@ -141,9 +170,19 @@ ${courseEntries.join('\n\n---\n\n')}`;
     // Build messages array with conversation history
     const messages: Anthropic.MessageParam[] = [];
 
-    // Add conversation history if it exists
+    // Add conversation history if it exists (with context window optimization)
     if (conversationHistory && Array.isArray(conversationHistory)) {
-      conversationHistory.forEach((msg: { role: string; content: string }) => {
+      const optimizedHistory = optimizeConversationHistory(conversationHistory);
+      const wasTruncated = conversationHistory.length > optimizedHistory.length;
+
+      if (wasTruncated) {
+        chatLogger.info('Conversation history truncated', {
+          original: conversationHistory.length,
+          optimized: optimizedHistory.length,
+        });
+      }
+
+      optimizedHistory.forEach((msg: { role: string; content: string }) => {
         messages.push({
           role: msg.role as 'user' | 'assistant',
           content: msg.content,
