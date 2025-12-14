@@ -20,12 +20,12 @@ export default function Home() {
         <ChatBot />
 
         {/* Quick Links */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+        <div className="mt-12 flex justify-center">
           <a
             href="https://share.hsforms.com/1EsdrWJXnR5WYr8BdPryuVg3hul4"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all group"
+            className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all group max-w-md w-full"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
@@ -35,21 +35,21 @@ export default function Home() {
             </div>
             <p className="text-sm text-gray-600">Need personalized help? Submit a ticket to our team</p>
           </a>
-          <a href="/analytics" className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all group">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors">
-                <BarChart3 className="w-5 h-5 text-green-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900">Analytics Dashboard</h3>
-            </div>
-            <p className="text-sm text-gray-600">View chatbot usage metrics and insights</p>
-          </a>
         </div>
 
         {/* Admin Links */}
         <div className="mt-12">
           <h3 className="text-center text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Admin Access</h3>
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-4">
+            <a href="/analytics" className="bg-white p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:shadow-md transition-all flex items-center gap-3">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <BarChart3 className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Analytics</h4>
+                <p className="text-xs text-gray-500">Usage metrics and insights</p>
+              </div>
+            </a>
             <a href="/admin/sessions" className="bg-white p-4 rounded-lg border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all flex items-center gap-3">
               <div className="p-2 bg-indigo-50 rounded-lg">
                 <Users className="w-5 h-5 text-indigo-600" />
