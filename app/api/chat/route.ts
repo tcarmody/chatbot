@@ -61,6 +61,68 @@ function detectKnowledgeGap(response: string): { isGap: boolean; gapType: 'no_ma
   return { isGap: false, gapType: 'no_match' };
 }
 
+// Intent detection types
+type UserIntent = 'help_seeking' | 'confused' | 'frustrated' | 'off_topic' | 'greeting' | 'feedback' | 'standard_query';
+
+// Intent detection patterns
+const INTENT_PATTERNS: Record<UserIntent, string[]> = {
+  help_seeking: [
+    'help me', 'can you help', 'i need help', 'please help', 'assist me',
+    'i\'m stuck', 'i\'m having trouble', 'i can\'t figure out', 'how do i',
+    'what should i do', 'i don\'t know how', 'guide me', 'walk me through',
+  ],
+  confused: [
+    'i don\'t understand', 'confused', 'what do you mean', 'unclear',
+    'i\'m lost', 'doesn\'t make sense', 'can you explain', 'what?',
+    'huh?', 'sorry?', 'i still don\'t get', 'that didn\'t help',
+  ],
+  frustrated: [
+    'this is frustrating', 'not working', 'broken', 'useless', 'waste of time',
+    'doesn\'t work', 'still not working', 'nothing works', 'terrible',
+    'awful', 'hate this', 'so annoying', 'ridiculous', 'unacceptable',
+  ],
+  off_topic: [
+    'weather', 'joke', 'tell me a story', 'what\'s your name', 'who made you',
+    'are you a robot', 'are you ai', 'what can you do', 'play a game',
+    'sing', 'poem', 'recipe', 'news', 'sports', 'politics',
+  ],
+  greeting: [
+    'hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening',
+    'howdy', 'greetings', 'what\'s up', 'yo', 'hiya',
+  ],
+  feedback: [
+    'thank you', 'thanks', 'that helped', 'great', 'perfect', 'awesome',
+    'excellent', 'good job', 'well done', 'appreciate', 'helpful',
+  ],
+  standard_query: [], // Default - no specific patterns
+};
+
+// Detect user intent from message
+function detectUserIntent(message: string): { intent: UserIntent; confidence: 'high' | 'medium' | 'low' } {
+  const messageLower = message.toLowerCase().trim();
+
+  // Check each intent pattern
+  for (const [intent, patterns] of Object.entries(INTENT_PATTERNS)) {
+    if (intent === 'standard_query') continue; // Skip default
+
+    const matchCount = patterns.filter(pattern => messageLower.includes(pattern)).length;
+
+    if (matchCount >= 2) {
+      return { intent: intent as UserIntent, confidence: 'high' };
+    }
+    if (matchCount === 1) {
+      return { intent: intent as UserIntent, confidence: 'medium' };
+    }
+  }
+
+  // Check for very short messages that might indicate confusion
+  if (messageLower.length < 10 && (messageLower.includes('?') || messageLower === 'what' || messageLower === 'how')) {
+    return { intent: 'confused', confidence: 'low' };
+  }
+
+  return { intent: 'standard_query', confidence: 'high' };
+}
+
 // Truncate conversation history to manage context window
 function optimizeConversationHistory(
   history: Array<{ role: string; content: string }>,
@@ -103,6 +165,18 @@ export async function POST(req: NextRequest) {
         { error: 'Message is required' },
         { status: 400 }
       );
+    }
+
+    // Detect user intent
+    const userIntent = detectUserIntent(message);
+
+    // Log intent for analytics (especially non-standard intents)
+    if (userIntent.intent !== 'standard_query') {
+      chatLogger.info('User intent detected', {
+        intent: userIntent.intent,
+        confidence: userIntent.confidence,
+        messagePreview: message.substring(0, 50),
+      });
     }
 
     // Detect relevant categories based on keywords in the user's message
@@ -344,9 +418,19 @@ GENERALIZATION STRATEGY:
 - Don't refuse to answer just because the user mentioned a specific name - extract the general question and answer it
 - Only say you don't have information if there's truly NO relevant information in your knowledge base`;
 
+    // Build intent context hint for special cases
+    let intentContext = '';
+    if (userIntent.intent === 'frustrated' && userIntent.confidence !== 'low') {
+      intentContext = `\n\nUSER CONTEXT: The user may be frustrated. Be extra empathetic, acknowledge their concern, and focus on solving their problem quickly. If you can't help, apologize and direct them to support.`;
+    } else if (userIntent.intent === 'confused' && userIntent.confidence !== 'low') {
+      intentContext = `\n\nUSER CONTEXT: The user seems confused. Use simpler language, break down your explanation into steps, and ask clarifying questions if needed.`;
+    } else if (userIntent.intent === 'off_topic') {
+      intentContext = `\n\nUSER CONTEXT: The user's question may be off-topic. Politely redirect them to topics you can help with (courses, enrollment, certificates, technical support, billing).`;
+    }
+
     // Dynamic knowledge base content (changes per request based on detected categories)
     const dynamicKnowledgeBase = `KNOWLEDGE BASE:
-${knowledgeBase}`;
+${knowledgeBase}${intentContext}`;
 
     // Call Claude Haiku 4.5 with prompt caching
     // Static instructions are cached to reduce token costs on repeated queries
@@ -389,6 +473,8 @@ ${knowledgeBase}`;
       responseTime,
       categories: relevantCategories,
       faqCount: relevantFaqs.length,
+      intent: userIntent.intent,
+      intentConfidence: userIntent.confidence,
       tokens: {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
