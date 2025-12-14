@@ -492,6 +492,8 @@ ${knowledgeBase}${intentContext}`;
       tokenUsage: {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
+        cacheCreation: cacheCreationTokens,
+        cacheRead: cacheReadTokens,
       },
     });
 

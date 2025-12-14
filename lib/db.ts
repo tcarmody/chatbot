@@ -30,8 +30,20 @@ export async function initializeSchema() {
         response_time INTEGER,
         input_tokens INTEGER,
         output_tokens INTEGER,
+        cache_creation_tokens INTEGER DEFAULT 0,
+        cache_read_tokens INTEGER DEFAULT 0,
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       )
+    `;
+
+    // Add cache token columns if they don't exist (for existing databases)
+    await sql`
+      ALTER TABLE analytics_events
+      ADD COLUMN IF NOT EXISTS cache_creation_tokens INTEGER DEFAULT 0
+    `;
+    await sql`
+      ALTER TABLE analytics_events
+      ADD COLUMN IF NOT EXISTS cache_read_tokens INTEGER DEFAULT 0
     `;
 
     // Create indexes for analytics

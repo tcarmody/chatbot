@@ -42,6 +42,8 @@ export interface AnalyticsEvent {
   tokenUsage?: {
     input: number;
     output: number;
+    cacheCreation?: number;
+    cacheRead?: number;
   };
 }
 
@@ -53,7 +55,7 @@ export async function logAnalyticsEvent(event: AnalyticsEvent) {
     await sql`
       INSERT INTO analytics_events (
         timestamp, user_message, detected_categories, faq_count,
-        response_time, input_tokens, output_tokens
+        response_time, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens
       ) VALUES (
         ${event.timestamp},
         ${event.userMessage},
@@ -61,7 +63,9 @@ export async function logAnalyticsEvent(event: AnalyticsEvent) {
         ${event.faqCount},
         ${event.responseTime || null},
         ${event.tokenUsage?.input || null},
-        ${event.tokenUsage?.output || null}
+        ${event.tokenUsage?.output || null},
+        ${event.tokenUsage?.cacheCreation || 0},
+        ${event.tokenUsage?.cacheRead || 0}
       )
     `;
   } catch (error) {
@@ -132,16 +136,39 @@ export async function getAnalyticsSummary() {
       ? Math.round(Number((avgResponseTimeResult[0] as { avg: string }).avg))
       : 0;
 
-    // Token usage
+    // Token usage including cache tokens
     const tokenStatsResult = await sql`
       SELECT
         COALESCE(SUM(input_tokens), 0) as total_input,
-        COALESCE(SUM(output_tokens), 0) as total_output
+        COALESCE(SUM(output_tokens), 0) as total_output,
+        COALESCE(SUM(cache_creation_tokens), 0) as total_cache_creation,
+        COALESCE(SUM(cache_read_tokens), 0) as total_cache_read
       FROM analytics_events
     `;
-    const tokenRow = tokenStatsResult[0] as { total_input: string; total_output: string };
+    const tokenRow = tokenStatsResult[0] as {
+      total_input: string;
+      total_output: string;
+      total_cache_creation: string;
+      total_cache_read: string;
+    };
     const totalInputTokens = Number(tokenRow?.total_input || 0);
     const totalOutputTokens = Number(tokenRow?.total_output || 0);
+    const totalCacheCreationTokens = Number(tokenRow?.total_cache_creation || 0);
+    const totalCacheReadTokens = Number(tokenRow?.total_cache_read || 0);
+
+    // Claude Haiku 4.5 pricing (per million tokens):
+    // - Regular input: $0.25/M
+    // - Cache write (creation): $0.30/M (20% more than regular)
+    // - Cache read: $0.025/M (90% discount)
+    // - Output: $1.25/M
+    const regularInputTokens = totalInputTokens - totalCacheCreationTokens - totalCacheReadTokens;
+    const inputCost = (Math.max(0, regularInputTokens) / 1_000_000) * 0.25;
+    const cacheCreationCost = (totalCacheCreationTokens / 1_000_000) * 0.30;
+    const cacheReadCost = (totalCacheReadTokens / 1_000_000) * 0.025;
+    const outputCost = (totalOutputTokens / 1_000_000) * 1.25;
+
+    // Calculate savings from cache reads (what it would have cost vs what it did cost)
+    const cacheSavings = (totalCacheReadTokens / 1_000_000) * (0.25 - 0.025);
 
     return {
       totalQueries,
@@ -154,10 +181,15 @@ export async function getAnalyticsSummary() {
       avgResponseTime,
       totalInputTokens,
       totalOutputTokens,
+      totalCacheCreationTokens,
+      totalCacheReadTokens,
       estimatedCost: {
-        input: (totalInputTokens / 1_000_000) * 0.25,
-        output: (totalOutputTokens / 1_000_000) * 1.25,
-        total: ((totalInputTokens / 1_000_000) * 0.25) + ((totalOutputTokens / 1_000_000) * 1.25),
+        input: inputCost,
+        cacheCreation: cacheCreationCost,
+        cacheRead: cacheReadCost,
+        output: outputCost,
+        total: inputCost + cacheCreationCost + cacheReadCost + outputCost,
+        savings: cacheSavings,
       },
     };
   } catch (error) {
