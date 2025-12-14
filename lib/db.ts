@@ -155,6 +155,22 @@ export async function initializeSchema() {
     await sql`CREATE INDEX IF NOT EXISTS idx_feedback_created ON response_feedback(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_feedback_type ON response_feedback(feedback)`;
 
+    // FAQ gaps table - tracks queries outside knowledge base
+    await sql`
+      CREATE TABLE IF NOT EXISTS faq_gaps (
+        id SERIAL PRIMARY KEY,
+        user_message TEXT NOT NULL,
+        detected_categories TEXT NOT NULL,
+        gap_type TEXT NOT NULL CHECK (gap_type IN ('no_match', 'partial_match', 'out_of_scope')),
+        suggested_topic TEXT,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create indexes for FAQ gaps
+    await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_created ON faq_gaps(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_type ON faq_gaps(gap_type)`;
+
     schemaInitialized = true;
     console.log('Database schema initialized successfully');
   } catch (error) {

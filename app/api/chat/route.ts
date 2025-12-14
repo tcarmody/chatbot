@@ -5,6 +5,7 @@ import courseCatalog from '@/deeplearning-ai-course-catalog.json';
 import { logAnalyticsEvent } from '@/lib/analytics';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 import { chatLogger, logError } from '@/lib/logger';
+import { sql, initializeSchema } from '@/lib/db';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -12,6 +13,53 @@ const anthropic = new Anthropic({
 
 // Context window optimization settings
 const MAX_CONVERSATION_MESSAGES = 20; // Keep last N messages
+
+// FAQ gap detection patterns
+const GAP_INDICATORS = [
+  "I don't have information about that",
+  "outside my knowledge base",
+  "create a support ticket",
+  "I'm not able to help with",
+  "I don't have specific information",
+  "beyond what I can help with",
+];
+
+// Log FAQ gaps to database for analysis
+async function logFaqGap(
+  userMessage: string,
+  detectedCategories: string[],
+  gapType: 'no_match' | 'partial_match' | 'out_of_scope',
+  suggestedTopic?: string,
+): Promise<void> {
+  try {
+    await initializeSchema();
+    await sql`
+      INSERT INTO faq_gaps (user_message, detected_categories, gap_type, suggested_topic)
+      VALUES (${userMessage}, ${JSON.stringify(detectedCategories)}, ${gapType}, ${suggestedTopic || null})
+    `;
+    chatLogger.info('FAQ gap logged', { gapType, suggestedTopic, messagePreview: userMessage.substring(0, 50) });
+  } catch (error) {
+    // Don't fail the request if gap logging fails
+    chatLogger.error('Failed to log FAQ gap', { error });
+  }
+}
+
+// Detect if response indicates a knowledge gap
+function detectKnowledgeGap(response: string): { isGap: boolean; gapType: 'no_match' | 'partial_match' | 'out_of_scope' } {
+  const responseLower = response.toLowerCase();
+
+  for (const indicator of GAP_INDICATORS) {
+    if (responseLower.includes(indicator.toLowerCase())) {
+      // Determine gap type based on indicator
+      if (indicator.includes("support ticket")) {
+        return { isGap: true, gapType: 'out_of_scope' };
+      }
+      return { isGap: true, gapType: 'no_match' };
+    }
+  }
+
+  return { isGap: false, gapType: 'no_match' };
+}
 
 // Truncate conversation history to manage context window
 function optimizeConversationHistory(
@@ -322,6 +370,13 @@ ${knowledgeBase}`;
     // Extract the assistant's response
     const assistantMessage =
       response.content[0].type === 'text' ? response.content[0].text : '';
+
+    // Check for FAQ gaps and log them (non-blocking)
+    const gapDetection = detectKnowledgeGap(assistantMessage);
+    if (gapDetection.isGap) {
+      // Fire and forget - don't await to avoid slowing response
+      logFaqGap(message, relevantCategories, gapDetection.gapType).catch(() => {});
+    }
 
     // Log analytics event
     const responseTime = Date.now() - startTime;
