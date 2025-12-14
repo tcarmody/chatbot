@@ -7,6 +7,7 @@ This document captures the key design, architectural, and technical decisions ma
 - [LLM Selection](#llm-selection)
 - [Knowledge Base Strategy](#knowledge-base-strategy)
 - [Chatbot Response Strategy](#chatbot-response-strategy)
+- [Chatbot Intelligence Features](#chatbot-intelligence-features)
 - [Visual Design & UX](#visual-design--ux)
 - [Frontend Implementation](#frontend-implementation)
 - [Production Considerations](#production-considerations)
@@ -218,6 +219,125 @@ To prevent the chatbot from being too conservative and saying "I don't know" whe
 **Related Documentation**:
 - See [STYLE.md](./STYLE.md) for detailed response patterns and examples
 - System prompt implementation in `app/api/chat/route.ts`
+
+---
+
+## Chatbot Intelligence Features
+
+### Prompt Caching (Added Dec 14, 2024)
+
+**Decision**: Split the system prompt into static (cached) and dynamic parts to reduce token costs.
+
+**Implementation**:
+- Static instructions (behavior guidelines, response formatting) marked with `cache_control: { type: 'ephemeral' }`
+- Dynamic content (FAQ knowledge base, intent context) sent fresh each request
+- Cache hits reduce input token costs by 90% for the cached portion
+
+**Pricing Impact** (Claude Haiku 4.5):
+- Regular input: $0.25/M tokens
+- Cache write: $0.30/M tokens (20% premium on first request)
+- Cache read: $0.025/M tokens (90% discount on subsequent requests)
+
+**Analytics**: Cache usage tracked in database; analytics dashboard shows estimated savings.
+
+---
+
+### Response Feedback System (Added Dec 14, 2024)
+
+**Decision**: Add thumbs up/down feedback buttons to track response quality.
+
+**Implementation**:
+- Each assistant message gets a unique ID for feedback tracking
+- `response_feedback` table stores: message_id, user_message, assistant_response, feedback type
+- Feedback buttons appear on hover (doesn't clutter UI)
+- Feedback persists across page reloads via localStorage
+
+**Future Use**:
+- Identify problematic FAQ areas
+- Generate fine-tuning datasets from positive examples
+- Track quality improvements over time
+
+---
+
+### Conversation Persistence (Added Dec 14, 2024)
+
+**Decision**: Persist chat history in localStorage so users can continue conversations.
+
+**Implementation**:
+- Conversations saved to `chatbot_conversation` key in localStorage
+- Date objects properly serialized/deserialized
+- Hydration state prevents flash of default content
+- "New Chat" button allows starting fresh
+
+**Trade-offs**:
+- Limited to single device/browser
+- No cross-device sync (would require user accounts)
+- localStorage has ~5MB limit (sufficient for chat history)
+
+---
+
+### Context Window Optimization (Added Dec 14, 2024)
+
+**Decision**: Limit conversation history to prevent context overflow and reduce costs.
+
+**Implementation**:
+- `MAX_CONVERSATION_MESSAGES = 20` (configurable)
+- When truncated, adds context note: "[Note: X earlier messages have been summarized...]"
+- Ensures messages array always starts with user message (Claude API requirement)
+
+**Benefits**:
+- Prevents context window overflow on long conversations
+- Reduces token costs for extended sessions
+- Maintains conversational coherence with context note
+
+---
+
+### FAQ Gap Analysis (Added Dec 14, 2024)
+
+**Decision**: Automatically detect and log when the chatbot can't answer questions.
+
+**Implementation**:
+- `GAP_INDICATORS` array detects phrases like "I don't have information" in responses
+- Gaps classified as: `no_match`, `partial_match`, `out_of_scope`
+- Logged to `faq_gaps` table with user message and detected categories
+- Non-blocking (fire-and-forget) to avoid slowing responses
+
+**Gap Types**:
+- `no_match`: No relevant FAQ found
+- `partial_match`: Some info but incomplete
+- `out_of_scope`: Question outside knowledge domain (suggests ticket)
+
+**Future Use**:
+- Identify missing FAQ topics
+- Prioritize knowledge base expansion
+- Track improvement in coverage over time
+
+---
+
+### Intent Detection (Added Dec 14, 2024)
+
+**Decision**: Classify user intent to provide context-aware responses.
+
+**Intent Types**:
+| Intent | Example Triggers | Response Adaptation |
+|--------|-----------------|---------------------|
+| `frustrated` | "not working", "useless", "ridiculous" | Extra empathy, quick resolution focus |
+| `confused` | "I don't understand", "what?" | Simpler language, step-by-step |
+| `off_topic` | "weather", "joke", "recipe" | Polite redirect to supported topics |
+| `greeting` | "hello", "hi", "hey" | Friendly welcome |
+| `feedback` | "thank you", "that helped" | Acknowledge appreciation |
+| `help_seeking` | "help me", "I'm stuck" | Proactive assistance |
+| `standard_query` | Default | Normal response |
+
+**Implementation**:
+- Pattern matching with confidence levels (high, medium, low)
+- Intent context injected into system prompt for frustrated/confused users
+- Logged for analytics (track user sentiment over time)
+
+**Benefits**:
+- Better UX for frustrated users (reduces escalation)
+- Clearer explanations for confused users
+- Graceful handling of off-topic requests
 
 ---
 
@@ -647,10 +767,11 @@ CREATE TABLE admin_sessions (
 ## Document History
 
 **Created**: December 2024
-**Last Updated**: December 13, 2024
+**Last Updated**: December 14, 2024
 **Authors**: Tim (Project Owner), Claude (AI Assistant)
 
 ### Recent Updates
+- **Dec 14, 2024**: Added "Chatbot Intelligence Features" section documenting prompt caching, response feedback, conversation persistence, context window optimization, FAQ gap analysis, and intent detection
 - **Dec 13, 2024**: Switched from custom HubSpot API integration to HubSpot Forms for ticket creation; deprecated custom ticket routes and admin dashboard
 - **Dec 11, 2024**: Migrated ticket system from SQLite to HubSpot Tickets API; removed Resend email integration (now handled via HubSpot workflows)
 - **Dec 10, 2024**: Added "Chatbot Response Strategy" section documenting the shift to focused, concise responses with engagement-oriented closings and minimal ticket escalation

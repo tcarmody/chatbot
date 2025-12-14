@@ -4,12 +4,23 @@ An AI-powered customer service chatbot for DeepLearning.AI, built with Next.js a
 
 ## Features
 
+### Core Chatbot
 - **AI-Powered Responses**: Uses Claude Haiku 4.5 for fast, accurate answers
 - **Smart FAQ Matching**: Category-based filtering reduces token usage by 50-70%
+- **Prompt Caching**: Static instructions cached for 90% cost reduction on repeated queries
+- **Conversation Persistence**: Chat history saved in localStorage across page reloads
+- **Response Feedback**: Thumbs up/down buttons to track response quality
+
+### Intelligence Features
+- **Intent Detection**: Adapts responses for frustrated, confused, or off-topic users
+- **FAQ Gap Analysis**: Automatically logs questions the chatbot can't answer
+- **Context Window Optimization**: Manages long conversations efficiently (20 message limit)
+
+### Admin & Analytics
 - **Admin Dashboard**: View analytics, session management, and usage metrics
 - **Question Topic Clustering**: Groups similar questions into actionable insights
+- **Cache Savings Tracking**: See estimated cost savings from prompt caching
 - **HubSpot Integration**: Seamless ticket creation for issues the chatbot can't resolve
-- **Real-time Analytics**: Track queries, response times, token usage, and costs
 
 ## Tech Stack
 
@@ -128,11 +139,12 @@ To add or modify FAQs, edit the JSON file directly. Changes take effect on the n
 
 ### Analytics Dashboard (`/analytics`)
 
-- Total query count
-- Average response time
-- Token usage and estimated costs
-- Category breakdown
-- Question topic clustering with drill-down
+- Total query count and average response time
+- Token usage breakdown (input, output, cache creation, cache read)
+- Estimated costs with cache savings displayed
+- Category usage breakdown
+- Question topic clustering with drill-down to individual questions
+- Response feedback tracking (coming soon)
 
 ### Session Management (`/admin/sessions`)
 
@@ -181,7 +193,9 @@ For detailed architecture and design decisions, see [DOCTRINE.md](./DOCTRINE.md)
 
 Key decisions:
 - **Claude Haiku 4.5**: Optimized for speed and cost in customer service
+- **Prompt Caching**: Static instructions cached for 90% cost reduction
 - **Category-based FAQ filtering**: Reduces token usage without semantic search complexity
+- **Intent Detection**: Adapts tone for frustrated/confused users
 - **HubSpot Forms**: External forms for ticket creation (zero maintenance)
 - **Neon Postgres**: Serverless database for analytics and user management
 
