@@ -19,7 +19,7 @@ interface FaqGap {
   id: number;
   user_message: string;
   detected_categories: string[];
-  gap_type: 'no_match' | 'partial_match' | 'out_of_scope';
+  gap_type: 'no_match' | 'partial_match' | 'off_topic' | 'out_of_scope';
   suggested_topic: string | null;
   created_at: string;
 }
@@ -46,7 +46,7 @@ interface FeedbackData {
 }
 
 type TabType = 'gaps' | 'feedback';
-type GapFilter = 'all' | 'no_match' | 'partial_match' | 'out_of_scope';
+type GapFilter = 'all' | 'actionable' | 'no_match' | 'partial_match' | 'off_topic' | 'out_of_scope';
 type FeedbackFilter = 'all' | 'positive' | 'negative';
 
 export default function InsightsPage() {
@@ -101,7 +101,12 @@ export default function InsightsPage() {
 
     try {
       if (activeTab === 'gaps') {
-        const typeParam = gapFilter !== 'all' ? `&type=${gapFilter}` : '';
+        let typeParam = '';
+        if (gapFilter === 'actionable') {
+          typeParam = '&actionable=true';
+        } else if (gapFilter !== 'all') {
+          typeParam = `&type=${gapFilter}`;
+        }
         const response = await fetch(`/api/admin/gaps?limit=50${typeParam}`);
         if (!response.ok) throw new Error('Failed to fetch gaps');
         const data = await response.json();
@@ -145,11 +150,13 @@ export default function InsightsPage() {
     const styles: Record<string, string> = {
       no_match: 'bg-red-100 text-red-800',
       partial_match: 'bg-yellow-100 text-yellow-800',
+      off_topic: 'bg-blue-100 text-blue-800',
       out_of_scope: 'bg-gray-100 text-gray-800',
     };
     const labels: Record<string, string> = {
       no_match: 'No Match',
       partial_match: 'Partial',
+      off_topic: 'Off Topic',
       out_of_scope: 'Out of Scope',
     };
     return (
@@ -243,24 +250,49 @@ export default function InsightsPage() {
 
         {/* Summary Stats */}
         {activeTab === 'gaps' && gapsData && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600">Total Gaps</div>
-              <div className="text-2xl font-bold text-gray-900">{gapsData.total}</div>
+          <>
+            {/* Actionable vs Non-Actionable Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                <div className="text-sm text-gray-600 font-medium">Actionable Gaps</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {(gapsData.typeCounts.no_match || 0) + (gapsData.typeCounts.partial_match || 0)}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">Questions that need FAQ additions</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-gray-400">
+                <div className="text-sm text-gray-600 font-medium">Non-Actionable</div>
+                <div className="text-2xl font-bold text-gray-600">
+                  {(gapsData.typeCounts.off_topic || 0) + (gapsData.typeCounts.out_of_scope || 0)}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">Off-topic or competitor questions</div>
+              </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600">No Match</div>
-              <div className="text-2xl font-bold text-red-600">{gapsData.typeCounts.no_match || 0}</div>
+
+            {/* Detailed Breakdown */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-600">Total</div>
+                <div className="text-2xl font-bold text-gray-900">{gapsData.total}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-600">No Match</div>
+                <div className="text-2xl font-bold text-red-600">{gapsData.typeCounts.no_match || 0}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-600">Partial</div>
+                <div className="text-2xl font-bold text-yellow-600">{gapsData.typeCounts.partial_match || 0}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-600">Off Topic</div>
+                <div className="text-2xl font-bold text-blue-600">{gapsData.typeCounts.off_topic || 0}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-600">Out of Scope</div>
+                <div className="text-2xl font-bold text-gray-600">{gapsData.typeCounts.out_of_scope || 0}</div>
+              </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600">Partial Match</div>
-              <div className="text-2xl font-bold text-yellow-600">{gapsData.typeCounts.partial_match || 0}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600">Out of Scope</div>
-              <div className="text-2xl font-bold text-gray-600">{gapsData.typeCounts.out_of_scope || 0}</div>
-            </div>
-          </div>
+          </>
         )}
 
         {activeTab === 'feedback' && feedbackData && (
@@ -295,8 +327,10 @@ export default function InsightsPage() {
                 className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Types</option>
+                <option value="actionable">Actionable Only</option>
                 <option value="no_match">No Match</option>
                 <option value="partial_match">Partial Match</option>
+                <option value="off_topic">Off Topic</option>
                 <option value="out_of_scope">Out of Scope</option>
               </select>
             ) : (

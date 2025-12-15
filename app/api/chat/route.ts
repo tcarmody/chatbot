@@ -15,34 +15,64 @@ const anthropic = new Anthropic({
 const MAX_CONVERSATION_MESSAGES = 20; // Keep last N messages
 
 // FAQ gap detection patterns - using regex for flexible matching
-const GAP_PATTERNS: { pattern: RegExp; gapType: 'no_match' | 'partial_match' | 'out_of_scope' }[] = [
-  // No match - chatbot doesn't have the information
+// Gap types:
+//   - no_match: Relevant question but FAQ doesn't have the answer (ACTIONABLE - add to FAQ)
+//   - partial_match: FAQ has some info but incomplete (ACTIONABLE - improve FAQ)
+//   - off_topic: Completely unrelated questions like math, trivia (NOT ACTIONABLE)
+//   - out_of_scope: Related to learning but not our platform, e.g. competitor questions (NOT ACTIONABLE)
+const GAP_PATTERNS: { pattern: RegExp; gapType: 'no_match' | 'partial_match' | 'off_topic' | 'out_of_scope' }[] = [
+  // No match - relevant question but FAQ doesn't have answer (ACTIONABLE)
   { pattern: /i don't have (specific )?information (about|on|regarding)/i, gapType: 'no_match' },
   { pattern: /i don't have (any )?(details|data|knowledge) (about|on|regarding)/i, gapType: 'no_match' },
   { pattern: /outside (of )?my knowledge base/i, gapType: 'no_match' },
   { pattern: /beyond (the scope of )?(what )?my knowledge/i, gapType: 'no_match' },
-  { pattern: /i('m| am) not (able|equipped) to (help|assist|answer)/i, gapType: 'no_match' },
-  { pattern: /i can't (help|assist|answer|provide).*(that|this)/i, gapType: 'no_match' },
-  { pattern: /not something i (can|am able to) (help|assist|answer)/i, gapType: 'no_match' },
   { pattern: /i('m| am) unable to (find|locate|provide)/i, gapType: 'no_match' },
+  { pattern: /i don't have.*in my (knowledge base|faq|database)/i, gapType: 'no_match' },
+  { pattern: /that('s| is) (outside|beyond|not within) my (area|scope|expertise)/i, gapType: 'no_match' },
+  { pattern: /not (within|in) my (area|scope|domain)/i, gapType: 'no_match' },
+  { pattern: /that('s| is) not (something|a question) i can/i, gapType: 'no_match' },
 
-  // Partial match - has some info but incomplete
-  { pattern: /i('m| am) not (entirely )?sure (about|if)/i, gapType: 'partial_match' },
-  { pattern: /my information (may be|might be|is) (limited|incomplete)/i, gapType: 'partial_match' },
+  // Partial match - has some info but incomplete (ACTIONABLE)
+  { pattern: /i('m| am) not (entirely )?sure (about|if|whether)/i, gapType: 'partial_match' },
+  { pattern: /my information (may be|might be|is) (limited|incomplete|outdated)/i, gapType: 'partial_match' },
   { pattern: /i (only )?have limited information/i, gapType: 'partial_match' },
+  { pattern: /i don't have (the )?(latest|current|updated) information/i, gapType: 'partial_match' },
+  { pattern: /for (the )?(most )?(up-to-date|current|latest) information/i, gapType: 'partial_match' },
+  { pattern: /i('d| would) recommend (checking|visiting|contacting)/i, gapType: 'partial_match' },
+  { pattern: /you (may|might|should) (want to )?(check|visit|contact)/i, gapType: 'partial_match' },
 
-  // Out of scope - should contact support
+  // Off-topic - completely unrelated questions (NOT ACTIONABLE - expected behavior)
+  { pattern: /that('s| is) (more of )?a (general|math|science|trivia) question/i, gapType: 'off_topic' },
+  { pattern: /i('m| am) not (able|equipped) to (help|assist) with.*(math|calculation|arithmetic)/i, gapType: 'off_topic' },
+  { pattern: /i can't (do|perform|help with) (math|calculation|arithmetic)/i, gapType: 'off_topic' },
+  { pattern: /not something i (can|am able to) (help|assist|answer)/i, gapType: 'off_topic' },
+  { pattern: /i('m| am) (designed|built|here) to (help|assist|answer).*(deeplearning|course|platform|learning)/i, gapType: 'off_topic' },
+  { pattern: /i specialize in.*(deeplearning|course|education|learning)/i, gapType: 'off_topic' },
+  { pattern: /my (focus|expertise|knowledge) is (on|limited to|specifically).*(course|learning|platform)/i, gapType: 'off_topic' },
+  { pattern: /i (can only|only) (help|assist|answer).*(deeplearning|course|learning|platform)/i, gapType: 'off_topic' },
+  { pattern: /i('m| am) a.*(deeplearning|course|support).*(assistant|chatbot|bot)/i, gapType: 'off_topic' },
+  { pattern: /not (really )?related to (our |the )?(courses|platform|deeplearning|learning)/i, gapType: 'off_topic' },
+  { pattern: /that('s| is) (a bit )?outside (of )?what i('m| am) here (to|for)/i, gapType: 'off_topic' },
+
+  // Out of scope - related to learning but not our platform (NOT ACTIONABLE)
   { pattern: /(create|submit|open|file) a (support )?ticket/i, gapType: 'out_of_scope' },
   { pattern: /contact (our )?support/i, gapType: 'out_of_scope' },
   { pattern: /reach out to (our )?(support|team|staff)/i, gapType: 'out_of_scope' },
   { pattern: /beyond what i can help with/i, gapType: 'out_of_scope' },
+  { pattern: /i('m| am) not (able|equipped) to (help|assist|answer)/i, gapType: 'out_of_scope' },
+  { pattern: /i can't (help|assist|answer|provide).*(that|this)/i, gapType: 'out_of_scope' },
+  { pattern: /i don't have information about.*(openai|coursera|udemy|udacity|edx|linkedin learning)/i, gapType: 'out_of_scope' },
+  { pattern: /(openai|coursera|udemy|udacity|edx|linkedin learning)('s|s)? (platform|offering|course)/i, gapType: 'out_of_scope' },
 ];
+
+// Gap type definition
+type GapType = 'no_match' | 'partial_match' | 'off_topic' | 'out_of_scope';
 
 // Log FAQ gaps to database for analysis
 async function logFaqGap(
   userMessage: string,
   detectedCategories: string[],
-  gapType: 'no_match' | 'partial_match' | 'out_of_scope',
+  gapType: GapType,
   suggestedTopic?: string,
 ): Promise<void> {
   try {
@@ -59,7 +89,7 @@ async function logFaqGap(
 }
 
 // Detect if response indicates a knowledge gap
-function detectKnowledgeGap(response: string): { isGap: boolean; gapType: 'no_match' | 'partial_match' | 'out_of_scope' } {
+function detectKnowledgeGap(response: string): { isGap: boolean; gapType: GapType } {
   for (const { pattern, gapType } of GAP_PATTERNS) {
     if (pattern.test(response)) {
       return { isGap: true, gapType };

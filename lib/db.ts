@@ -168,12 +168,17 @@ export async function initializeSchema() {
     await sql`CREATE INDEX IF NOT EXISTS idx_feedback_type ON response_feedback(feedback)`;
 
     // FAQ gaps table - tracks queries outside knowledge base
+    // Gap types:
+    //   - no_match: Relevant question but FAQ doesn't have the answer (actionable)
+    //   - partial_match: FAQ has some info but incomplete (actionable)
+    //   - off_topic: Completely unrelated questions like math, trivia (not actionable)
+    //   - out_of_scope: Related to learning but not our platform, e.g. competitor questions (not actionable)
     await sql`
       CREATE TABLE IF NOT EXISTS faq_gaps (
         id SERIAL PRIMARY KEY,
         user_message TEXT NOT NULL,
         detected_categories TEXT NOT NULL,
-        gap_type TEXT NOT NULL CHECK (gap_type IN ('no_match', 'partial_match', 'out_of_scope')),
+        gap_type TEXT NOT NULL CHECK (gap_type IN ('no_match', 'partial_match', 'off_topic', 'out_of_scope')),
         suggested_topic TEXT,
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       )
@@ -182,6 +187,21 @@ export async function initializeSchema() {
     // Create indexes for FAQ gaps
     await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_created ON faq_gaps(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_type ON faq_gaps(gap_type)`;
+
+    // Migration: Update constraint to include 'off_topic' type
+    // Drop old constraint and add new one (PostgreSQL doesn't have ALTER CONSTRAINT)
+    await sql`
+      DO $$
+      BEGIN
+        -- Drop old constraint if it exists
+        ALTER TABLE faq_gaps DROP CONSTRAINT IF EXISTS faq_gaps_gap_type_check;
+        -- Add new constraint with off_topic
+        ALTER TABLE faq_gaps ADD CONSTRAINT faq_gaps_gap_type_check
+          CHECK (gap_type IN ('no_match', 'partial_match', 'off_topic', 'out_of_scope'));
+      EXCEPTION
+        WHEN others THEN NULL;
+      END $$;
+    `;
 
     schemaInitialized = true;
     console.log('Database schema initialized successfully');

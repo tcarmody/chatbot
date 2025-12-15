@@ -19,11 +19,26 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const offset = parseInt(searchParams.get('offset') || '0');
-    const gapType = searchParams.get('type'); // Filter by gap type
+    const gapType = searchParams.get('type'); // Filter by specific gap type
+    const actionable = searchParams.get('actionable') === 'true'; // Filter actionable only
 
     // Get gaps
     let gaps;
-    if (gapType) {
+    let countResult;
+
+    if (actionable) {
+      // Actionable gaps: no_match and partial_match
+      gaps = await sql`
+        SELECT id, user_message, detected_categories, gap_type, suggested_topic, created_at
+        FROM faq_gaps
+        WHERE gap_type IN ('no_match', 'partial_match')
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      countResult = await sql`
+        SELECT COUNT(*) as count FROM faq_gaps WHERE gap_type IN ('no_match', 'partial_match')
+      `;
+    } else if (gapType) {
       gaps = await sql`
         SELECT id, user_message, detected_categories, gap_type, suggested_topic, created_at
         FROM faq_gaps
@@ -31,6 +46,7 @@ export async function GET(req: NextRequest) {
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
+      countResult = await sql`SELECT COUNT(*) as count FROM faq_gaps WHERE gap_type = ${gapType}`;
     } else {
       gaps = await sql`
         SELECT id, user_message, detected_categories, gap_type, suggested_topic, created_at
@@ -38,12 +54,9 @@ export async function GET(req: NextRequest) {
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
+      countResult = await sql`SELECT COUNT(*) as count FROM faq_gaps`;
     }
 
-    // Get total count
-    const countResult = gapType
-      ? await sql`SELECT COUNT(*) as count FROM faq_gaps WHERE gap_type = ${gapType}`
-      : await sql`SELECT COUNT(*) as count FROM faq_gaps`;
     const total = Number((countResult[0] as { count: string })?.count || 0);
 
     // Get counts by type
