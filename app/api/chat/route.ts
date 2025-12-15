@@ -14,14 +14,28 @@ const anthropic = new Anthropic({
 // Context window optimization settings
 const MAX_CONVERSATION_MESSAGES = 20; // Keep last N messages
 
-// FAQ gap detection patterns
-const GAP_INDICATORS = [
-  "I don't have information about that",
-  "outside my knowledge base",
-  "create a support ticket",
-  "I'm not able to help with",
-  "I don't have specific information",
-  "beyond what I can help with",
+// FAQ gap detection patterns - using regex for flexible matching
+const GAP_PATTERNS: { pattern: RegExp; gapType: 'no_match' | 'partial_match' | 'out_of_scope' }[] = [
+  // No match - chatbot doesn't have the information
+  { pattern: /i don't have (specific )?information (about|on|regarding)/i, gapType: 'no_match' },
+  { pattern: /i don't have (any )?(details|data|knowledge) (about|on|regarding)/i, gapType: 'no_match' },
+  { pattern: /outside (of )?my knowledge base/i, gapType: 'no_match' },
+  { pattern: /beyond (the scope of )?(what )?my knowledge/i, gapType: 'no_match' },
+  { pattern: /i('m| am) not (able|equipped) to (help|assist|answer)/i, gapType: 'no_match' },
+  { pattern: /i can't (help|assist|answer|provide).*(that|this)/i, gapType: 'no_match' },
+  { pattern: /not something i (can|am able to) (help|assist|answer)/i, gapType: 'no_match' },
+  { pattern: /i('m| am) unable to (find|locate|provide)/i, gapType: 'no_match' },
+
+  // Partial match - has some info but incomplete
+  { pattern: /i('m| am) not (entirely )?sure (about|if)/i, gapType: 'partial_match' },
+  { pattern: /my information (may be|might be|is) (limited|incomplete)/i, gapType: 'partial_match' },
+  { pattern: /i (only )?have limited information/i, gapType: 'partial_match' },
+
+  // Out of scope - should contact support
+  { pattern: /(create|submit|open|file) a (support )?ticket/i, gapType: 'out_of_scope' },
+  { pattern: /contact (our )?support/i, gapType: 'out_of_scope' },
+  { pattern: /reach out to (our )?(support|team|staff)/i, gapType: 'out_of_scope' },
+  { pattern: /beyond what i can help with/i, gapType: 'out_of_scope' },
 ];
 
 // Log FAQ gaps to database for analysis
@@ -46,15 +60,9 @@ async function logFaqGap(
 
 // Detect if response indicates a knowledge gap
 function detectKnowledgeGap(response: string): { isGap: boolean; gapType: 'no_match' | 'partial_match' | 'out_of_scope' } {
-  const responseLower = response.toLowerCase();
-
-  for (const indicator of GAP_INDICATORS) {
-    if (responseLower.includes(indicator.toLowerCase())) {
-      // Determine gap type based on indicator
-      if (indicator.includes("support ticket")) {
-        return { isGap: true, gapType: 'out_of_scope' };
-      }
-      return { isGap: true, gapType: 'no_match' };
+  for (const { pattern, gapType } of GAP_PATTERNS) {
+    if (pattern.test(response)) {
+      return { isGap: true, gapType };
     }
   }
 
