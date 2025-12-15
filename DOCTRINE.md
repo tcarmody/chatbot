@@ -11,6 +11,7 @@ This document captures the key design, architectural, and technical decisions ma
 - [Visual Design & UX](#visual-design--ux)
 - [Frontend Implementation](#frontend-implementation)
 - [Production Considerations](#production-considerations)
+- [Codebase Health & Refactoring Guidelines](#codebase-health--refactoring-guidelines)
 
 ---
 
@@ -733,6 +734,117 @@ CREATE TABLE admin_sessions (
 
 ---
 
+## Codebase Health & Refactoring Guidelines
+
+### Current State (December 2024)
+
+**Metrics**:
+- **Total Files**: 42 source files
+- **Total Lines**: ~5,300 lines of code
+- **Largest File**: `app/api/chat/route.ts` at 549 lines
+
+**Assessment**: The codebase is well-organized and maintainable at its current size. No immediate refactoring is needed.
+
+### Refactoring Triggers
+
+Refactor when any of these thresholds are reached:
+
+#### 1. Chat Route Extraction (>700-800 lines in route.ts)
+
+**When**: `app/api/chat/route.ts` exceeds 700-800 lines
+
+**Action**: Extract into separate modules:
+```
+lib/
+├── gap-detection.ts      # GAP_PATTERNS, detectKnowledgeGap(), logFaqGap()
+├── intent-detection.ts   # INTENT_PATTERNS, detectIntent(), IntentResult type
+├── category-detection.ts # Existing category filtering logic
+└── prompt-builder.ts     # System prompt construction, cache segments
+```
+
+**Why**: The chat route currently handles multiple concerns (intent detection, gap analysis, category filtering, prompt building). As it grows, these should be isolated for testability and maintainability.
+
+#### 2. Shared Admin Layout (4+ admin pages)
+
+**When**: Adding a 4th admin page beyond Sessions, Analytics, Insights
+
+**Action**: Create shared admin layout component:
+```tsx
+// app/admin/layout.tsx
+export default function AdminLayout({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navigation variant="admin" />
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {children}
+      </main>
+    </div>
+  );
+}
+```
+
+**Why**: Reduces duplication of navigation, auth checks, and layout structure across admin pages.
+
+#### 3. Database Migration System (complex schema changes)
+
+**When**: Need to make complex schema changes (column renames, data migrations, rollbacks)
+
+**Action**: Adopt a migration tool like `drizzle-kit` or `prisma migrate`
+
+**Current Approach**: Inline migrations in `lib/db.ts` using `initializeSchema()` with TRY/CATCH blocks for adding constraints. This works for additive changes.
+
+**Why**: Current inline migrations don't support rollbacks or complex transformations. A migration system provides version tracking and safe rollbacks.
+
+#### 4. Component Library (10+ shared components)
+
+**When**: `app/components/` grows beyond 10 reusable components
+
+**Action**: Consider organizing into:
+```
+components/
+├── ui/           # Buttons, inputs, cards
+├── layout/       # Navigation, headers, footers
+├── admin/        # Admin-specific components
+└── chat/         # Chat interface components
+```
+
+**Why**: Flat structure becomes hard to navigate as component count grows.
+
+### Extraction Candidates
+
+These areas of `app/api/chat/route.ts` are ready for extraction when needed:
+
+| Module | Lines | Functions | Purpose |
+|--------|-------|-----------|---------|
+| gap-detection | ~80 | `detectKnowledgeGap()`, `logFaqGap()` | FAQ gap analysis |
+| intent-detection | ~60 | `detectIntent()`, `INTENT_PATTERNS` | User intent classification |
+| prompt-builder | ~100 | `buildSystemPrompt()`, cache segments | Prompt construction |
+
+### What NOT to Refactor
+
+Avoid premature optimization:
+- **Don't split small files** just for consistency
+- **Don't add abstractions** until you have 3+ similar patterns
+- **Don't create helper utilities** for one-off operations
+- **Don't extract components** used in only one place
+
+### Monitoring Codebase Health
+
+Run these checks periodically:
+
+```bash
+# File count
+find app lib -name "*.ts" -o -name "*.tsx" | wc -l
+
+# Lines of code
+find app lib -name "*.ts" -o -name "*.tsx" -exec wc -l {} + | tail -1
+
+# Largest files
+find app lib -name "*.ts" -o -name "*.tsx" -exec wc -l {} + | sort -rn | head -10
+```
+
+---
+
 ## Future Considerations
 
 ### When to Reconsider These Decisions
@@ -767,10 +879,11 @@ CREATE TABLE admin_sessions (
 ## Document History
 
 **Created**: December 2024
-**Last Updated**: December 14, 2024
+**Last Updated**: December 15, 2024
 **Authors**: Tim (Project Owner), Claude (AI Assistant)
 
 ### Recent Updates
+- **Dec 15, 2024**: Added "Codebase Health & Refactoring Guidelines" section with metrics, refactoring triggers, extraction candidates, and monitoring commands
 - **Dec 14, 2024**: Added "Chatbot Intelligence Features" section documenting prompt caching, response feedback, conversation persistence, context window optimization, FAQ gap analysis, and intent detection
 - **Dec 13, 2024**: Switched from custom HubSpot API integration to HubSpot Forms for ticket creation; deprecated custom ticket routes and admin dashboard
 - **Dec 11, 2024**: Migrated ticket system from SQLite to HubSpot Tickets API; removed Resend email integration (now handled via HubSpot workflows)
