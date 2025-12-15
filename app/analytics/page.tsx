@@ -39,6 +39,9 @@ export default function AnalyticsPage() {
   const [expandedCluster, setExpandedCluster] = useState<string | null>(null);
   const [clusterQuestions, setClusterQuestions] = useState<ClusterQuestion[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [categoryQuestions, setCategoryQuestions] = useState<ClusterQuestion[]>([]);
+  const [loadingCategoryQuestions, setLoadingCategoryQuestions] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -111,6 +114,29 @@ export default function AnalyticsPage() {
       console.error('Failed to fetch cluster questions:', err);
     } finally {
       setLoadingQuestions(false);
+    }
+  };
+
+  const handleCategoryClick = async (categoryName: string) => {
+    if (expandedCategory === categoryName) {
+      setExpandedCategory(null);
+      setCategoryQuestions([]);
+      return;
+    }
+
+    setExpandedCategory(categoryName);
+    setLoadingCategoryQuestions(true);
+
+    try {
+      const response = await fetch(`/api/analytics/category?category=${encodeURIComponent(categoryName)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategoryQuestions(data.questions);
+      }
+    } catch (err) {
+      console.error('Failed to fetch category questions:', err);
+    } finally {
+      setLoadingCategoryQuestions(false);
     }
   };
 
@@ -234,21 +260,56 @@ export default function AnalyticsPage() {
           {/* Category Usage */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Category Usage</h2>
+            <p className="text-sm text-gray-500 mb-4">Click a category to view individual questions</p>
             <div className="space-y-3">
               {analytics.categoryUsage.map((item, index) => (
                 <div key={index}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-700">{item.category}</span>
-                    <span className="text-sm font-medium text-gray-900">{item.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{
-                        width: `${(item.count / analytics.totalQueries) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
+                  <button
+                    onClick={() => handleCategoryClick(item.category)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-700 flex items-center gap-1 hover:text-blue-600 transition-colors">
+                        {expandedCategory === item.category ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                        {item.category}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">{item.count}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{
+                          width: `${(item.count / analytics.totalQueries) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </button>
+
+                  {/* Expanded questions list */}
+                  {expandedCategory === item.category && (
+                    <div className="mt-2 ml-5 border-l-2 border-blue-200 pl-3">
+                      {loadingCategoryQuestions ? (
+                        <div className="py-2 text-sm text-gray-500">Loading questions...</div>
+                      ) : categoryQuestions.length > 0 ? (
+                        <ul className="space-y-2 py-2">
+                          {categoryQuestions.map((q, qIndex) => (
+                            <li key={qIndex} className="text-sm">
+                              <span className="text-gray-700">&quot;{q.message}&quot;</span>
+                              <span className="text-gray-400 text-xs ml-2">
+                                {formatDate(q.timestamp)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="py-2 text-sm text-gray-500">No questions found</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

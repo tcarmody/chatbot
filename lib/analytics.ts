@@ -99,6 +99,35 @@ export async function getQuestionsForCluster(clusterName: string) {
   }
 }
 
+// Get questions for a specific category
+export async function getQuestionsForCategory(categoryName: string) {
+  try {
+    await initializeSchema();
+
+    const queriesResult = await sql`
+      SELECT user_message, timestamp, detected_categories
+      FROM analytics_events
+      ORDER BY timestamp DESC
+    `;
+    const questions: { message: string; timestamp: string }[] = [];
+
+    (queriesResult as { user_message: string; timestamp: string; detected_categories: string }[]).forEach(event => {
+      const categories = JSON.parse(event.detected_categories) as string[];
+      if (categories.includes(categoryName)) {
+        questions.push({
+          message: event.user_message,
+          timestamp: event.timestamp,
+        });
+      }
+    });
+
+    return questions;
+  } catch (error) {
+    console.error('Error getting questions for category:', error);
+    return [];
+  }
+}
+
 // Get analytics summary
 export async function getAnalyticsSummary() {
   try {
