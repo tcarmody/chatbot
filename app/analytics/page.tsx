@@ -222,9 +222,9 @@ export default function AnalyticsPage() {
             <div className="text-xs text-gray-500 mt-1">
               ${analytics.estimatedCost.input.toFixed(3)} in / ${analytics.estimatedCost.output.toFixed(3)} out
             </div>
-            {analytics.estimatedCost.savings && analytics.estimatedCost.savings > 0 && (
+            {analytics.estimatedCost.savings != null && analytics.estimatedCost.savings > 0 && (
               <div className="text-xs text-green-600 mt-1">
-                💰 ${analytics.estimatedCost.savings.toFixed(3)} saved from cache
+                ${analytics.estimatedCost.savings.toFixed(3)} saved from cache
               </div>
             )}
           </div>
