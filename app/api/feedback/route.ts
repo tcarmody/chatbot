@@ -3,6 +3,11 @@ import { sql, initializeSchema } from '@/lib/db';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 import { chatLogger, logError } from '@/lib/logger';
 
+// Handle CORS preflight requests for widget embedding
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 });
+}
+
 export async function POST(req: NextRequest) {
   const clientIP = getClientIP(req);
   const rateLimitResult = checkRateLimit(clientIP, RATE_LIMITS.chat);

@@ -7,6 +7,11 @@ import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/l
 import { chatLogger, logError } from '@/lib/logger';
 import { sql, initializeSchema } from '@/lib/db';
 
+// Handle CORS preflight requests for widget embedding
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 });
+}
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });

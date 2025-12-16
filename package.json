@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:widget && next build",
+    "build:widget": "tsx widget/build.ts",
+    "build:widget:watch": "tsx widget/build.ts --watch",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -31,6 +33,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "esbuild": "^0.24.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^20",
