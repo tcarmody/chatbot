@@ -28,17 +28,28 @@
 
 ---
 
-### 8. Multi-Instance Scaling (Redis State)
+### 8. Multi-Instance Scaling (Upstash Redis)
 
 **Purpose:** Support horizontal scaling by moving session state from in-memory to Redis.
 
-**Implementation plan:**
-- Add Upstash Redis or similar serverless Redis
-- Move rate limiting state to Redis (currently in-memory Map)
-- Store conversation sessions in Redis with TTL
-- Add distributed locking for any shared resources
+**Current problem:** Rate limiting uses in-memory `Map` in `lib/rate-limit.ts`. On Vercel, each serverless function instance has isolated memory, so rate limits don't accumulate across instances. A user could bypass limits by hitting different instances.
 
-**Complexity:** Medium (Vercel edge functions + Upstash work well together)
+**Implementation plan:**
+- Add Upstash Redis (serverless, ~1-2ms latency from Vercel edge)
+- Use `@upstash/ratelimit` package with sliding window algorithm:
+  ```typescript
+  import { Ratelimit } from '@upstash/ratelimit';
+  import { Redis } from '@upstash/redis';
+
+  const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(20, '1m'),
+  });
+  ```
+- Replace in-memory rate limiting in `/api/chat/stream` and `/api/chat`
+- Free tier: 10,000 requests/day (sufficient for development)
+
+**Complexity:** Low-Medium (Upstash has excellent Vercel integration, purpose-built SDK)
 
 ---
 
