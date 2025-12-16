@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Copy, Check, Send, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
@@ -9,13 +9,16 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  id?: string; // Unique ID for feedback tracking
-  userMessage?: string; // The user message this response is answering (for assistant messages)
+  id?: string;
+  userMessage?: string;
   feedback?: 'positive' | 'negative' | null;
 }
 
 // Storage key for localStorage
 const STORAGE_KEY = 'chatbot_conversation';
+
+// Debounce delay for localStorage writes (ms)
+const STORAGE_DEBOUNCE_MS = 500;
 
 // Default greeting message
 const DEFAULT_GREETING: Message = {
@@ -24,15 +27,144 @@ const DEFAULT_GREETING: Message = {
   timestamp: new Date(),
 };
 
+// Memoized message component to prevent re-renders
+interface MessageBubbleProps {
+  message: Message;
+  index: number;
+  copiedIndex: number | null;
+  feedbackSubmitting: string | null;
+  onCopy: (text: string, index: number) => void;
+  onFeedback: (messageId: string, feedback: 'positive' | 'negative', userMessage: string, assistantResponse: string) => void;
+}
+
+const MessageBubble = memo(function MessageBubble({
+  message,
+  index,
+  copiedIndex,
+  feedbackSubmitting,
+  onCopy,
+  onFeedback,
+}: MessageBubbleProps) {
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+  return (
+    <div
+      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+    >
+      <div className={`max-w-[80%] ${message.role === 'assistant' ? 'group' : ''}`}>
+        <div
+          className={`rounded-lg px-4 py-2 ${
+            message.role === 'user'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-800 border border-gray-200'
+          }`}
+        >
+          {message.role === 'user' ? (
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+            </div>
+          )}
+        </div>
+        {/* Timestamp and actions */}
+        <div className={`flex items-center gap-2 mt-1 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <span className="text-xs text-gray-400">{formatTime(message.timestamp)}</span>
+          {message.role === 'assistant' && (
+            <>
+              <button
+                onClick={() => onCopy(message.content, index)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
+                title="Copy to clipboard"
+              >
+                {copiedIndex === index ? (
+                  <Check className="w-3 h-3 text-green-500" />
+                ) : (
+                  <Copy className="w-3 h-3 text-gray-400" />
+                )}
+              </button>
+              {message.id && (
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => onFeedback(message.id!, 'positive', message.userMessage!, message.content)}
+                    disabled={feedbackSubmitting === message.id}
+                    className={`p-1 rounded transition-colors ${
+                      message.feedback === 'positive'
+                        ? 'text-green-500 bg-green-50'
+                        : 'text-gray-400 hover:bg-gray-200 hover:text-green-500'
+                    }`}
+                    title="Helpful"
+                  >
+                    <ThumbsUp className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => onFeedback(message.id!, 'negative', message.userMessage!, message.content)}
+                    disabled={feedbackSubmitting === message.id}
+                    className={`p-1 rounded transition-colors ${
+                      message.feedback === 'negative'
+                        ? 'text-red-500 bg-red-50'
+                        : 'text-gray-400 hover:bg-gray-200 hover:text-red-500'
+                    }`}
+                    title="Not helpful"
+                  >
+                    <ThumbsDown className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Streaming message component - shows content as it arrives
+const StreamingMessage = memo(function StreamingMessage({ content }: { content: string }) {
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[80%]">
+        <div className="rounded-lg px-4 py-2 bg-white text-gray-800 border border-gray-200">
+          <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([DEFAULT_GREETING]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced save to localStorage
+  const saveToStorage = useCallback((messagesToSave: Message[]) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messagesToSave));
+      } catch (err) {
+        console.error('Failed to save conversation to localStorage:', err);
+      }
+    }, STORAGE_DEBOUNCE_MS);
+  }, []);
 
   // Load conversation from localStorage on mount
   useEffect(() => {
@@ -40,7 +172,6 @@ export default function ChatBot() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Convert timestamp strings back to Date objects
         const restored = parsed.map((msg: Message & { timestamp: string }) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
@@ -53,30 +184,26 @@ export default function ChatBot() {
     setIsHydrated(true);
   }, []);
 
-  // Save conversation to localStorage when messages change
+  // Save conversation when messages change (debounced)
   useEffect(() => {
-    if (!isHydrated) return; // Don't save until we've loaded
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    } catch (err) {
-      console.error('Failed to save conversation to localStorage:', err);
-    }
-  }, [messages, isHydrated]);
+    if (!isHydrated) return;
+    saveToStorage(messages);
+  }, [messages, isHydrated, saveToStorage]);
 
-  // Start a new conversation
-  const startNewChat = () => {
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const startNewChat = useCallback(() => {
     setMessages([{ ...DEFAULT_GREETING, timestamp: new Date() }]);
-  };
+  }, []);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
-
-  const copyToClipboard = async (text: string, index: number) => {
+  const copyToClipboard = useCallback(async (text: string, index: number) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
@@ -84,9 +211,14 @@ export default function ChatBot() {
     } catch (err) {
       console.error('Failed to copy:', err);
     }
-  };
+  }, []);
 
-  const submitFeedback = async (messageId: string, feedback: 'positive' | 'negative', userMessage: string, assistantResponse: string) => {
+  const submitFeedback = useCallback(async (
+    messageId: string,
+    feedback: 'positive' | 'negative',
+    userMessage: string,
+    assistantResponse: string
+  ) => {
     setFeedbackSubmitting(messageId);
     try {
       const response = await fetch('/api/feedback', {
@@ -105,20 +237,19 @@ export default function ChatBot() {
     } finally {
       setFeedbackSubmitting(null);
     }
-  };
+  }, []);
 
-  const scrollToBottom = () => {
-    // Scroll within the chat container only, not the browser window
+  const scrollToBottom = useCallback(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingContent, scrollToBottom]);
 
-  const sendMessage = async (e: React.FormEvent) => {
+  const sendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
@@ -129,9 +260,11 @@ export default function ChatBot() {
     const newMessages = [...messages, { role: 'user' as const, content: userMessage, timestamp: new Date() }];
     setMessages(newMessages);
     setIsLoading(true);
+    setStreamingContent('');
 
     try {
-      const response = await fetch('/api/chat', {
+      // Use streaming endpoint
+      const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,22 +279,50 @@ export default function ChatBot() {
         throw new Error('Failed to get response');
       }
 
-      const data = await response.json();
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
 
-      // Generate a unique ID for feedback tracking
-      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const decoder = new TextDecoder();
+      let fullContent = '';
 
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: data.response,
-          timestamp: new Date(),
-          id: messageId,
-          userMessage: userMessage,
-          feedback: null,
-        },
-      ]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.text) {
+                fullContent += data.text;
+                setStreamingContent(fullContent);
+              } else if (data.done) {
+                // Stream complete - add final message
+                const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+                setMessages([
+                  ...newMessages,
+                  {
+                    role: 'assistant',
+                    content: fullContent,
+                    timestamp: new Date(),
+                    id: messageId,
+                    userMessage: userMessage,
+                    feedback: null,
+                  },
+                ]);
+                setStreamingContent('');
+              } else if (data.error) {
+                throw new Error(data.error);
+              }
+            } catch {
+              // Ignore JSON parse errors for incomplete chunks
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('Error:', error);
       setMessages([
@@ -172,10 +333,11 @@ export default function ChatBot() {
           timestamp: new Date(),
         },
       ]);
+      setStreamingContent('');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, isLoading, messages]);
 
   return (
     <div className="flex flex-col h-[600px] max-w-3xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200">
@@ -183,7 +345,7 @@ export default function ChatBot() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 flex justify-between items-start">
         <div>
           <h2 className="text-xl font-semibold">Customer Support</h2>
-          <p className="text-sm text-blue-100">We're here to help!</p>
+          <p className="text-sm text-blue-100">We&apos;re here to help!</p>
         </div>
         {messages.length > 1 && (
           <button
@@ -200,80 +362,18 @@ export default function ChatBot() {
       {/* Messages */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            <div className={`max-w-[80%] ${message.role === 'assistant' ? 'group' : ''}`}>
-              <div
-                className={`rounded-lg px-4 py-2 ${
-                  message.role === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-800 border border-gray-200'
-                }`}
-              >
-                {message.role === 'user' ? (
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                ) : (
-                  <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-                  </div>
-                )}
-              </div>
-              {/* Timestamp and actions */}
-              <div className={`flex items-center gap-2 mt-1 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <span className="text-xs text-gray-400">{formatTime(message.timestamp)}</span>
-                {message.role === 'assistant' && (
-                  <>
-                    <button
-                      onClick={() => copyToClipboard(message.content, index)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
-                      title="Copy to clipboard"
-                    >
-                      {copiedIndex === index ? (
-                        <Check className="w-3 h-3 text-green-500" />
-                      ) : (
-                        <Copy className="w-3 h-3 text-gray-400" />
-                      )}
-                    </button>
-                    {/* Feedback buttons - only show for messages with IDs (not the initial greeting) */}
-                    {message.id && (
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => submitFeedback(message.id!, 'positive', message.userMessage!, message.content)}
-                          disabled={feedbackSubmitting === message.id}
-                          className={`p-1 rounded transition-colors ${
-                            message.feedback === 'positive'
-                              ? 'text-green-500 bg-green-50'
-                              : 'text-gray-400 hover:bg-gray-200 hover:text-green-500'
-                          }`}
-                          title="Helpful"
-                        >
-                          <ThumbsUp className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={() => submitFeedback(message.id!, 'negative', message.userMessage!, message.content)}
-                          disabled={feedbackSubmitting === message.id}
-                          className={`p-1 rounded transition-colors ${
-                            message.feedback === 'negative'
-                              ? 'text-red-500 bg-red-50'
-                              : 'text-gray-400 hover:bg-gray-200 hover:text-red-500'
-                          }`}
-                          title="Not helpful"
-                        >
-                          <ThumbsDown className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+          <MessageBubble
+            key={message.id || `msg-${index}`}
+            message={message}
+            index={index}
+            copiedIndex={copiedIndex}
+            feedbackSubmitting={feedbackSubmitting}
+            onCopy={copyToClipboard}
+            onFeedback={submitFeedback}
+          />
         ))}
-        {isLoading && (
+        {streamingContent && <StreamingMessage content={streamingContent} />}
+        {isLoading && !streamingContent && (
           <div className="flex justify-start">
             <div className="bg-white text-gray-800 border border-gray-200 rounded-lg px-4 py-2">
               <div className="flex space-x-2">
@@ -284,7 +384,6 @@ export default function ChatBot() {
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

@@ -234,10 +234,10 @@ export class ChatBotWidget {
     // Show loading
     this.isLoading = true;
     this.updateInputState();
-    this.renderLoading();
 
     try {
-      const response = await fetch(`${this.config.apiUrl}/api/chat`, {
+      // Use streaming endpoint
+      const response = await fetch(`${this.config.apiUrl}/api/chat/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +245,7 @@ export class ChatBotWidget {
         },
         body: JSON.stringify({
           message,
-          conversationHistory: this.messages.slice(0, -1), // Exclude the just-added message
+          conversationHistory: this.messages.slice(0, -1),
         }),
       });
 
@@ -253,22 +253,51 @@ export class ChatBotWidget {
         throw new Error('Failed to get response');
       }
 
-      const data = await response.json();
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
 
-      // Generate unique ID for feedback
-      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const decoder = new TextDecoder();
+      let fullContent = '';
 
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date(),
-        id: messageId,
-        userMessage: message,
-        feedback: null,
-      };
+      // Render initial streaming message
+      this.renderStreamingMessage('');
 
-      this.messages.push(assistantMessage);
-      this.config.onMessage(assistantMessage);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.text) {
+                fullContent += data.text;
+                this.updateStreamingMessage(fullContent);
+              } else if (data.done) {
+                // Stream complete
+                const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+                const assistantMessage: Message = {
+                  role: 'assistant',
+                  content: fullContent,
+                  timestamp: new Date(),
+                  id: messageId,
+                  userMessage: message,
+                  feedback: null,
+                };
+                this.messages.push(assistantMessage);
+                this.config.onMessage(assistantMessage);
+              } else if (data.error) {
+                throw new Error(data.error);
+              }
+            } catch {
+              // Ignore JSON parse errors for incomplete chunks
+            }
+          }
+        }
+      }
     } catch {
       const errorMessage: Message = {
         role: 'assistant',
@@ -283,6 +312,37 @@ export class ChatBotWidget {
     this.renderMessages();
     this.saveConversation();
     this.updateNewChatVisibility();
+  }
+
+  private renderStreamingMessage(content: string): void {
+    if (!this.messagesContainer) return;
+
+    const streamingHtml = `
+      <div class="widget-message assistant widget-streaming">
+        <div class="widget-message-bubble">
+          <div class="widget-message-content">
+            ${content ? parseMarkdown(content) : ''}
+            <span class="widget-streaming-cursor"></span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.messagesContainer.innerHTML = this.messages
+      .map((msg, index) => this.renderMessage(msg, index))
+      .join('') + streamingHtml;
+
+    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+  }
+
+  private updateStreamingMessage(content: string): void {
+    if (!this.messagesContainer) return;
+
+    const streamingEl = this.messagesContainer.querySelector('.widget-streaming .widget-message-content');
+    if (streamingEl) {
+      streamingEl.innerHTML = parseMarkdown(content) + '<span class="widget-streaming-cursor"></span>';
+      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+    }
   }
 
   private async submitFeedback(messageId: string, feedback: 'positive' | 'negative'): Promise<void> {
@@ -373,21 +433,6 @@ export class ChatBotWidget {
         </div>
       </div>
     `;
-  }
-
-  private renderLoading(): void {
-    if (!this.messagesContainer) return;
-
-    const loadingHtml = `
-      <div class="widget-loading">
-        <div class="widget-loading-dot"></div>
-        <div class="widget-loading-dot"></div>
-        <div class="widget-loading-dot"></div>
-      </div>
-    `;
-
-    this.messagesContainer.innerHTML += loadingHtml;
-    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
   }
 
   private bindFeedbackButtons(): void {

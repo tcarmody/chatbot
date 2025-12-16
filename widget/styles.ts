@@ -332,6 +332,22 @@ export function getWidgetStyles(primaryColor: string = '#2563eb'): string {
       40% { transform: translateY(-6px); }
     }
 
+    /* Streaming cursor */
+    .widget-streaming-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      background: ${primaryColor};
+      animation: widget-blink 1s ease-in-out infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
+
+    @keyframes widget-blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
     /* Input area */
     .widget-input-area {
       padding: 12px 16px;
