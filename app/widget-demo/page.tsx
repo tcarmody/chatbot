@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
+import Navigation from '../components/Navigation';
 
 export default function WidgetDemoPage() {
   const [widgetLoaded, setWidgetLoaded] = useState(false);
@@ -31,6 +32,7 @@ export default function WidgetDemoPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <Navigation variant="public" />
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="bg-white rounded-lg shadow-md p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Widget Demo</h1>
