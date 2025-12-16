@@ -42,6 +42,6 @@ export interface ChatBotWidgetAPI {
 
 declare global {
   interface Window {
-    ChatBotWidget: ChatBotWidgetAPI;
+    ChatBotWidget?: ChatBotWidgetAPI;
   }
 }

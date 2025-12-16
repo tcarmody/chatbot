@@ -27,7 +27,7 @@ interface NavItem {
 const publicNavItems: NavItem[] = [
   { label: 'Home', href: '/', icon: <Home className="w-4 h-4" /> },
   { label: 'Support', href: '/', icon: <MessageSquare className="w-4 h-4" /> },
-  { label: 'Widget', href: '/widget/example.html', icon: <Code className="w-4 h-4" /> },
+  { label: 'Widget', href: '/widget-demo', icon: <Code className="w-4 h-4" /> },
   { label: 'Create Ticket', href: 'https://share.hsforms.com/1EsdrWJXnR5WYr8BdPryuVg3hul4', icon: <ExternalLink className="w-4 h-4" />, external: true },
 ];
 
