@@ -69,6 +69,43 @@ export function getWidgetStyles(primaryColor: string = '#2563eb'): string {
       display: none;
     }
 
+    /* Mascot image styles */
+    .widget-launcher.has-mascot {
+      width: 70px;
+      height: 70px;
+      padding: 4px;
+      background: white;
+      border: 2px solid ${primaryColor};
+    }
+
+    .widget-launcher.has-mascot:hover {
+      border-color: ${adjustColor(primaryColor, -20)};
+    }
+
+    .widget-launcher .mascot-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .widget-launcher.has-mascot.open .mascot-icon {
+      display: none;
+    }
+
+    .widget-launcher.has-mascot.open svg.close-icon {
+      display: block;
+      stroke: ${primaryColor};
+    }
+
+    .widget-launcher.has-mascot:not(.open) .mascot-icon {
+      display: block;
+    }
+
+    .widget-launcher.has-mascot:not(.open) svg.close-icon {
+      display: none;
+    }
+
     /* Chat window */
     .widget-window {
       position: fixed;
@@ -112,6 +149,21 @@ export function getWidgetStyles(primaryColor: string = '#2563eb'): string {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+    }
+
+    .widget-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .widget-header-mascot {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: white;
+      padding: 2px;
     }
 
     .widget-header-title {
@@ -427,6 +479,11 @@ export function getWidgetStyles(primaryColor: string = '#2563eb'): string {
       .widget-launcher {
         width: 54px;
         height: 54px;
+      }
+
+      .widget-launcher.has-mascot {
+        width: 64px;
+        height: 64px;
       }
 
       .widget-launcher.bottom-right,

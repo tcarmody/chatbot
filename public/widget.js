@@ -1,5 +1,5 @@
 /* ChatBot Widget - https://github.com/your-org/chatbot */
-"use strict";var ChatBotWidgetModule=(()=>{var u=Object.defineProperty;var S=Object.getOwnPropertyDescriptor;var $=Object.getOwnPropertyNames;var L=Object.prototype.hasOwnProperty;var H=(i,e)=>{for(var t in e)u(i,t,{get:e[t],enumerable:!0})},B=(i,e,t,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of $(e))!L.call(i,s)&&s!==t&&u(i,s,{get:()=>e[s],enumerable:!(n=S(e,s))||n.enumerable});return i};var E=i=>B(u({},"__esModule",{value:!0}),i);var z={};H(z,{ChatBotWidget:()=>w});function v(i="#2563eb"){return`
+"use strict";var ChatBotWidgetModule=(()=>{var u=Object.defineProperty;var $=Object.getOwnPropertyDescriptor;var S=Object.getOwnPropertyNames;var H=Object.prototype.hasOwnProperty;var L=(i,e)=>{for(var t in e)u(i,t,{get:e[t],enumerable:!0})},B=(i,e,t,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of S(e))!H.call(i,s)&&s!==t&&u(i,s,{get:()=>e[s],enumerable:!(n=$(e,s))||n.enumerable});return i};var E=i=>B(u({},"__esModule",{value:!0}),i);var z={};L(z,{ChatBotWidget:()=>w});function v(i="#2563eb"){return`
     * {
       box-sizing: border-box;
       margin: 0;
@@ -67,6 +67,43 @@
       display: none;
     }
 
+    /* Mascot image styles */
+    .widget-launcher.has-mascot {
+      width: 70px;
+      height: 70px;
+      padding: 4px;
+      background: white;
+      border: 2px solid ${i};
+    }
+
+    .widget-launcher.has-mascot:hover {
+      border-color: ${m(i,-20)};
+    }
+
+    .widget-launcher .mascot-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .widget-launcher.has-mascot.open .mascot-icon {
+      display: none;
+    }
+
+    .widget-launcher.has-mascot.open svg.close-icon {
+      display: block;
+      stroke: ${i};
+    }
+
+    .widget-launcher.has-mascot:not(.open) .mascot-icon {
+      display: block;
+    }
+
+    .widget-launcher.has-mascot:not(.open) svg.close-icon {
+      display: none;
+    }
+
     /* Chat window */
     .widget-window {
       position: fixed;
@@ -104,12 +141,27 @@
 
     /* Header */
     .widget-header {
-      background: linear-gradient(135deg, ${i} 0%, ${b(i,-20)} 100%);
+      background: linear-gradient(135deg, ${i} 0%, ${m(i,-20)} 100%);
       color: white;
       padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+    }
+
+    .widget-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .widget-header-mascot {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: white;
+      padding: 2px;
     }
 
     .widget-header-title {
@@ -393,7 +445,7 @@
     }
 
     .widget-send-btn:hover:not(:disabled) {
-      background: ${b(i,-15)};
+      background: ${m(i,-15)};
     }
 
     .widget-send-btn:disabled {
@@ -427,6 +479,11 @@
         height: 54px;
       }
 
+      .widget-launcher.has-mascot {
+        width: 64px;
+        height: 64px;
+      }
+
       .widget-launcher.bottom-right,
       .widget-launcher.bottom-left {
         bottom: 16px;
@@ -440,7 +497,7 @@
         left: 16px;
       }
     }
-  `}function b(i,e){let t=parseInt(i.replace("#",""),16),n=Math.min(255,Math.max(0,(t>>16)+e)),s=Math.min(255,Math.max(0,(t>>8&255)+e)),a=Math.min(255,Math.max(0,(t&255)+e));return"#"+((1<<24)+(n<<16)+(s<<8)+a).toString(16).slice(1)}var d={chat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  `}function m(i,e){let t=parseInt(i.replace("#",""),16),n=Math.min(255,Math.max(0,(t>>16)+e)),s=Math.min(255,Math.max(0,(t>>8&255)+e)),a=Math.min(255,Math.max(0,(t&255)+e));return"#"+((1<<24)+(n<<16)+(s<<8)+a).toString(16).slice(1)}var d={chat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
   </svg>`,close:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -460,25 +517,32 @@
     <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
   </svg>`,thumbsDown:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
-  </svg>`};function c(i){let e=T(i);return e=e.replace(/```(\w*)\n([\s\S]*?)```/g,"<pre><code>$2</code></pre>"),e=e.replace(/`([^`]+)`/g,"<code>$1</code>"),e=e.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"),e=e.replace(/__([^_]+)__/g,"<strong>$1</strong>"),e=e.replace(/\*([^*]+)\*/g,"<em>$1</em>"),e=e.replace(/_([^_]+)_/g,"<em>$1</em>"),e=e.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'),e=e.replace(/^[-*]\s+(.+)$/gm,"<li>$1</li>"),e=e.replace(/(<li>.*<\/li>\n?)+/g,"<ul>$&</ul>"),e=e.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>"),e=e.replace(/^### (.+)$/gm,"<h3>$1</h3>"),e=e.replace(/^## (.+)$/gm,"<h2>$1</h2>"),e=e.replace(/^# (.+)$/gm,"<h1>$1</h1>"),e=e.split(/\n\n+/).map(t=>(t=t.trim(),t?/^<(ul|ol|pre|h[1-6]|blockquote)/.test(t)?t:`<p>${t}</p>`:"")).join(""),e=e.replace(/(<p>[\s\S]*?<\/p>)/g,t=>t.replace(/\n/g,"<br>")),e}function T(i){let e={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};return i.replace(/[&<>"']/g,t=>e[t])}var W="chatbot_widget_",p=class{constructor(e){this.container=null;this.shadowRoot=null;this.isOpen=!1;this.messages=[];this.isLoading=!1;this.launcher=null;this.window=null;this.messagesContainer=null;this.input=null;this.sendButton=null;this.newChatButton=null;this.config={apiUrl:e.apiUrl,position:e.position||"bottom-right",primaryColor:e.primaryColor||"#2563eb",headerTitle:e.headerTitle||"Customer Support",headerSubtitle:e.headerSubtitle||"We're here to help!",placeholder:e.placeholder||"Type your message...",greeting:e.greeting||"Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.",defaultOpen:e.defaultOpen||!1,persistConversation:e.persistConversation!==!1,onOpen:e.onOpen||(()=>{}),onClose:e.onClose||(()=>{}),onMessage:e.onMessage||(()=>{})},this.init()}init(){this.container=document.createElement("div"),this.container.id="chatbot-widget-container",this.shadowRoot=this.container.attachShadow({mode:"open"});let e=document.createElement("style");e.textContent=v(this.config.primaryColor),this.shadowRoot.appendChild(e);let t=document.createElement("div");t.className="widget-container",t.innerHTML=this.getWidgetHTML(),this.shadowRoot.appendChild(t),document.body.appendChild(this.container),this.launcher=this.shadowRoot.querySelector(".widget-launcher"),this.window=this.shadowRoot.querySelector(".widget-window"),this.messagesContainer=this.shadowRoot.querySelector(".widget-messages"),this.input=this.shadowRoot.querySelector(".widget-input"),this.sendButton=this.shadowRoot.querySelector(".widget-send-btn"),this.newChatButton=this.shadowRoot.querySelector(".widget-new-chat"),this.bindEvents(),this.loadConversation(),this.config.defaultOpen&&this.open()}getWidgetHTML(){return`
-      <!-- Launcher button -->
-      <button class="widget-launcher ${this.config.position}" aria-label="Open chat">
-        <svg class="chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  </svg>`};function c(i){let e=T(i);return e=e.replace(/```(\w*)\n([\s\S]*?)```/g,"<pre><code>$2</code></pre>"),e=e.replace(/`([^`]+)`/g,"<code>$1</code>"),e=e.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"),e=e.replace(/__([^_]+)__/g,"<strong>$1</strong>"),e=e.replace(/\*([^*]+)\*/g,"<em>$1</em>"),e=e.replace(/_([^_]+)_/g,"<em>$1</em>"),e=e.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'),e=e.replace(/^[-*]\s+(.+)$/gm,"<li>$1</li>"),e=e.replace(/(<li>.*<\/li>\n?)+/g,"<ul>$&</ul>"),e=e.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>"),e=e.replace(/^### (.+)$/gm,"<h3>$1</h3>"),e=e.replace(/^## (.+)$/gm,"<h2>$1</h2>"),e=e.replace(/^# (.+)$/gm,"<h1>$1</h1>"),e=e.split(/\n\n+/).map(t=>(t=t.trim(),t?/^<(ul|ol|pre|h[1-6]|blockquote)/.test(t)?t:`<p>${t}</p>`:"")).join(""),e=e.replace(/(<p>[\s\S]*?<\/p>)/g,t=>t.replace(/\n/g,"<br>")),e}function T(i){let e={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};return i.replace(/[&<>"']/g,t=>e[t])}var W="chatbot_widget_",h=class{constructor(e){this.container=null;this.shadowRoot=null;this.isOpen=!1;this.messages=[];this.isLoading=!1;this.launcher=null;this.window=null;this.messagesContainer=null;this.input=null;this.sendButton=null;this.newChatButton=null;this.config={apiUrl:e.apiUrl,position:e.position||"bottom-right",primaryColor:e.primaryColor||"#2563eb",headerTitle:e.headerTitle||"Customer Support",headerSubtitle:e.headerSubtitle||"We're here to help!",placeholder:e.placeholder||"Type your message...",greeting:e.greeting||"Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.",mascotImage:e.mascotImage||"",defaultOpen:e.defaultOpen||!1,persistConversation:e.persistConversation!==!1,onOpen:e.onOpen||(()=>{}),onClose:e.onClose||(()=>{}),onMessage:e.onMessage||(()=>{})},this.init()}init(){this.container=document.createElement("div"),this.container.id="chatbot-widget-container",this.shadowRoot=this.container.attachShadow({mode:"open"});let e=document.createElement("style");e.textContent=v(this.config.primaryColor),this.shadowRoot.appendChild(e);let t=document.createElement("div");t.className="widget-container",t.innerHTML=this.getWidgetHTML(),this.shadowRoot.appendChild(t),document.body.appendChild(this.container),this.launcher=this.shadowRoot.querySelector(".widget-launcher"),this.window=this.shadowRoot.querySelector(".widget-window"),this.messagesContainer=this.shadowRoot.querySelector(".widget-messages"),this.input=this.shadowRoot.querySelector(".widget-input"),this.sendButton=this.shadowRoot.querySelector(".widget-send-btn"),this.newChatButton=this.shadowRoot.querySelector(".widget-new-chat"),this.bindEvents(),this.loadConversation(),this.config.defaultOpen&&this.open()}getWidgetHTML(){let e=this.config.mascotImage?`<img class="mascot-icon" src="${this.escapeHtml(this.config.mascotImage)}" alt="Chat" />
+        <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>`:`<svg class="chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
         <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        </svg>`;return`
+      <!-- Launcher button -->
+      <button class="widget-launcher ${this.config.position}${this.config.mascotImage?" has-mascot":""}" aria-label="Open chat">
+        ${e}
       </button>
 
       <!-- Chat window -->
       <div class="widget-window ${this.config.position}">
         <!-- Header -->
         <div class="widget-header">
-          <div>
-            <h2 class="widget-header-title">${this.escapeHtml(this.config.headerTitle)}</h2>
-            <p class="widget-header-subtitle">${this.escapeHtml(this.config.headerSubtitle)}</p>
+          <div class="widget-header-info">
+            ${this.config.mascotImage?`<img class="widget-header-mascot" src="${this.escapeHtml(this.config.mascotImage)}" alt="" />`:""}
+            <div>
+              <h2 class="widget-header-title">${this.escapeHtml(this.config.headerTitle)}</h2>
+              <p class="widget-header-subtitle">${this.escapeHtml(this.config.headerSubtitle)}</p>
+            </div>
           </div>
           <button class="widget-new-chat" style="display: none;">
             ${d.refresh}
@@ -504,8 +568,8 @@
           </form>
         </div>
       </div>
-    `}bindEvents(){var t,n,s,a;(t=this.launcher)==null||t.addEventListener("click",()=>this.toggle());let e=(n=this.shadowRoot)==null?void 0:n.querySelector(".widget-input-form");e==null||e.addEventListener("submit",o=>{o.preventDefault(),this.handleSend()}),(s=this.newChatButton)==null||s.addEventListener("click",()=>this.startNewChat()),(a=this.input)==null||a.addEventListener("keydown",o=>{o.key==="Enter"&&!o.shiftKey&&(o.preventDefault(),this.handleSend())}),document.addEventListener("keydown",o=>{o.key==="Escape"&&this.isOpen&&this.close()})}loadConversation(){if(!this.config.persistConversation){this.initializeWithGreeting();return}try{let e=this.getStorageKey(),t=localStorage.getItem(e);if(t){let n=JSON.parse(t);this.messages=n.map(s=>({...s,timestamp:new Date(s.timestamp)}))}else this.initializeWithGreeting()}catch(e){this.initializeWithGreeting()}this.renderMessages(),this.updateNewChatVisibility()}initializeWithGreeting(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}]}saveConversation(){if(this.config.persistConversation)try{let e=this.getStorageKey();localStorage.setItem(e,JSON.stringify(this.messages))}catch(e){}}getStorageKey(){let e=new URL(this.config.apiUrl).hostname;return`${W}${e}`}async handleSend(){var n,s;let e=(n=this.input)==null?void 0:n.value.trim();if(!e||this.isLoading)return;this.input&&(this.input.value="");let t={role:"user",content:e,timestamp:new Date};this.messages.push(t),this.renderMessages(),this.saveConversation(),this.config.onMessage(t),this.isLoading=!0,this.updateInputState();try{let a=await fetch(`${this.config.apiUrl}/api/chat/stream`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({message:e,conversationHistory:this.messages.slice(0,-1)})});if(!a.ok)throw new Error("Failed to get response");let o=(s=a.body)==null?void 0:s.getReader();if(!o)throw new Error("No reader available");let h=new TextDecoder,g="";for(this.renderStreamingMessage("");;){let{done:y,value:k}=await o.read();if(y)break;let C=h.decode(k).split(`
-`);for(let m of C)if(m.startsWith("data: "))try{let l=JSON.parse(m.slice(6));if(l.text)g+=l.text,this.updateStreamingMessage(g);else if(l.done){let M=`msg_${Date.now()}_${Math.random().toString(36).substring(2,9)}`,f={role:"assistant",content:g,timestamp:new Date,id:M,userMessage:e,feedback:null};this.messages.push(f),this.config.onMessage(f)}else if(l.error)throw new Error(l.error)}catch(l){}}}catch(a){let o={role:"assistant",content:"Sorry, I encountered an error. Please try again.",timestamp:new Date};this.messages.push(o)}this.isLoading=!1,this.updateInputState(),this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}renderStreamingMessage(e){if(!this.messagesContainer)return;let t=`
+    `}bindEvents(){var t,n,s,a;(t=this.launcher)==null||t.addEventListener("click",()=>this.toggle());let e=(n=this.shadowRoot)==null?void 0:n.querySelector(".widget-input-form");e==null||e.addEventListener("submit",o=>{o.preventDefault(),this.handleSend()}),(s=this.newChatButton)==null||s.addEventListener("click",()=>this.startNewChat()),(a=this.input)==null||a.addEventListener("keydown",o=>{o.key==="Enter"&&!o.shiftKey&&(o.preventDefault(),this.handleSend())}),document.addEventListener("keydown",o=>{o.key==="Escape"&&this.isOpen&&this.close()})}loadConversation(){if(!this.config.persistConversation){this.initializeWithGreeting();return}try{let e=this.getStorageKey(),t=localStorage.getItem(e);if(t){let n=JSON.parse(t);this.messages=n.map(s=>({...s,timestamp:new Date(s.timestamp)}))}else this.initializeWithGreeting()}catch(e){this.initializeWithGreeting()}this.renderMessages(),this.updateNewChatVisibility()}initializeWithGreeting(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}]}saveConversation(){if(this.config.persistConversation)try{let e=this.getStorageKey();localStorage.setItem(e,JSON.stringify(this.messages))}catch(e){}}getStorageKey(){let e=new URL(this.config.apiUrl).hostname;return`${W}${e}`}async handleSend(){var n,s;let e=(n=this.input)==null?void 0:n.value.trim();if(!e||this.isLoading)return;this.input&&(this.input.value="");let t={role:"user",content:e,timestamp:new Date};this.messages.push(t),this.renderMessages(),this.saveConversation(),this.config.onMessage(t),this.isLoading=!0,this.updateInputState();try{let a=await fetch(`${this.config.apiUrl}/api/chat/stream`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({message:e,conversationHistory:this.messages.slice(0,-1)})});if(!a.ok)throw new Error("Failed to get response");let o=(s=a.body)==null?void 0:s.getReader();if(!o)throw new Error("No reader available");let p=new TextDecoder,g="";for(this.renderStreamingMessage("");;){let{done:y,value:k}=await o.read();if(y)break;let C=p.decode(k).split(`
+`);for(let f of C)if(f.startsWith("data: "))try{let l=JSON.parse(f.slice(6));if(l.text)g+=l.text,this.updateStreamingMessage(g);else if(l.done){let M=`msg_${Date.now()}_${Math.random().toString(36).substring(2,9)}`,b={role:"assistant",content:g,timestamp:new Date,id:M,userMessage:e,feedback:null};this.messages.push(b),this.config.onMessage(b)}else if(l.error)throw new Error(l.error)}catch(l){}}}catch(a){let o={role:"assistant",content:"Sorry, I encountered an error. Please try again.",timestamp:new Date};this.messages.push(o)}this.isLoading=!1,this.updateInputState(),this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}renderStreamingMessage(e){if(!this.messagesContainer)return;let t=`
       <div class="widget-message assistant widget-streaming">
         <div class="widget-message-bubble">
           <div class="widget-message-content">
@@ -514,13 +578,13 @@
           </div>
         </div>
       </div>
-    `;this.messagesContainer.innerHTML=this.messages.map((n,s)=>this.renderMessage(n,s)).join("")+t,this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight}updateStreamingMessage(e){if(!this.messagesContainer)return;let t=this.messagesContainer.querySelector(".widget-streaming .widget-message-content");t&&(t.innerHTML=c(e)+'<span class="widget-streaming-cursor"></span>',this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight)}async submitFeedback(e,t){let n=this.messages.find(s=>s.id===e);if(n)try{(await fetch(`${this.config.apiUrl}/api/feedback`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({messageId:e,userMessage:n.userMessage,assistantResponse:n.content,feedback:t})})).ok&&(n.feedback=t,this.saveConversation(),this.renderMessages())}catch(s){}}renderMessages(){this.messagesContainer&&(this.messagesContainer.innerHTML=this.messages.map((e,t)=>this.renderMessage(e,t)).join(""),this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight,this.bindFeedbackButtons(),this.bindCopyButtons())}renderMessage(e,t){let n=this.formatTime(e.timestamp),s=e.role==="assistant",a="";if(s){let o="widget-action-btn copy-btn",h=`widget-action-btn thumbs-up ${e.feedback==="positive"?"positive":""}`,g=`widget-action-btn thumbs-down ${e.feedback==="negative"?"negative":""}`;a=`
+    `;this.messagesContainer.innerHTML=this.messages.map((n,s)=>this.renderMessage(n,s)).join("")+t,this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight}updateStreamingMessage(e){if(!this.messagesContainer)return;let t=this.messagesContainer.querySelector(".widget-streaming .widget-message-content");t&&(t.innerHTML=c(e)+'<span class="widget-streaming-cursor"></span>',this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight)}async submitFeedback(e,t){let n=this.messages.find(s=>s.id===e);if(n)try{(await fetch(`${this.config.apiUrl}/api/feedback`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({messageId:e,userMessage:n.userMessage,assistantResponse:n.content,feedback:t})})).ok&&(n.feedback=t,this.saveConversation(),this.renderMessages())}catch(s){}}renderMessages(){this.messagesContainer&&(this.messagesContainer.innerHTML=this.messages.map((e,t)=>this.renderMessage(e,t)).join(""),this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight,this.bindFeedbackButtons(),this.bindCopyButtons())}renderMessage(e,t){let n=this.formatTime(e.timestamp),s=e.role==="assistant",a="";if(s){let o="widget-action-btn copy-btn",p=`widget-action-btn thumbs-up ${e.feedback==="positive"?"positive":""}`,g=`widget-action-btn thumbs-down ${e.feedback==="negative"?"negative":""}`;a=`
         <div class="widget-message-actions">
           <button class="${o}" data-index="${t}" title="Copy">
             ${d.copy}
           </button>
           ${e.id?`
-            <button class="${h}" data-id="${e.id}" title="Helpful">
+            <button class="${p}" data-id="${e.id}" title="Helpful">
               ${d.thumbsUp}
             </button>
             <button class="${g}" data-id="${e.id}" title="Not helpful">
@@ -540,7 +604,7 @@
           ${a}
         </div>
       </div>
-    `}bindFeedbackButtons(){var n,s;let e=(n=this.shadowRoot)==null?void 0:n.querySelectorAll(".thumbs-up"),t=(s=this.shadowRoot)==null?void 0:s.querySelectorAll(".thumbs-down");e==null||e.forEach(a=>{a.addEventListener("click",()=>{let o=a.getAttribute("data-id");o&&this.submitFeedback(o,"positive")})}),t==null||t.forEach(a=>{a.addEventListener("click",()=>{let o=a.getAttribute("data-id");o&&this.submitFeedback(o,"negative")})})}bindCopyButtons(){var t;let e=(t=this.shadowRoot)==null?void 0:t.querySelectorAll(".copy-btn");e==null||e.forEach(n=>{n.addEventListener("click",async()=>{let s=parseInt(n.getAttribute("data-index")||"0",10),a=this.messages[s];if(a)try{await navigator.clipboard.writeText(a.content),n.innerHTML=d.check,setTimeout(()=>{n.innerHTML=d.copy},2e3)}catch(o){}})})}updateInputState(){this.input&&(this.input.disabled=this.isLoading),this.sendButton&&(this.sendButton.disabled=this.isLoading)}updateNewChatVisibility(){this.newChatButton&&(this.newChatButton.style.display=this.messages.length>1?"flex":"none")}formatTime(e){return e.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:!0})}escapeHtml(e){let t=document.createElement("div");return t.textContent=e,t.innerHTML}startNewChat(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}],this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}open(){var e,t,n;this.isOpen=!0,(e=this.launcher)==null||e.classList.add("open"),(t=this.window)==null||t.classList.add("visible"),(n=this.input)==null||n.focus(),this.config.onOpen()}close(){var e,t;this.isOpen=!1,(e=this.launcher)==null||e.classList.remove("open"),(t=this.window)==null||t.classList.remove("visible"),this.config.onClose()}toggle(){this.isOpen?this.close():this.open()}destroy(){var e;(e=this.container)==null||e.remove(),this.container=null,this.shadowRoot=null}sendMessage(e){this.input&&(this.input.value=e,this.handleSend())}};var r=null,w={init(i){if(r){console.warn("ChatBotWidget is already initialized. Call destroy() first to reinitialize.");return}if(!i.apiUrl){console.error("ChatBotWidget: apiUrl is required");return}r=new p(i)},open(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.open()},close(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.close()},toggle(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.toggle()},destroy(){r&&(r.destroy(),r=null)},sendMessage(i){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.sendMessage(i)}};if(typeof window!="undefined"){window.ChatBotWidget=w;let i=document.currentScript;if(i){let e=i.getAttribute("data-api-url");e&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>x(i,e)):x(i,e))}}function x(i,e){let t={apiUrl:e,position:i.getAttribute("data-position")||void 0,primaryColor:i.getAttribute("data-primary-color")||void 0,headerTitle:i.getAttribute("data-header-title")||void 0,headerSubtitle:i.getAttribute("data-header-subtitle")||void 0,placeholder:i.getAttribute("data-placeholder")||void 0,greeting:i.getAttribute("data-greeting")||void 0,defaultOpen:i.getAttribute("data-default-open")==="true",persistConversation:i.getAttribute("data-persist-conversation")!=="false"};w.init(t)}return E(z);})();
+    `}bindFeedbackButtons(){var n,s;let e=(n=this.shadowRoot)==null?void 0:n.querySelectorAll(".thumbs-up"),t=(s=this.shadowRoot)==null?void 0:s.querySelectorAll(".thumbs-down");e==null||e.forEach(a=>{a.addEventListener("click",()=>{let o=a.getAttribute("data-id");o&&this.submitFeedback(o,"positive")})}),t==null||t.forEach(a=>{a.addEventListener("click",()=>{let o=a.getAttribute("data-id");o&&this.submitFeedback(o,"negative")})})}bindCopyButtons(){var t;let e=(t=this.shadowRoot)==null?void 0:t.querySelectorAll(".copy-btn");e==null||e.forEach(n=>{n.addEventListener("click",async()=>{let s=parseInt(n.getAttribute("data-index")||"0",10),a=this.messages[s];if(a)try{await navigator.clipboard.writeText(a.content),n.innerHTML=d.check,setTimeout(()=>{n.innerHTML=d.copy},2e3)}catch(o){}})})}updateInputState(){this.input&&(this.input.disabled=this.isLoading),this.sendButton&&(this.sendButton.disabled=this.isLoading)}updateNewChatVisibility(){this.newChatButton&&(this.newChatButton.style.display=this.messages.length>1?"flex":"none")}formatTime(e){return e.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:!0})}escapeHtml(e){let t=document.createElement("div");return t.textContent=e,t.innerHTML}startNewChat(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}],this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}open(){var e,t,n;this.isOpen=!0,(e=this.launcher)==null||e.classList.add("open"),(t=this.window)==null||t.classList.add("visible"),(n=this.input)==null||n.focus(),this.config.onOpen()}close(){var e,t;this.isOpen=!1,(e=this.launcher)==null||e.classList.remove("open"),(t=this.window)==null||t.classList.remove("visible"),this.config.onClose()}toggle(){this.isOpen?this.close():this.open()}destroy(){var e;(e=this.container)==null||e.remove(),this.container=null,this.shadowRoot=null}sendMessage(e){this.input&&(this.input.value=e,this.handleSend())}};var r=null,w={init(i){if(r){console.warn("ChatBotWidget is already initialized. Call destroy() first to reinitialize.");return}if(!i.apiUrl){console.error("ChatBotWidget: apiUrl is required");return}r=new h(i)},open(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.open()},close(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.close()},toggle(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.toggle()},destroy(){r&&(r.destroy(),r=null)},sendMessage(i){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.sendMessage(i)}};if(typeof window!="undefined"){window.ChatBotWidget=w;let i=document.currentScript;if(i){let e=i.getAttribute("data-api-url");e&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>x(i,e)):x(i,e))}}function x(i,e){let t={apiUrl:e,position:i.getAttribute("data-position")||void 0,primaryColor:i.getAttribute("data-primary-color")||void 0,headerTitle:i.getAttribute("data-header-title")||void 0,headerSubtitle:i.getAttribute("data-header-subtitle")||void 0,placeholder:i.getAttribute("data-placeholder")||void 0,greeting:i.getAttribute("data-greeting")||void 0,mascotImage:i.getAttribute("data-mascot-image")||void 0,defaultOpen:i.getAttribute("data-default-open")==="true",persistConversation:i.getAttribute("data-persist-conversation")!=="false"};w.init(t)}return E(z);})();
 
 // Ensure ChatBotWidget is available globally
 if (typeof window !== 'undefined' && !window.ChatBotWidget) {

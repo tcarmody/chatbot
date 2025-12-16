@@ -6,12 +6,15 @@ import Navigation from '../components/Navigation';
 
 export default function WidgetDemoPage() {
   const [widgetLoaded, setWidgetLoaded] = useState(false);
-  const apiUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const [apiUrl, setApiUrl] = useState('');
 
   useEffect(() => {
+    // Set apiUrl on client side only to avoid hydration mismatch
+    setApiUrl(window.location.origin);
+
     // Cleanup widget on unmount
     return () => {
-      if (typeof window !== 'undefined' && window.ChatBotWidget) {
+      if (window.ChatBotWidget) {
         window.ChatBotWidget.destroy();
       }
     };
@@ -19,13 +22,15 @@ export default function WidgetDemoPage() {
 
   const handleWidgetLoad = () => {
     setWidgetLoaded(true);
-    if (typeof window !== 'undefined' && window.ChatBotWidget && apiUrl) {
+    const url = window.location.origin;
+    if (window.ChatBotWidget) {
       window.ChatBotWidget.init({
-        apiUrl,
+        apiUrl: url,
         position: 'bottom-right',
         primaryColor: '#2563eb',
         headerTitle: 'Customer Support',
         headerSubtitle: "We're here to help!",
+        mascotImage: '/mascots/server-ai.png',
       });
     }
   };
@@ -48,8 +53,8 @@ export default function WidgetDemoPage() {
             </p>
             <pre className="bg-blue-900 text-blue-100 p-4 rounded text-sm overflow-x-auto">
 {`<script
-  src="${apiUrl}/widget.js"
-  data-api-url="${apiUrl}"
+  src="${apiUrl || 'https://your-domain.com'}/widget.js"
+  data-api-url="${apiUrl || 'https://your-domain.com'}"
 ></script>`}
             </pre>
           </div>
@@ -113,10 +118,15 @@ export default function WidgetDemoPage() {
                     <td className="py-2 pr-4">Customer Support</td>
                     <td className="py-2">Chat header title</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-gray-100">
                     <td className="py-2 pr-4 font-mono text-xs">data-default-open</td>
                     <td className="py-2 pr-4">false</td>
                     <td className="py-2">Open chat on page load</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 font-mono text-xs">data-mascot-image</td>
+                    <td className="py-2 pr-4">none</td>
+                    <td className="py-2">URL to custom mascot image</td>
                   </tr>
                 </tbody>
               </table>

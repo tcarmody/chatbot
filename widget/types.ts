@@ -11,6 +11,7 @@ export interface WidgetConfig {
   headerSubtitle?: string;
   placeholder?: string;
   greeting?: string;
+  mascotImage?: string; // URL to a custom mascot image for the launcher button
 
   // Optional: Widget behavior
   defaultOpen?: boolean;

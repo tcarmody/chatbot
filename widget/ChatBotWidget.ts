@@ -30,6 +30,7 @@ export class ChatBotWidget {
       headerSubtitle: config.headerSubtitle || "We're here to help!",
       placeholder: config.placeholder || 'Type your message...',
       greeting: config.greeting || 'Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.',
+      mascotImage: config.mascotImage || '',
       defaultOpen: config.defaultOpen || false,
       persistConversation: config.persistConversation !== false,
       onOpen: config.onOpen || (() => {}),
@@ -83,25 +84,36 @@ export class ChatBotWidget {
   }
 
   private getWidgetHTML(): string {
-    return `
-      <!-- Launcher button -->
-      <button class="widget-launcher ${this.config.position}" aria-label="Open chat">
-        <svg class="chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    const launcherContent = this.config.mascotImage
+      ? `<img class="mascot-icon" src="${this.escapeHtml(this.config.mascotImage)}" alt="Chat" />
+        <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>`
+      : `<svg class="chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
         <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        </svg>`;
+
+    return `
+      <!-- Launcher button -->
+      <button class="widget-launcher ${this.config.position}${this.config.mascotImage ? ' has-mascot' : ''}" aria-label="Open chat">
+        ${launcherContent}
       </button>
 
       <!-- Chat window -->
       <div class="widget-window ${this.config.position}">
         <!-- Header -->
         <div class="widget-header">
-          <div>
-            <h2 class="widget-header-title">${this.escapeHtml(this.config.headerTitle)}</h2>
-            <p class="widget-header-subtitle">${this.escapeHtml(this.config.headerSubtitle)}</p>
+          <div class="widget-header-info">
+            ${this.config.mascotImage ? `<img class="widget-header-mascot" src="${this.escapeHtml(this.config.mascotImage)}" alt="" />` : ''}
+            <div>
+              <h2 class="widget-header-title">${this.escapeHtml(this.config.headerTitle)}</h2>
+              <p class="widget-header-subtitle">${this.escapeHtml(this.config.headerSubtitle)}</p>
+            </div>
           </div>
           <button class="widget-new-chat" style="display: none;">
             ${icons.refresh}

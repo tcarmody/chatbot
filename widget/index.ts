@@ -89,6 +89,7 @@ function initFromAttributes(script: HTMLScriptElement, apiUrl: string): void {
     headerSubtitle: script.getAttribute('data-header-subtitle') || undefined,
     placeholder: script.getAttribute('data-placeholder') || undefined,
     greeting: script.getAttribute('data-greeting') || undefined,
+    mascotImage: script.getAttribute('data-mascot-image') || undefined,
     defaultOpen: script.getAttribute('data-default-open') === 'true',
     persistConversation: script.getAttribute('data-persist-conversation') !== 'false',
   };

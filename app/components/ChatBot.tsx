@@ -20,12 +20,15 @@ const STORAGE_KEY = 'chatbot_conversation';
 // Debounce delay for localStorage writes (ms)
 const STORAGE_DEBOUNCE_MS = 500;
 
-// Default greeting message
-const DEFAULT_GREETING: Message = {
+// Default greeting message content
+const DEFAULT_GREETING_CONTENT = 'Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.';
+
+// Create a default greeting - timestamp will be set on client side only
+const createDefaultGreeting = (): Message => ({
   role: 'assistant',
-  content: 'Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.',
+  content: DEFAULT_GREETING_CONTENT,
   timestamp: new Date(),
-};
+});
 
 // Memoized message component to prevent re-renders
 interface MessageBubbleProps {
@@ -142,7 +145,8 @@ const StreamingMessage = memo(function StreamingMessage({ content }: { content: 
 });
 
 export default function ChatBot() {
-  const [messages, setMessages] = useState<Message[]>([DEFAULT_GREETING]);
+  // Start with empty array to avoid hydration mismatch from Date objects
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
@@ -177,9 +181,13 @@ export default function ChatBot() {
           timestamp: new Date(msg.timestamp),
         }));
         setMessages(restored);
+      } else {
+        // No stored conversation, show default greeting
+        setMessages([createDefaultGreeting()]);
       }
     } catch (err) {
       console.error('Failed to load conversation from localStorage:', err);
+      setMessages([createDefaultGreeting()]);
     }
     setIsHydrated(true);
   }, []);
@@ -200,7 +208,7 @@ export default function ChatBot() {
   }, []);
 
   const startNewChat = useCallback(() => {
-    setMessages([{ ...DEFAULT_GREETING, timestamp: new Date() }]);
+    setMessages([createDefaultGreeting()]);
   }, []);
 
   const copyToClipboard = useCallback(async (text: string, index: number) => {
