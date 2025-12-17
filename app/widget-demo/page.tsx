@@ -8,20 +8,7 @@ export default function WidgetDemoPage() {
   const [widgetLoaded, setWidgetLoaded] = useState(false);
   const [apiUrl, setApiUrl] = useState('');
 
-  useEffect(() => {
-    // Set apiUrl on client side only to avoid hydration mismatch
-    setApiUrl(window.location.origin);
-
-    // Cleanup widget on unmount
-    return () => {
-      if (window.ChatBotWidget) {
-        window.ChatBotWidget.destroy();
-      }
-    };
-  }, []);
-
-  const handleWidgetLoad = () => {
-    setWidgetLoaded(true);
+  const initWidget = () => {
     const url = window.location.origin;
     if (window.ChatBotWidget) {
       window.ChatBotWidget.init({
@@ -33,7 +20,30 @@ export default function WidgetDemoPage() {
         mascotImage: '/mascots/server-ai.png',
         tooltipText: 'Chat with us!',
       });
+      setWidgetLoaded(true);
     }
+  };
+
+  useEffect(() => {
+    // Set apiUrl on client side only to avoid hydration mismatch
+    setApiUrl(window.location.origin);
+
+    // If widget script is already loaded (e.g., after client-side navigation),
+    // initialize immediately
+    if (window.ChatBotWidget) {
+      initWidget();
+    }
+
+    // Cleanup widget on unmount
+    return () => {
+      if (window.ChatBotWidget) {
+        window.ChatBotWidget.destroy();
+      }
+    };
+  }, []);
+
+  const handleWidgetLoad = () => {
+    initWidget();
   };
 
   return (
