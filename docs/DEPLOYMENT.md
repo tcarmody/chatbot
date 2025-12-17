@@ -47,8 +47,38 @@ Configure these in Vercel Dashboard → Project → Settings → Environment Var
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `ANTHROPIC_API_KEY` | Claude API key from [Anthropic Console](https://console.anthropic.com/) | `sk-ant-api03-...` |
 | `DATABASE_URL` | Neon Postgres connection string | `postgresql://user:pass@host/db?sslmode=require` |
+
+### AI Provider Configuration
+
+The application supports multiple AI providers. Set `AI_MODEL` to select your provider and model:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AI_MODEL` | Provider and model in `provider:model` format | `anthropic:claude-haiku-4-5` |
+
+**Supported Providers and Models:**
+
+| Provider | Model | Description |
+|----------|-------|-------------|
+| `anthropic` | `claude-haiku-4-5` | Fastest, most cost-effective (default) |
+| `anthropic` | `claude-sonnet-4-5` | Best balance of speed/cost/quality |
+| `anthropic` | `claude-opus-4-5` | Premium, maximum intelligence |
+| `openai` | `gpt-5.2` | Latest flagship with reasoning |
+| `openai` | `gpt-5.2-chat-latest` | Instant responses, no reasoning |
+| `openai` | `gpt-4o` | Previous generation, still capable |
+| `openai` | `gpt-4o-mini` | Cost-effective for simple tasks |
+| `google` | `gemini-3-flash-preview` | Fastest frontier model |
+| `google` | `gemini-2.5-flash` | Fast and capable |
+| `google` | `gemini-2.5-pro` | Most advanced 2.5 model |
+
+**API Keys (only one required based on your `AI_MODEL` choice):**
+
+| Variable | Required When | Get Key From |
+|----------|---------------|--------------|
+| `ANTHROPIC_API_KEY` | `AI_MODEL` starts with `anthropic:` | [Anthropic Console](https://console.anthropic.com/) |
+| `OPENAI_API_KEY` | `AI_MODEL` starts with `openai:` | [OpenAI Platform](https://platform.openai.com/) |
+| `GOOGLE_API_KEY` | `AI_MODEL` starts with `google:` | [Google AI Studio](https://aistudio.google.com/) |
 
 ### Optional Variables
 
@@ -121,9 +151,13 @@ On the configuration screen:
 ### Step 5: Add Environment Variables
 
 1. Expand the **Environment Variables** section
-2. Add each variable:
-   - `ANTHROPIC_API_KEY` - Your Claude API key
+2. Add the required variables:
    - `DATABASE_URL` - The Neon connection string from Step 1
+   - `AI_MODEL` - Your chosen provider and model (e.g., `anthropic:claude-haiku-4-5`)
+   - The API key for your chosen provider:
+     - `ANTHROPIC_API_KEY` for Anthropic models
+     - `OPENAI_API_KEY` for OpenAI models
+     - `GOOGLE_API_KEY` for Google Gemini models
    - Any other optional variables you need
 3. For `NEXT_PUBLIC_APP_URL`, use your Vercel domain:
    - `https://your-project.vercel.app` (default)
@@ -256,9 +290,25 @@ Enable Vercel Analytics for additional monitoring:
 
 ### Runtime Errors
 
-**"ANTHROPIC_API_KEY is required"**
-- Add the environment variable in Vercel dashboard
+**"ANTHROPIC_API_KEY is required for Anthropic models"**
+- Add `ANTHROPIC_API_KEY` in Vercel dashboard
+- Or switch to a different provider by changing `AI_MODEL`
 - Redeploy after adding variables
+
+**"OPENAI_API_KEY is required for OpenAI models"**
+- Add `OPENAI_API_KEY` in Vercel dashboard
+- Or switch to a different provider by changing `AI_MODEL`
+- Redeploy after adding variables
+
+**"GOOGLE_API_KEY is required for Google Gemini models"**
+- Add `GOOGLE_API_KEY` in Vercel dashboard
+- Or switch to a different provider by changing `AI_MODEL`
+- Redeploy after adding variables
+
+**"Invalid model format" or "Unsupported provider"**
+- Check that `AI_MODEL` follows the `provider:model` format
+- Supported providers: `anthropic`, `openai`, `google`
+- Example: `anthropic:claude-haiku-4-5`
 
 **"DATABASE_URL environment variable is not set"**
 - Add the Neon connection string to Vercel environment variables
@@ -290,7 +340,11 @@ To develop locally:
 1. Copy `.env.local.example` to `.env.local`
 2. Fill in your environment variables:
    - Get `DATABASE_URL` from your Neon dashboard
-   - Get `ANTHROPIC_API_KEY` from Anthropic console
+   - Set `AI_MODEL` to your preferred provider and model (defaults to `anthropic:claude-haiku-4-5`)
+   - Add the API key for your chosen provider:
+     - `ANTHROPIC_API_KEY` from [Anthropic Console](https://console.anthropic.com/)
+     - `OPENAI_API_KEY` from [OpenAI Platform](https://platform.openai.com/)
+     - `GOOGLE_API_KEY` from [Google AI Studio](https://aistudio.google.com/)
 3. Run `npm run dev`
 
 For production database access locally:
@@ -313,10 +367,25 @@ For production database access locally:
 - **Launch ($19/month)**: 10GB storage, 300 compute hours
 - **Scale**: Usage-based pricing
 
-### Anthropic API
+### AI Provider APIs
 
-- **Claude Haiku 4.5**: ~$0.25/M input tokens, $1.25/M output tokens
-- Average chat costs ~$0.001-0.003 per message
+Costs vary by provider and model. Approximate pricing (check provider sites for current rates):
+
+**Anthropic Claude**
+- Claude Haiku 4.5: ~$0.25/M input, $1.25/M output (most cost-effective)
+- Claude Sonnet 4.5: ~$3/M input, $15/M output
+- Claude Opus 4.5: ~$15/M input, $75/M output
+
+**OpenAI GPT**
+- GPT-4o-mini: ~$0.15/M input, $0.60/M output (most cost-effective)
+- GPT-4o: ~$2.50/M input, $10/M output
+- GPT-5.2: ~$5/M input, $15/M output
+
+**Google Gemini**
+- Gemini Flash models: Free tier available, then ~$0.075/M input, $0.30/M output
+- Gemini Pro models: ~$1.25/M input, $5/M output
+
+Average chat costs ~$0.001-0.01 per message depending on model choice
 
 ### Sentry
 
