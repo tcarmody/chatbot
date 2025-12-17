@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import faqData from '@/data/faq.json';
 import courseCatalog from '@/data/deeplearning-ai-course-catalog.json';
@@ -6,15 +5,12 @@ import { logAnalyticsEvent } from '@/lib/analytics';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 import { chatLogger, logError } from '@/lib/logger';
 import { sql, initializeSchema } from '@/lib/db';
+import { chatCompletion, getModelInfo, type ChatMessage } from '@/lib/ai';
 
 // Handle CORS preflight requests for widget embedding
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204 });
 }
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 // Context window optimization settings
 const MAX_CONVERSATION_MESSAGES = 20; // Keep last N messages
@@ -333,7 +329,7 @@ ${courseEntries.join('\n\n---\n\n')}`;
     const knowledgeBase = faqKnowledgeBase + courseCatalogKnowledgeBase;
 
     // Build messages array with conversation history
-    const messages: Anthropic.MessageParam[] = [];
+    const messages: ChatMessage[] = [];
 
     // Add conversation history if it exists (with context window optimization)
     if (conversationHistory && Array.isArray(conversationHistory)) {
@@ -475,28 +471,22 @@ GENERALIZATION STRATEGY:
     const dynamicKnowledgeBase = `KNOWLEDGE BASE:
 ${knowledgeBase}${intentContext}`;
 
-    // Call Claude Haiku 4.5 with prompt caching
-    // Static instructions are cached to reduce token costs on repeated queries
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 1024,
-      system: [
-        {
-          type: 'text',
-          text: staticInstructions,
-          cache_control: { type: 'ephemeral' },
-        },
-        {
-          type: 'text',
-          text: dynamicKnowledgeBase,
-        },
-      ],
-      messages: messages,
+    // Get model info for logging
+    const modelInfo = getModelInfo();
+
+    // Call AI provider with prompt caching support
+    // Static instructions are cached to reduce token costs on repeated queries (Anthropic-specific)
+    const response = await chatCompletion({
+      messages,
+      systemPrompt: {
+        staticContent: staticInstructions,
+        dynamicContent: dynamicKnowledgeBase,
+      },
+      maxTokens: 1024,
     });
 
     // Extract the assistant's response
-    const assistantMessage =
-      response.content[0].type === 'text' ? response.content[0].text : '';
+    const assistantMessage = response.content;
 
     // Check for FAQ gaps and log them (non-blocking)
     const gapDetection = detectKnowledgeGap(assistantMessage);
@@ -508,9 +498,9 @@ ${knowledgeBase}${intentContext}`;
     // Log analytics event
     const responseTime = Date.now() - startTime;
 
-    // Extract cache usage from response (if available)
-    const cacheCreationTokens = (response.usage as any).cache_creation_input_tokens ?? 0;
-    const cacheReadTokens = (response.usage as any).cache_read_input_tokens ?? 0;
+    // Extract cache usage from response (if available - Anthropic-specific)
+    const cacheCreationTokens = response.usage.cacheCreationTokens ?? 0;
+    const cacheReadTokens = response.usage.cacheReadTokens ?? 0;
 
     chatLogger.info('Chat request completed', {
       responseTime,
@@ -518,9 +508,10 @@ ${knowledgeBase}${intentContext}`;
       faqCount: relevantFaqs.length,
       intent: userIntent.intent,
       intentConfidence: userIntent.confidence,
+      model: modelInfo.displayName,
       tokens: {
-        input: response.usage.input_tokens,
-        output: response.usage.output_tokens,
+        input: response.usage.inputTokens,
+        output: response.usage.outputTokens,
         cacheCreation: cacheCreationTokens,
         cacheRead: cacheReadTokens,
       },
@@ -533,8 +524,8 @@ ${knowledgeBase}${intentContext}`;
       faqCount: relevantFaqs.length,
       responseTime,
       tokenUsage: {
-        input: response.usage.input_tokens,
-        output: response.usage.output_tokens,
+        input: response.usage.inputTokens,
+        output: response.usage.outputTokens,
         cacheCreation: cacheCreationTokens,
         cacheRead: cacheReadTokens,
       },
@@ -542,10 +533,14 @@ ${knowledgeBase}${intentContext}`;
 
     return NextResponse.json({
       response: assistantMessage,
-      usage: response.usage,
+      usage: {
+        input_tokens: response.usage.inputTokens,
+        output_tokens: response.usage.outputTokens,
+      },
     });
   } catch (error) {
-    logError(error as Error, { endpoint: '/api/chat', ip: clientIP });
+    const modelInfo = getModelInfo();
+    logError(error as Error, { endpoint: '/api/chat', ip: clientIP, model: modelInfo.displayName });
     return NextResponse.json(
       { error: 'Failed to process chat request' },
       { status: 500 }

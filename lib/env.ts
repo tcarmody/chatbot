@@ -2,8 +2,11 @@
 // This module validates required environment variables at build/startup time
 
 interface EnvConfig {
-  // Required
-  ANTHROPIC_API_KEY: string;
+  // AI Model configuration
+  AI_MODEL: string;
+  ANTHROPIC_API_KEY?: string;
+  OPENAI_API_KEY?: string;
+  GOOGLE_API_KEY?: string;
 
   // Optional with defaults
   NEXT_PUBLIC_APP_URL: string;
@@ -25,9 +28,19 @@ function validateEnv(): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Required variables
-  if (!process.env.ANTHROPIC_API_KEY) {
-    errors.push('ANTHROPIC_API_KEY is required - get your key from https://console.anthropic.com/');
+  // AI Model configuration
+  const aiModel = process.env.AI_MODEL || 'anthropic:claude-haiku-4-5';
+  const [provider] = aiModel.split(':');
+
+  // Validate API key based on selected provider
+  if (provider === 'anthropic' && !process.env.ANTHROPIC_API_KEY) {
+    errors.push('ANTHROPIC_API_KEY is required for Anthropic models - get your key from https://console.anthropic.com/');
+  }
+  if (provider === 'openai' && !process.env.OPENAI_API_KEY) {
+    errors.push('OPENAI_API_KEY is required for OpenAI models - get your key from https://platform.openai.com/');
+  }
+  if (provider === 'google' && !process.env.GOOGLE_API_KEY) {
+    errors.push('GOOGLE_API_KEY is required for Google Gemini models - get your key from https://aistudio.google.com/');
   }
 
   // Optional but recommended
@@ -64,7 +77,10 @@ export function getValidatedEnv(): EnvConfig {
   }
 
   return {
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY!,
+    AI_MODEL: process.env.AI_MODEL || 'anthropic:claude-haiku-4-5',
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     HUBSPOT_ACCESS_TOKEN: process.env.HUBSPOT_ACCESS_TOKEN,
     HUBSPOT_PIPELINE_ID: process.env.HUBSPOT_PIPELINE_ID,

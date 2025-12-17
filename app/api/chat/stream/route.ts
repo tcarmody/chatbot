@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import faqData from '@/data/faq.json';
 import courseCatalog from '@/data/deeplearning-ai-course-catalog.json';
@@ -6,6 +5,7 @@ import { logAnalyticsEvent } from '@/lib/analytics';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 import { chatLogger, logError } from '@/lib/logger';
 import { sql, initializeSchema } from '@/lib/db';
+import { streamingChatCompletion, getModelInfo, type ChatMessage } from '@/lib/ai';
 
 // Handle CORS preflight requests for widget embedding
 export async function OPTIONS() {
@@ -18,10 +18,6 @@ export async function OPTIONS() {
     },
   });
 }
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 // Context window optimization settings
 const MAX_CONVERSATION_MESSAGES = 20;
@@ -255,7 +251,7 @@ export async function POST(req: NextRequest) {
     const knowledgeBase = faqKnowledgeBase + courseCatalogKnowledgeBase;
 
     // Build messages array
-    const messages: Anthropic.MessageParam[] = [];
+    const messages: ChatMessage[] = [];
     if (conversationHistory && Array.isArray(conversationHistory)) {
       const optimizedHistory = optimizeConversationHistory(conversationHistory);
       optimizedHistory.forEach((msg: { role: string; content: string }) => {
@@ -282,74 +278,72 @@ export async function POST(req: NextRequest) {
     let fullResponse = '';
     let inputTokens = 0;
     let outputTokens = 0;
+    let cacheCreationTokens = 0;
+    let cacheReadTokens = 0;
+
+    const modelInfo = getModelInfo();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const response = await anthropic.messages.create({
-            model: 'claude-haiku-4-5',
-            max_tokens: 1024,
-            stream: true,
-            system: [
-              {
-                type: 'text',
-                text: STATIC_INSTRUCTIONS,
-                cache_control: { type: 'ephemeral' },
-              },
-              {
-                type: 'text',
-                text: dynamicKnowledgeBase,
-              },
-            ],
-            messages: messages,
-          });
-
-          for await (const event of response) {
-            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-              const text = event.delta.text;
+          await streamingChatCompletion({
+            messages,
+            systemPrompt: {
+              staticContent: STATIC_INSTRUCTIONS,
+              dynamicContent: dynamicKnowledgeBase,
+            },
+            maxTokens: 1024,
+            onText: (text) => {
               fullResponse += text;
-              // Send as SSE format
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
-            } else if (event.type === 'message_delta' && event.usage) {
-              outputTokens = event.usage.output_tokens;
-            } else if (event.type === 'message_start' && event.message.usage) {
-              inputTokens = event.message.usage.input_tokens;
-            }
-          }
+            },
+            onComplete: (result) => {
+              inputTokens = result.usage.inputTokens;
+              outputTokens = result.usage.outputTokens;
+              cacheCreationTokens = result.usage.cacheCreationTokens || 0;
+              cacheReadTokens = result.usage.cacheReadTokens || 0;
 
-          // Send done signal with usage info
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, usage: { input_tokens: inputTokens, output_tokens: outputTokens } })}\n\n`));
-          controller.close();
+              // Send done signal with usage info
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, usage: { input_tokens: inputTokens, output_tokens: outputTokens } })}\n\n`));
+              controller.close();
 
-          // Log analytics and gaps after stream completes
-          const responseTime = Date.now() - startTime;
-          const gapDetection = detectKnowledgeGap(fullResponse);
-          if (gapDetection.isGap) {
-            logFaqGap(message, relevantCategories, gapDetection.gapType).catch(() => {});
-          }
+              // Log analytics and gaps after stream completes
+              const responseTime = Date.now() - startTime;
+              const gapDetection = detectKnowledgeGap(fullResponse);
+              if (gapDetection.isGap) {
+                logFaqGap(message, relevantCategories, gapDetection.gapType).catch(() => {});
+              }
 
-          chatLogger.info('Streaming chat completed', {
-            responseTime,
-            categories: relevantCategories,
-            intent: userIntent.intent,
-            tokens: { input: inputTokens, output: outputTokens },
-          });
+              chatLogger.info('Streaming chat completed', {
+                responseTime,
+                categories: relevantCategories,
+                intent: userIntent.intent,
+                model: modelInfo.displayName,
+                tokens: { input: inputTokens, output: outputTokens, cacheCreation: cacheCreationTokens, cacheRead: cacheReadTokens },
+              });
 
-          logAnalyticsEvent({
-            timestamp: new Date().toISOString(),
-            userMessage: message,
-            detectedCategories: relevantCategories,
-            faqCount: relevantFaqs.length,
-            responseTime,
-            tokenUsage: {
-              input: inputTokens,
-              output: outputTokens,
-              cacheCreation: 0,
-              cacheRead: 0,
+              logAnalyticsEvent({
+                timestamp: new Date().toISOString(),
+                userMessage: message,
+                detectedCategories: relevantCategories,
+                faqCount: relevantFaqs.length,
+                responseTime,
+                tokenUsage: {
+                  input: inputTokens,
+                  output: outputTokens,
+                  cacheCreation: cacheCreationTokens,
+                  cacheRead: cacheReadTokens,
+                },
+              });
+            },
+            onError: (error) => {
+              logError(error, { endpoint: '/api/chat/stream', ip: clientIP, model: modelInfo.displayName });
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`));
+              controller.close();
             },
           });
         } catch (error) {
-          logError(error as Error, { endpoint: '/api/chat/stream', ip: clientIP });
+          logError(error as Error, { endpoint: '/api/chat/stream', ip: clientIP, model: modelInfo.displayName });
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`));
           controller.close();
         }
