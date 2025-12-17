@@ -15,6 +15,7 @@ export class ChatBotWidget {
 
   // DOM references
   private launcher: HTMLButtonElement | null = null;
+  private tooltip: HTMLDivElement | null = null;
   private window: HTMLDivElement | null = null;
   private messagesContainer: HTMLDivElement | null = null;
   private input: HTMLInputElement | null = null;
@@ -31,6 +32,8 @@ export class ChatBotWidget {
       placeholder: config.placeholder || 'Type your message...',
       greeting: config.greeting || 'Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.',
       mascotImage: config.mascotImage || '',
+      tooltipText: config.tooltipText || '',
+      tooltipDismissDelay: config.tooltipDismissDelay || 0,
       defaultOpen: config.defaultOpen || false,
       persistConversation: config.persistConversation !== false,
       onOpen: config.onOpen || (() => {}),
@@ -65,6 +68,7 @@ export class ChatBotWidget {
 
     // Get DOM references
     this.launcher = this.shadowRoot.querySelector('.widget-launcher');
+    this.tooltip = this.shadowRoot.querySelector('.widget-tooltip');
     this.window = this.shadowRoot.querySelector('.widget-window');
     this.messagesContainer = this.shadowRoot.querySelector('.widget-messages');
     this.input = this.shadowRoot.querySelector('.widget-input');
@@ -80,6 +84,11 @@ export class ChatBotWidget {
     // Open by default if configured
     if (this.config.defaultOpen) {
       this.open();
+    }
+
+    // Show tooltip after a short delay (if configured)
+    if (this.config.tooltipText) {
+      setTimeout(() => this.showTooltip(), 500);
     }
   }
 
@@ -98,11 +107,21 @@ export class ChatBotWidget {
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>`;
 
+    const tooltipHtml = this.config.tooltipText
+      ? `<div class="widget-tooltip ${this.config.position}${this.config.mascotImage ? ' has-mascot' : ''}">
+          <span>${this.escapeHtml(this.config.tooltipText)}</span>
+          <button class="widget-tooltip-close" aria-label="Dismiss">&times;</button>
+        </div>`
+      : '';
+
     return `
       <!-- Launcher button -->
       <button class="widget-launcher ${this.config.position}${this.config.mascotImage ? ' has-mascot' : ''}" aria-label="Open chat">
         ${launcherContent}
       </button>
+
+      <!-- Tooltip -->
+      ${tooltipHtml}
 
       <!-- Chat window -->
       <div class="widget-window ${this.config.position}">
@@ -142,9 +161,36 @@ export class ChatBotWidget {
     `;
   }
 
+  private showTooltip(): void {
+    if (!this.tooltip || this.isOpen) return;
+    this.tooltip.classList.add('visible');
+
+    // Auto-dismiss after delay if configured
+    if (this.config.tooltipDismissDelay > 0) {
+      setTimeout(() => this.hideTooltip(), this.config.tooltipDismissDelay);
+    }
+  }
+
+  private hideTooltip(): void {
+    this.tooltip?.classList.remove('visible');
+  }
+
   private bindEvents(): void {
     // Launcher click
     this.launcher?.addEventListener('click', () => this.toggle());
+
+    // Tooltip close button
+    const tooltipClose = this.shadowRoot?.querySelector('.widget-tooltip-close');
+    tooltipClose?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideTooltip();
+    });
+
+    // Clicking the tooltip itself opens the chat
+    this.tooltip?.addEventListener('click', () => {
+      this.hideTooltip();
+      this.open();
+    });
 
     // Form submit
     const form = this.shadowRoot?.querySelector('.widget-input-form');
@@ -533,6 +579,7 @@ export class ChatBotWidget {
   // Public API methods
   public open(): void {
     this.isOpen = true;
+    this.hideTooltip();
     this.launcher?.classList.add('open');
     this.window?.classList.add('visible');
     this.input?.focus();

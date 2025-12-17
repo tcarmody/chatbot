@@ -12,6 +12,8 @@ export interface WidgetConfig {
   placeholder?: string;
   greeting?: string;
   mascotImage?: string; // URL to a custom mascot image for the launcher button
+  tooltipText?: string; // Text to show in a tooltip next to the launcher (e.g., "Chat with us!")
+  tooltipDismissDelay?: number; // Auto-dismiss tooltip after this many ms (default: 0 = don't auto-dismiss)
 
   // Optional: Widget behavior
   defaultOpen?: boolean;

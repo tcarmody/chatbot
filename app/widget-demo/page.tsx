@@ -31,6 +31,7 @@ export default function WidgetDemoPage() {
         headerTitle: 'Customer Support',
         headerSubtitle: "We're here to help!",
         mascotImage: '/mascots/server-ai.png',
+        tooltipText: 'Chat with us!',
       });
     }
   };
@@ -123,10 +124,20 @@ export default function WidgetDemoPage() {
                     <td className="py-2 pr-4">false</td>
                     <td className="py-2">Open chat on page load</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-gray-100">
                     <td className="py-2 pr-4 font-mono text-xs">data-mascot-image</td>
                     <td className="py-2 pr-4">none</td>
                     <td className="py-2">URL to custom mascot image</td>
+                  </tr>
+                  <tr className="border-b border-gray-100">
+                    <td className="py-2 pr-4 font-mono text-xs">data-tooltip-text</td>
+                    <td className="py-2 pr-4">none</td>
+                    <td className="py-2">Tooltip text shown next to launcher</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 font-mono text-xs">data-tooltip-dismiss-delay</td>
+                    <td className="py-2 pr-4">0</td>
+                    <td className="py-2">Auto-dismiss tooltip after ms (0 = manual)</td>
                   </tr>
                 </tbody>
               </table>

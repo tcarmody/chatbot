@@ -106,6 +106,91 @@ export function getWidgetStyles(primaryColor: string = '#2563eb'): string {
       display: none;
     }
 
+    /* Tooltip */
+    .widget-tooltip {
+      position: fixed;
+      background: white;
+      color: #1f2937;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      white-space: nowrap;
+      z-index: 9997;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+
+    .widget-tooltip.visible {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .widget-tooltip.bottom-right {
+      bottom: 35px;
+      right: 90px;
+    }
+
+    .widget-tooltip.bottom-left {
+      bottom: 35px;
+      left: 90px;
+    }
+
+    .widget-tooltip.has-mascot.bottom-right {
+      right: 100px;
+    }
+
+    .widget-tooltip.has-mascot.bottom-left {
+      left: 100px;
+    }
+
+    /* Tooltip arrow */
+    .widget-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 6px solid transparent;
+    }
+
+    .widget-tooltip.bottom-right::after {
+      right: -12px;
+      border-left-color: white;
+    }
+
+    .widget-tooltip.bottom-left::after {
+      left: -12px;
+      border-right-color: white;
+    }
+
+    /* Tooltip close button */
+    .widget-tooltip-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      margin-left: 8px;
+      background: #f3f4f6;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1;
+      vertical-align: middle;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .widget-tooltip-close:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
     /* Chat window */
     .widget-window {
       position: fixed;

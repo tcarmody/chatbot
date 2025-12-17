@@ -1,5 +1,5 @@
 /* ChatBot Widget - https://github.com/your-org/chatbot */
-"use strict";var ChatBotWidgetModule=(()=>{var u=Object.defineProperty;var $=Object.getOwnPropertyDescriptor;var S=Object.getOwnPropertyNames;var H=Object.prototype.hasOwnProperty;var L=(i,e)=>{for(var t in e)u(i,t,{get:e[t],enumerable:!0})},B=(i,e,t,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of S(e))!H.call(i,s)&&s!==t&&u(i,s,{get:()=>e[s],enumerable:!(n=$(e,s))||n.enumerable});return i};var E=i=>B(u({},"__esModule",{value:!0}),i);var z={};L(z,{ChatBotWidget:()=>w});function v(i="#2563eb"){return`
+"use strict";var ChatBotWidgetModule=(()=>{var m=Object.defineProperty;var $=Object.getOwnPropertyDescriptor;var S=Object.getOwnPropertyNames;var T=Object.prototype.hasOwnProperty;var L=(i,t)=>{for(var e in t)m(i,e,{get:t[e],enumerable:!0})},H=(i,t,e,o)=>{if(t&&typeof t=="object"||typeof t=="function")for(let s of S(t))!T.call(i,s)&&s!==e&&m(i,s,{get:()=>t[s],enumerable:!(o=$(t,s))||o.enumerable});return i};var E=i=>H(m({},"__esModule",{value:!0}),i);var z={};L(z,{ChatBotWidget:()=>f});function v(i="#2563eb"){return`
     * {
       box-sizing: border-box;
       margin: 0;
@@ -77,7 +77,7 @@
     }
 
     .widget-launcher.has-mascot:hover {
-      border-color: ${m(i,-20)};
+      border-color: ${w(i,-20)};
     }
 
     .widget-launcher .mascot-icon {
@@ -102,6 +102,91 @@
 
     .widget-launcher.has-mascot:not(.open) svg.close-icon {
       display: none;
+    }
+
+    /* Tooltip */
+    .widget-tooltip {
+      position: fixed;
+      background: white;
+      color: #1f2937;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      white-space: nowrap;
+      z-index: 9997;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+
+    .widget-tooltip.visible {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .widget-tooltip.bottom-right {
+      bottom: 35px;
+      right: 90px;
+    }
+
+    .widget-tooltip.bottom-left {
+      bottom: 35px;
+      left: 90px;
+    }
+
+    .widget-tooltip.has-mascot.bottom-right {
+      right: 100px;
+    }
+
+    .widget-tooltip.has-mascot.bottom-left {
+      left: 100px;
+    }
+
+    /* Tooltip arrow */
+    .widget-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 6px solid transparent;
+    }
+
+    .widget-tooltip.bottom-right::after {
+      right: -12px;
+      border-left-color: white;
+    }
+
+    .widget-tooltip.bottom-left::after {
+      left: -12px;
+      border-right-color: white;
+    }
+
+    /* Tooltip close button */
+    .widget-tooltip-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      margin-left: 8px;
+      background: #f3f4f6;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1;
+      vertical-align: middle;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .widget-tooltip-close:hover {
+      background: #e5e7eb;
+      color: #374151;
     }
 
     /* Chat window */
@@ -141,7 +226,7 @@
 
     /* Header */
     .widget-header {
-      background: linear-gradient(135deg, ${i} 0%, ${m(i,-20)} 100%);
+      background: linear-gradient(135deg, ${i} 0%, ${w(i,-20)} 100%);
       color: white;
       padding: 16px;
       display: flex;
@@ -445,7 +530,7 @@
     }
 
     .widget-send-btn:hover:not(:disabled) {
-      background: ${m(i,-15)};
+      background: ${w(i,-15)};
     }
 
     .widget-send-btn:disabled {
@@ -497,7 +582,7 @@
         left: 16px;
       }
     }
-  `}function m(i,e){let t=parseInt(i.replace("#",""),16),n=Math.min(255,Math.max(0,(t>>16)+e)),s=Math.min(255,Math.max(0,(t>>8&255)+e)),a=Math.min(255,Math.max(0,(t&255)+e));return"#"+((1<<24)+(n<<16)+(s<<8)+a).toString(16).slice(1)}var d={chat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  `}function w(i,t){let e=parseInt(i.replace("#",""),16),o=Math.min(255,Math.max(0,(e>>16)+t)),s=Math.min(255,Math.max(0,(e>>8&255)+t)),n=Math.min(255,Math.max(0,(e&255)+t));return"#"+((1<<24)+(o<<16)+(s<<8)+n).toString(16).slice(1)}var g={chat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
   </svg>`,close:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -517,7 +602,7 @@
     <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
   </svg>`,thumbsDown:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
-  </svg>`};function c(i){let e=T(i);return e=e.replace(/```(\w*)\n([\s\S]*?)```/g,"<pre><code>$2</code></pre>"),e=e.replace(/`([^`]+)`/g,"<code>$1</code>"),e=e.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"),e=e.replace(/__([^_]+)__/g,"<strong>$1</strong>"),e=e.replace(/\*([^*]+)\*/g,"<em>$1</em>"),e=e.replace(/_([^_]+)_/g,"<em>$1</em>"),e=e.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'),e=e.replace(/^[-*]\s+(.+)$/gm,"<li>$1</li>"),e=e.replace(/(<li>.*<\/li>\n?)+/g,"<ul>$&</ul>"),e=e.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>"),e=e.replace(/^### (.+)$/gm,"<h3>$1</h3>"),e=e.replace(/^## (.+)$/gm,"<h2>$1</h2>"),e=e.replace(/^# (.+)$/gm,"<h1>$1</h1>"),e=e.split(/\n\n+/).map(t=>(t=t.trim(),t?/^<(ul|ol|pre|h[1-6]|blockquote)/.test(t)?t:`<p>${t}</p>`:"")).join(""),e=e.replace(/(<p>[\s\S]*?<\/p>)/g,t=>t.replace(/\n/g,"<br>")),e}function T(i){let e={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};return i.replace(/[&<>"']/g,t=>e[t])}var W="chatbot_widget_",h=class{constructor(e){this.container=null;this.shadowRoot=null;this.isOpen=!1;this.messages=[];this.isLoading=!1;this.launcher=null;this.window=null;this.messagesContainer=null;this.input=null;this.sendButton=null;this.newChatButton=null;this.config={apiUrl:e.apiUrl,position:e.position||"bottom-right",primaryColor:e.primaryColor||"#2563eb",headerTitle:e.headerTitle||"Customer Support",headerSubtitle:e.headerSubtitle||"We're here to help!",placeholder:e.placeholder||"Type your message...",greeting:e.greeting||"Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.",mascotImage:e.mascotImage||"",defaultOpen:e.defaultOpen||!1,persistConversation:e.persistConversation!==!1,onOpen:e.onOpen||(()=>{}),onClose:e.onClose||(()=>{}),onMessage:e.onMessage||(()=>{})},this.init()}init(){this.container=document.createElement("div"),this.container.id="chatbot-widget-container",this.shadowRoot=this.container.attachShadow({mode:"open"});let e=document.createElement("style");e.textContent=v(this.config.primaryColor),this.shadowRoot.appendChild(e);let t=document.createElement("div");t.className="widget-container",t.innerHTML=this.getWidgetHTML(),this.shadowRoot.appendChild(t),document.body.appendChild(this.container),this.launcher=this.shadowRoot.querySelector(".widget-launcher"),this.window=this.shadowRoot.querySelector(".widget-window"),this.messagesContainer=this.shadowRoot.querySelector(".widget-messages"),this.input=this.shadowRoot.querySelector(".widget-input"),this.sendButton=this.shadowRoot.querySelector(".widget-send-btn"),this.newChatButton=this.shadowRoot.querySelector(".widget-new-chat"),this.bindEvents(),this.loadConversation(),this.config.defaultOpen&&this.open()}getWidgetHTML(){let e=this.config.mascotImage?`<img class="mascot-icon" src="${this.escapeHtml(this.config.mascotImage)}" alt="Chat" />
+  </svg>`};function h(i){let t=B(i);return t=t.replace(/```(\w*)\n([\s\S]*?)```/g,"<pre><code>$2</code></pre>"),t=t.replace(/`([^`]+)`/g,"<code>$1</code>"),t=t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"),t=t.replace(/__([^_]+)__/g,"<strong>$1</strong>"),t=t.replace(/\*([^*]+)\*/g,"<em>$1</em>"),t=t.replace(/_([^_]+)_/g,"<em>$1</em>"),t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'),t=t.replace(/^[-*]\s+(.+)$/gm,"<li>$1</li>"),t=t.replace(/(<li>.*<\/li>\n?)+/g,"<ul>$&</ul>"),t=t.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>"),t=t.replace(/^### (.+)$/gm,"<h3>$1</h3>"),t=t.replace(/^## (.+)$/gm,"<h2>$1</h2>"),t=t.replace(/^# (.+)$/gm,"<h1>$1</h1>"),t=t.split(/\n\n+/).map(e=>(e=e.trim(),e?/^<(ul|ol|pre|h[1-6]|blockquote)/.test(e)?e:`<p>${e}</p>`:"")).join(""),t=t.replace(/(<p>[\s\S]*?<\/p>)/g,e=>e.replace(/\n/g,"<br>")),t}function B(i){let t={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};return i.replace(/[&<>"']/g,e=>t[e])}var W="chatbot_widget_",u=class{constructor(t){this.container=null;this.shadowRoot=null;this.isOpen=!1;this.messages=[];this.isLoading=!1;this.launcher=null;this.tooltip=null;this.window=null;this.messagesContainer=null;this.input=null;this.sendButton=null;this.newChatButton=null;this.config={apiUrl:t.apiUrl,position:t.position||"bottom-right",primaryColor:t.primaryColor||"#2563eb",headerTitle:t.headerTitle||"Customer Support",headerSubtitle:t.headerSubtitle||"We're here to help!",placeholder:t.placeholder||"Type your message...",greeting:t.greeting||"Hello! How can I help you today? Feel free to ask about our courses, enrollment, pricing, or anything else.",mascotImage:t.mascotImage||"",tooltipText:t.tooltipText||"",tooltipDismissDelay:t.tooltipDismissDelay||0,defaultOpen:t.defaultOpen||!1,persistConversation:t.persistConversation!==!1,onOpen:t.onOpen||(()=>{}),onClose:t.onClose||(()=>{}),onMessage:t.onMessage||(()=>{})},this.init()}init(){this.container=document.createElement("div"),this.container.id="chatbot-widget-container",this.shadowRoot=this.container.attachShadow({mode:"open"});let t=document.createElement("style");t.textContent=v(this.config.primaryColor),this.shadowRoot.appendChild(t);let e=document.createElement("div");e.className="widget-container",e.innerHTML=this.getWidgetHTML(),this.shadowRoot.appendChild(e),document.body.appendChild(this.container),this.launcher=this.shadowRoot.querySelector(".widget-launcher"),this.tooltip=this.shadowRoot.querySelector(".widget-tooltip"),this.window=this.shadowRoot.querySelector(".widget-window"),this.messagesContainer=this.shadowRoot.querySelector(".widget-messages"),this.input=this.shadowRoot.querySelector(".widget-input"),this.sendButton=this.shadowRoot.querySelector(".widget-send-btn"),this.newChatButton=this.shadowRoot.querySelector(".widget-new-chat"),this.bindEvents(),this.loadConversation(),this.config.defaultOpen&&this.open(),this.config.tooltipText&&setTimeout(()=>this.showTooltip(),500)}getWidgetHTML(){let t=this.config.mascotImage?`<img class="mascot-icon" src="${this.escapeHtml(this.config.mascotImage)}" alt="Chat" />
         <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -527,11 +612,17 @@
         <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>`;return`
+        </svg>`,e=this.config.tooltipText?`<div class="widget-tooltip ${this.config.position}${this.config.mascotImage?" has-mascot":""}">
+          <span>${this.escapeHtml(this.config.tooltipText)}</span>
+          <button class="widget-tooltip-close" aria-label="Dismiss">&times;</button>
+        </div>`:"";return`
       <!-- Launcher button -->
       <button class="widget-launcher ${this.config.position}${this.config.mascotImage?" has-mascot":""}" aria-label="Open chat">
-        ${e}
+        ${t}
       </button>
+
+      <!-- Tooltip -->
+      ${e}
 
       <!-- Chat window -->
       <div class="widget-window ${this.config.position}">
@@ -545,7 +636,7 @@
             </div>
           </div>
           <button class="widget-new-chat" style="display: none;">
-            ${d.refresh}
+            ${g.refresh}
             <span>New Chat</span>
           </button>
         </div>
@@ -563,48 +654,48 @@
               autocomplete="off"
             />
             <button type="submit" class="widget-send-btn">
-              ${d.send}
+              ${g.send}
             </button>
           </form>
         </div>
       </div>
-    `}bindEvents(){var t,n,s,a;(t=this.launcher)==null||t.addEventListener("click",()=>this.toggle());let e=(n=this.shadowRoot)==null?void 0:n.querySelector(".widget-input-form");e==null||e.addEventListener("submit",o=>{o.preventDefault(),this.handleSend()}),(s=this.newChatButton)==null||s.addEventListener("click",()=>this.startNewChat()),(a=this.input)==null||a.addEventListener("keydown",o=>{o.key==="Enter"&&!o.shiftKey&&(o.preventDefault(),this.handleSend())}),document.addEventListener("keydown",o=>{o.key==="Escape"&&this.isOpen&&this.close()})}loadConversation(){if(!this.config.persistConversation){this.initializeWithGreeting();return}try{let e=this.getStorageKey(),t=localStorage.getItem(e);if(t){let n=JSON.parse(t);this.messages=n.map(s=>({...s,timestamp:new Date(s.timestamp)}))}else this.initializeWithGreeting()}catch(e){this.initializeWithGreeting()}this.renderMessages(),this.updateNewChatVisibility()}initializeWithGreeting(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}]}saveConversation(){if(this.config.persistConversation)try{let e=this.getStorageKey();localStorage.setItem(e,JSON.stringify(this.messages))}catch(e){}}getStorageKey(){let e=new URL(this.config.apiUrl).hostname;return`${W}${e}`}async handleSend(){var n,s;let e=(n=this.input)==null?void 0:n.value.trim();if(!e||this.isLoading)return;this.input&&(this.input.value="");let t={role:"user",content:e,timestamp:new Date};this.messages.push(t),this.renderMessages(),this.saveConversation(),this.config.onMessage(t),this.isLoading=!0,this.updateInputState();try{let a=await fetch(`${this.config.apiUrl}/api/chat/stream`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({message:e,conversationHistory:this.messages.slice(0,-1)})});if(!a.ok)throw new Error("Failed to get response");let o=(s=a.body)==null?void 0:s.getReader();if(!o)throw new Error("No reader available");let p=new TextDecoder,g="";for(this.renderStreamingMessage("");;){let{done:y,value:k}=await o.read();if(y)break;let C=p.decode(k).split(`
-`);for(let f of C)if(f.startsWith("data: "))try{let l=JSON.parse(f.slice(6));if(l.text)g+=l.text,this.updateStreamingMessage(g);else if(l.done){let M=`msg_${Date.now()}_${Math.random().toString(36).substring(2,9)}`,b={role:"assistant",content:g,timestamp:new Date,id:M,userMessage:e,feedback:null};this.messages.push(b),this.config.onMessage(b)}else if(l.error)throw new Error(l.error)}catch(l){}}}catch(a){let o={role:"assistant",content:"Sorry, I encountered an error. Please try again.",timestamp:new Date};this.messages.push(o)}this.isLoading=!1,this.updateInputState(),this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}renderStreamingMessage(e){if(!this.messagesContainer)return;let t=`
+    `}showTooltip(){!this.tooltip||this.isOpen||(this.tooltip.classList.add("visible"),this.config.tooltipDismissDelay>0&&setTimeout(()=>this.hideTooltip(),this.config.tooltipDismissDelay))}hideTooltip(){var t;(t=this.tooltip)==null||t.classList.remove("visible")}bindEvents(){var o,s,n,a,c,l;(o=this.launcher)==null||o.addEventListener("click",()=>this.toggle());let t=(s=this.shadowRoot)==null?void 0:s.querySelector(".widget-tooltip-close");t==null||t.addEventListener("click",d=>{d.stopPropagation(),this.hideTooltip()}),(n=this.tooltip)==null||n.addEventListener("click",()=>{this.hideTooltip(),this.open()});let e=(a=this.shadowRoot)==null?void 0:a.querySelector(".widget-input-form");e==null||e.addEventListener("submit",d=>{d.preventDefault(),this.handleSend()}),(c=this.newChatButton)==null||c.addEventListener("click",()=>this.startNewChat()),(l=this.input)==null||l.addEventListener("keydown",d=>{d.key==="Enter"&&!d.shiftKey&&(d.preventDefault(),this.handleSend())}),document.addEventListener("keydown",d=>{d.key==="Escape"&&this.isOpen&&this.close()})}loadConversation(){if(!this.config.persistConversation){this.initializeWithGreeting();return}try{let t=this.getStorageKey(),e=localStorage.getItem(t);if(e){let o=JSON.parse(e);this.messages=o.map(s=>({...s,timestamp:new Date(s.timestamp)}))}else this.initializeWithGreeting()}catch(t){this.initializeWithGreeting()}this.renderMessages(),this.updateNewChatVisibility()}initializeWithGreeting(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}]}saveConversation(){if(this.config.persistConversation)try{let t=this.getStorageKey();localStorage.setItem(t,JSON.stringify(this.messages))}catch(t){}}getStorageKey(){let t=new URL(this.config.apiUrl).hostname;return`${W}${t}`}async handleSend(){var o,s;let t=(o=this.input)==null?void 0:o.value.trim();if(!t||this.isLoading)return;this.input&&(this.input.value="");let e={role:"user",content:t,timestamp:new Date};this.messages.push(e),this.renderMessages(),this.saveConversation(),this.config.onMessage(e),this.isLoading=!0,this.updateInputState();try{let n=await fetch(`${this.config.apiUrl}/api/chat/stream`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({message:t,conversationHistory:this.messages.slice(0,-1)})});if(!n.ok)throw new Error("Failed to get response");let a=(s=n.body)==null?void 0:s.getReader();if(!a)throw new Error("No reader available");let c=new TextDecoder,l="";for(this.renderStreamingMessage("");;){let{done:d,value:k}=await a.read();if(d)break;let C=c.decode(k).split(`
+`);for(let b of C)if(b.startsWith("data: "))try{let p=JSON.parse(b.slice(6));if(p.text)l+=p.text,this.updateStreamingMessage(l);else if(p.done){let M=`msg_${Date.now()}_${Math.random().toString(36).substring(2,9)}`,x={role:"assistant",content:l,timestamp:new Date,id:M,userMessage:t,feedback:null};this.messages.push(x),this.config.onMessage(x)}else if(p.error)throw new Error(p.error)}catch(p){}}}catch(n){let a={role:"assistant",content:"Sorry, I encountered an error. Please try again.",timestamp:new Date};this.messages.push(a)}this.isLoading=!1,this.updateInputState(),this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}renderStreamingMessage(t){if(!this.messagesContainer)return;let e=`
       <div class="widget-message assistant widget-streaming">
         <div class="widget-message-bubble">
           <div class="widget-message-content">
-            ${e?c(e):""}
+            ${t?h(t):""}
             <span class="widget-streaming-cursor"></span>
           </div>
         </div>
       </div>
-    `;this.messagesContainer.innerHTML=this.messages.map((n,s)=>this.renderMessage(n,s)).join("")+t,this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight}updateStreamingMessage(e){if(!this.messagesContainer)return;let t=this.messagesContainer.querySelector(".widget-streaming .widget-message-content");t&&(t.innerHTML=c(e)+'<span class="widget-streaming-cursor"></span>',this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight)}async submitFeedback(e,t){let n=this.messages.find(s=>s.id===e);if(n)try{(await fetch(`${this.config.apiUrl}/api/feedback`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({messageId:e,userMessage:n.userMessage,assistantResponse:n.content,feedback:t})})).ok&&(n.feedback=t,this.saveConversation(),this.renderMessages())}catch(s){}}renderMessages(){this.messagesContainer&&(this.messagesContainer.innerHTML=this.messages.map((e,t)=>this.renderMessage(e,t)).join(""),this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight,this.bindFeedbackButtons(),this.bindCopyButtons())}renderMessage(e,t){let n=this.formatTime(e.timestamp),s=e.role==="assistant",a="";if(s){let o="widget-action-btn copy-btn",p=`widget-action-btn thumbs-up ${e.feedback==="positive"?"positive":""}`,g=`widget-action-btn thumbs-down ${e.feedback==="negative"?"negative":""}`;a=`
+    `;this.messagesContainer.innerHTML=this.messages.map((o,s)=>this.renderMessage(o,s)).join("")+e,this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight}updateStreamingMessage(t){if(!this.messagesContainer)return;let e=this.messagesContainer.querySelector(".widget-streaming .widget-message-content");e&&(e.innerHTML=h(t)+'<span class="widget-streaming-cursor"></span>',this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight)}async submitFeedback(t,e){let o=this.messages.find(s=>s.id===t);if(o)try{(await fetch(`${this.config.apiUrl}/api/feedback`,{method:"POST",headers:{"Content-Type":"application/json","X-Widget-Origin":window.location.origin},body:JSON.stringify({messageId:t,userMessage:o.userMessage,assistantResponse:o.content,feedback:e})})).ok&&(o.feedback=e,this.saveConversation(),this.renderMessages())}catch(s){}}renderMessages(){this.messagesContainer&&(this.messagesContainer.innerHTML=this.messages.map((t,e)=>this.renderMessage(t,e)).join(""),this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight,this.bindFeedbackButtons(),this.bindCopyButtons())}renderMessage(t,e){let o=this.formatTime(t.timestamp),s=t.role==="assistant",n="";if(s){let a="widget-action-btn copy-btn",c=`widget-action-btn thumbs-up ${t.feedback==="positive"?"positive":""}`,l=`widget-action-btn thumbs-down ${t.feedback==="negative"?"negative":""}`;n=`
         <div class="widget-message-actions">
-          <button class="${o}" data-index="${t}" title="Copy">
-            ${d.copy}
+          <button class="${a}" data-index="${e}" title="Copy">
+            ${g.copy}
           </button>
-          ${e.id?`
-            <button class="${p}" data-id="${e.id}" title="Helpful">
-              ${d.thumbsUp}
+          ${t.id?`
+            <button class="${c}" data-id="${t.id}" title="Helpful">
+              ${g.thumbsUp}
             </button>
-            <button class="${g}" data-id="${e.id}" title="Not helpful">
-              ${d.thumbsDown}
+            <button class="${l}" data-id="${t.id}" title="Not helpful">
+              ${g.thumbsDown}
             </button>
           `:""}
         </div>
       `}return`
-      <div class="widget-message ${e.role}">
+      <div class="widget-message ${t.role}">
         <div class="widget-message-bubble">
           <div class="widget-message-content">
-            ${s?c(e.content):this.escapeHtml(e.content)}
+            ${s?h(t.content):this.escapeHtml(t.content)}
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 4px;">
-          <span class="widget-message-time">${n}</span>
-          ${a}
+          <span class="widget-message-time">${o}</span>
+          ${n}
         </div>
       </div>
-    `}bindFeedbackButtons(){var n,s;let e=(n=this.shadowRoot)==null?void 0:n.querySelectorAll(".thumbs-up"),t=(s=this.shadowRoot)==null?void 0:s.querySelectorAll(".thumbs-down");e==null||e.forEach(a=>{a.addEventListener("click",()=>{let o=a.getAttribute("data-id");o&&this.submitFeedback(o,"positive")})}),t==null||t.forEach(a=>{a.addEventListener("click",()=>{let o=a.getAttribute("data-id");o&&this.submitFeedback(o,"negative")})})}bindCopyButtons(){var t;let e=(t=this.shadowRoot)==null?void 0:t.querySelectorAll(".copy-btn");e==null||e.forEach(n=>{n.addEventListener("click",async()=>{let s=parseInt(n.getAttribute("data-index")||"0",10),a=this.messages[s];if(a)try{await navigator.clipboard.writeText(a.content),n.innerHTML=d.check,setTimeout(()=>{n.innerHTML=d.copy},2e3)}catch(o){}})})}updateInputState(){this.input&&(this.input.disabled=this.isLoading),this.sendButton&&(this.sendButton.disabled=this.isLoading)}updateNewChatVisibility(){this.newChatButton&&(this.newChatButton.style.display=this.messages.length>1?"flex":"none")}formatTime(e){return e.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:!0})}escapeHtml(e){let t=document.createElement("div");return t.textContent=e,t.innerHTML}startNewChat(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}],this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}open(){var e,t,n;this.isOpen=!0,(e=this.launcher)==null||e.classList.add("open"),(t=this.window)==null||t.classList.add("visible"),(n=this.input)==null||n.focus(),this.config.onOpen()}close(){var e,t;this.isOpen=!1,(e=this.launcher)==null||e.classList.remove("open"),(t=this.window)==null||t.classList.remove("visible"),this.config.onClose()}toggle(){this.isOpen?this.close():this.open()}destroy(){var e;(e=this.container)==null||e.remove(),this.container=null,this.shadowRoot=null}sendMessage(e){this.input&&(this.input.value=e,this.handleSend())}};var r=null,w={init(i){if(r){console.warn("ChatBotWidget is already initialized. Call destroy() first to reinitialize.");return}if(!i.apiUrl){console.error("ChatBotWidget: apiUrl is required");return}r=new h(i)},open(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.open()},close(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.close()},toggle(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.toggle()},destroy(){r&&(r.destroy(),r=null)},sendMessage(i){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.sendMessage(i)}};if(typeof window!="undefined"){window.ChatBotWidget=w;let i=document.currentScript;if(i){let e=i.getAttribute("data-api-url");e&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>x(i,e)):x(i,e))}}function x(i,e){let t={apiUrl:e,position:i.getAttribute("data-position")||void 0,primaryColor:i.getAttribute("data-primary-color")||void 0,headerTitle:i.getAttribute("data-header-title")||void 0,headerSubtitle:i.getAttribute("data-header-subtitle")||void 0,placeholder:i.getAttribute("data-placeholder")||void 0,greeting:i.getAttribute("data-greeting")||void 0,mascotImage:i.getAttribute("data-mascot-image")||void 0,defaultOpen:i.getAttribute("data-default-open")==="true",persistConversation:i.getAttribute("data-persist-conversation")!=="false"};w.init(t)}return E(z);})();
+    `}bindFeedbackButtons(){var o,s;let t=(o=this.shadowRoot)==null?void 0:o.querySelectorAll(".thumbs-up"),e=(s=this.shadowRoot)==null?void 0:s.querySelectorAll(".thumbs-down");t==null||t.forEach(n=>{n.addEventListener("click",()=>{let a=n.getAttribute("data-id");a&&this.submitFeedback(a,"positive")})}),e==null||e.forEach(n=>{n.addEventListener("click",()=>{let a=n.getAttribute("data-id");a&&this.submitFeedback(a,"negative")})})}bindCopyButtons(){var e;let t=(e=this.shadowRoot)==null?void 0:e.querySelectorAll(".copy-btn");t==null||t.forEach(o=>{o.addEventListener("click",async()=>{let s=parseInt(o.getAttribute("data-index")||"0",10),n=this.messages[s];if(n)try{await navigator.clipboard.writeText(n.content),o.innerHTML=g.check,setTimeout(()=>{o.innerHTML=g.copy},2e3)}catch(a){}})})}updateInputState(){this.input&&(this.input.disabled=this.isLoading),this.sendButton&&(this.sendButton.disabled=this.isLoading)}updateNewChatVisibility(){this.newChatButton&&(this.newChatButton.style.display=this.messages.length>1?"flex":"none")}formatTime(t){return t.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:!0})}escapeHtml(t){let e=document.createElement("div");return e.textContent=t,e.innerHTML}startNewChat(){this.messages=[{role:"assistant",content:this.config.greeting,timestamp:new Date}],this.renderMessages(),this.saveConversation(),this.updateNewChatVisibility()}open(){var t,e,o;this.isOpen=!0,this.hideTooltip(),(t=this.launcher)==null||t.classList.add("open"),(e=this.window)==null||e.classList.add("visible"),(o=this.input)==null||o.focus(),this.config.onOpen()}close(){var t,e;this.isOpen=!1,(t=this.launcher)==null||t.classList.remove("open"),(e=this.window)==null||e.classList.remove("visible"),this.config.onClose()}toggle(){this.isOpen?this.close():this.open()}destroy(){var t;(t=this.container)==null||t.remove(),this.container=null,this.shadowRoot=null}sendMessage(t){this.input&&(this.input.value=t,this.handleSend())}};var r=null,f={init(i){if(r){console.warn("ChatBotWidget is already initialized. Call destroy() first to reinitialize.");return}if(!i.apiUrl){console.error("ChatBotWidget: apiUrl is required");return}r=new u(i)},open(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.open()},close(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.close()},toggle(){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.toggle()},destroy(){r&&(r.destroy(),r=null)},sendMessage(i){if(!r){console.warn("ChatBotWidget is not initialized. Call init() first.");return}r.sendMessage(i)}};if(typeof window!="undefined"){window.ChatBotWidget=f;let i=document.currentScript;if(i){let t=i.getAttribute("data-api-url");t&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>y(i,t)):y(i,t))}}function y(i,t){let e={apiUrl:t,position:i.getAttribute("data-position")||void 0,primaryColor:i.getAttribute("data-primary-color")||void 0,headerTitle:i.getAttribute("data-header-title")||void 0,headerSubtitle:i.getAttribute("data-header-subtitle")||void 0,placeholder:i.getAttribute("data-placeholder")||void 0,greeting:i.getAttribute("data-greeting")||void 0,mascotImage:i.getAttribute("data-mascot-image")||void 0,tooltipText:i.getAttribute("data-tooltip-text")||void 0,tooltipDismissDelay:i.getAttribute("data-tooltip-dismiss-delay")?parseInt(i.getAttribute("data-tooltip-dismiss-delay"),10):void 0,defaultOpen:i.getAttribute("data-default-open")==="true",persistConversation:i.getAttribute("data-persist-conversation")!=="false"};f.init(e)}return E(z);})();
 
 // Ensure ChatBotWidget is available globally
 if (typeof window !== 'undefined' && !window.ChatBotWidget) {
