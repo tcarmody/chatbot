@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import faqData from '@/data/faq.json';
-import courseCatalog from '@/deeplearning-ai-course-catalog.json';
+import courseCatalog from '@/data/deeplearning-ai-course-catalog.json';
 import { logAnalyticsEvent } from '@/lib/analytics';
 import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 import { chatLogger, logError } from '@/lib/logger';
