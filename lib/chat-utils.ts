@@ -5,6 +5,7 @@ import faqData from '@/data/faq.json';
 import courseCatalog from '@/data/deeplearning-ai-course-catalog.json';
 import { sql, initializeSchema } from '@/lib/db';
 import { chatLogger } from '@/lib/logger';
+import { generateEmbedding } from '@/lib/embeddings';
 import type { ChatMessage } from '@/lib/ai';
 
 // Context window optimization settings
@@ -280,19 +281,75 @@ export interface KnowledgeBaseResult {
   relevantCategories: string[];
 }
 
-// Build the knowledge base context from FAQs and course catalog
-export function buildKnowledgeBase(userMessage: string): KnowledgeBaseResult {
+interface FaqEmbeddingRow {
+  faq_id: number;
+  question: string;
+  answer: string;
+  category: string;
+  similarity: number;
+}
+
+// Semantic search configuration
+const SEMANTIC_SEARCH_LIMIT = 5; // Number of FAQs to retrieve
+const SIMILARITY_THRESHOLD = 0.3; // Minimum similarity score (0-1)
+
+// Build the knowledge base context from FAQs using semantic search
+export async function buildKnowledgeBase(userMessage: string): Promise<KnowledgeBaseResult> {
   const relevantCategories = detectRelevantCategories(userMessage);
 
-  // Filter FAQs to only include relevant categories
-  const relevantFaqs = faqData.faqs.filter(faq =>
-    relevantCategories.includes(faq.category)
-  );
+  let relevantFaqs: typeof faqData.faqs = [];
+  let faqKnowledgeBase = '';
 
-  // Build FAQ knowledge base
-  const faqKnowledgeBase = relevantFaqs
-    .map(faq => `Q: ${faq.question}\nA: ${faq.answer}\nCategory: ${faq.category}`)
-    .join('\n\n');
+  try {
+    // Generate embedding for user query
+    const queryEmbedding = await generateEmbedding(userMessage);
+
+    // Find semantically similar FAQs using cosine similarity
+    const similarFaqs = await sql`
+      SELECT
+        faq_id,
+        question,
+        answer,
+        category,
+        1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity
+      FROM faq_embeddings
+      ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+      LIMIT ${SEMANTIC_SEARCH_LIMIT}
+    ` as FaqEmbeddingRow[];
+
+    // Filter by similarity threshold and build knowledge base
+    const matchedFaqs = similarFaqs.filter(faq => faq.similarity >= SIMILARITY_THRESHOLD);
+
+    if (matchedFaqs.length > 0) {
+      relevantFaqs = matchedFaqs.map(faq => ({
+        id: faq.faq_id,
+        question: faq.question,
+        answer: faq.answer,
+        category: faq.category,
+      }));
+
+      faqKnowledgeBase = matchedFaqs
+        .map(faq => `Q: ${faq.question}\nA: ${faq.answer}\nCategory: ${faq.category}\nRelevance: ${(faq.similarity * 100).toFixed(1)}%`)
+        .join('\n\n');
+
+      chatLogger.info('Semantic search results', {
+        query: userMessage.substring(0, 50),
+        matchCount: matchedFaqs.length,
+        topSimilarity: matchedFaqs[0]?.similarity.toFixed(3),
+      });
+    }
+  } catch (error) {
+    // Fallback to keyword-based search if semantic search fails
+    chatLogger.warn('Semantic search failed, falling back to keyword search', { error });
+
+    relevantFaqs = faqData.faqs.filter(faq =>
+      relevantCategories.includes(faq.category)
+    );
+
+    faqKnowledgeBase = relevantFaqs
+      .map(faq => `Q: ${faq.question}\nA: ${faq.answer}\nCategory: ${faq.category}`)
+      .join('\n\n');
+  }
 
   // Build course catalog if relevant
   let courseCatalogKnowledgeBase = '';

@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Build knowledge base from FAQs and course catalog
-    const { knowledgeBase, relevantFaqs, relevantCategories } = buildKnowledgeBase(message);
+    // Build knowledge base from FAQs and course catalog using semantic search
+    const { knowledgeBase, relevantFaqs, relevantCategories } = await buildKnowledgeBase(message);
 
     // Build messages array with conversation history
     const messages = buildMessagesArray(conversationHistory, message);

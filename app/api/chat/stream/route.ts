@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    // Detect user intent and build knowledge base
+    // Detect user intent and build knowledge base using semantic search
     const userIntent = detectUserIntent(message);
-    const { knowledgeBase, relevantFaqs, relevantCategories } = buildKnowledgeBase(message);
+    const { knowledgeBase, relevantFaqs, relevantCategories } = await buildKnowledgeBase(message);
 
     // Build messages array with conversation history
     const messages = buildMessagesArray(conversationHistory, message);

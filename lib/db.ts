@@ -1,5 +1,6 @@
 // Neon Postgres database connection and schema initialization
 import { neon } from '@neondatabase/serverless';
+import { EMBEDDING_DIMENSIONS } from './embeddings';
 
 // Create SQL query function from connection string
 function getSQL() {
@@ -187,6 +188,30 @@ export async function initializeSchema() {
     // Create indexes for FAQ gaps
     await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_created ON faq_gaps(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_type ON faq_gaps(gap_type)`;
+
+    // Enable pgvector extension for semantic search
+    await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+
+    // FAQ embeddings table for semantic search
+    await sql`
+      CREATE TABLE IF NOT EXISTS faq_embeddings (
+        id SERIAL PRIMARY KEY,
+        faq_id INTEGER UNIQUE NOT NULL,
+        question TEXT NOT NULL,
+        answer TEXT NOT NULL,
+        category TEXT NOT NULL,
+        embedding vector(${EMBEDDING_DIMENSIONS}),
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create HNSW index for fast similarity search (better than IVFFlat for query performance)
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_faq_embeddings_hnsw
+      ON faq_embeddings
+      USING hnsw (embedding vector_cosine_ops)
+    `;
 
     // Migration: Update constraint to include 'off_topic' type
     // Drop old constraint and add new one (PostgreSQL doesn't have ALTER CONSTRAINT)
