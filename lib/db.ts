@@ -1,6 +1,5 @@
 // Neon Postgres database connection and schema initialization
 import { neon } from '@neondatabase/serverless';
-import { EMBEDDING_DIMENSIONS } from './embeddings';
 
 // Create SQL query function from connection string
 function getSQL() {
@@ -192,7 +191,7 @@ export async function initializeSchema() {
     // Enable pgvector extension for semantic search
     await sql`CREATE EXTENSION IF NOT EXISTS vector`;
 
-    // FAQ embeddings table for semantic search
+    // FAQ embeddings table for semantic search (using halfvec for 3072 dimensions)
     await sql`
       CREATE TABLE IF NOT EXISTS faq_embeddings (
         id SERIAL PRIMARY KEY,
@@ -200,17 +199,41 @@ export async function initializeSchema() {
         question TEXT NOT NULL,
         answer TEXT NOT NULL,
         category TEXT NOT NULL,
-        embedding vector(${EMBEDDING_DIMENSIONS}),
+        embedding halfvec(3072),
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       )
     `;
 
-    // Create HNSW index for fast similarity search (better than IVFFlat for query performance)
+    // Create HNSW index (halfvec supports up to 4000 dimensions)
     await sql`
       CREATE INDEX IF NOT EXISTS idx_faq_embeddings_hnsw
       ON faq_embeddings
-      USING hnsw (embedding vector_cosine_ops)
+      USING hnsw (embedding halfvec_cosine_ops)
+    `;
+
+    // Course embeddings table for semantic search
+    await sql`
+      CREATE TABLE IF NOT EXISTS course_embeddings (
+        id SERIAL PRIMARY KEY,
+        course_id INTEGER UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        format TEXT NOT NULL,
+        platform TEXT NOT NULL,
+        partner TEXT,
+        learner_hours REAL,
+        description TEXT NOT NULL,
+        embedding halfvec(3072),
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create HNSW index for courses
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_course_embeddings_hnsw
+      ON course_embeddings
+      USING hnsw (embedding halfvec_cosine_ops)
     `;
 
     // Migration: Update constraint to include 'off_topic' type

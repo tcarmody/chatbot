@@ -289,8 +289,20 @@ interface FaqEmbeddingRow {
   similarity: number;
 }
 
+interface CourseEmbeddingRow {
+  course_id: number;
+  name: string;
+  format: string;
+  platform: string;
+  partner: string | null;
+  learner_hours: number | null;
+  description: string;
+  similarity: number;
+}
+
 // Semantic search configuration
 const SEMANTIC_SEARCH_LIMIT = 5; // Number of FAQs to retrieve
+const COURSE_SEARCH_LIMIT = 5; // Number of courses to retrieve
 const SIMILARITY_THRESHOLD = 0.3; // Minimum similarity score (0-1)
 
 // Build the knowledge base context from FAQs using semantic search
@@ -304,16 +316,16 @@ export async function buildKnowledgeBase(userMessage: string): Promise<Knowledge
     // Generate embedding for user query
     const queryEmbedding = await generateEmbedding(userMessage);
 
-    // Find semantically similar FAQs using cosine similarity
+    // Find semantically similar FAQs using cosine similarity (halfvec for 3072 dimensions)
     const similarFaqs = await sql`
       SELECT
         faq_id,
         question,
         answer,
         category,
-        1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity
+        1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::halfvec) as similarity
       FROM faq_embeddings
-      ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+      ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::halfvec
       LIMIT ${SEMANTIC_SEARCH_LIMIT}
     ` as FaqEmbeddingRow[];
 
@@ -351,23 +363,62 @@ export async function buildKnowledgeBase(userMessage: string): Promise<Knowledge
       .join('\n\n');
   }
 
-  // Build course catalog if relevant
+  // Build course catalog using semantic search
   let courseCatalogKnowledgeBase = '';
   if (relevantCategories.includes('Courses & Programs')) {
-    const courseEntries: string[] = [];
+    try {
+      // Reuse the same embedding we already generated for FAQ search
+      const queryEmbedding = await generateEmbedding(userMessage);
 
-    for (const [partner, courses] of Object.entries(courseCatalog.courses_by_partner)) {
-      if (Array.isArray(courses) && courses.length > 0) {
-        courses.forEach((course: any) => {
-          const partnerName = partner === 'DeepLearning.AI (Independent)' ? 'DeepLearning.AI' : partner;
-          courseEntries.push(
-            `Course: ${course.name}\nFormat: ${course.format}\nPartner: ${partnerName}\nPlatform: ${course.platform}\nLearner Hours: ${course.learner_hours || 'N/A'}\nLaunch Date: ${course.launch_date}\nDescription: ${course.description}`
-          );
+      // Find semantically similar courses
+      const similarCourses = await sql`
+        SELECT
+          course_id,
+          name,
+          format,
+          platform,
+          partner,
+          learner_hours,
+          description,
+          1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::halfvec) as similarity
+        FROM course_embeddings
+        ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::halfvec
+        LIMIT ${COURSE_SEARCH_LIMIT}
+      ` as CourseEmbeddingRow[];
+
+      const matchedCourses = similarCourses.filter(course => course.similarity >= SIMILARITY_THRESHOLD);
+
+      if (matchedCourses.length > 0) {
+        const courseEntries = matchedCourses.map(course =>
+          `Course: ${course.name}\nFormat: ${course.format}\nPartner: ${course.partner || 'DeepLearning.AI'}\nPlatform: ${course.platform}\nLearner Hours: ${course.learner_hours || 'N/A'}\nDescription: ${course.description}\nRelevance: ${(course.similarity * 100).toFixed(1)}%`
+        );
+
+        courseCatalogKnowledgeBase = `\n\nRELEVANT COURSES (${matchedCourses.length} matches from ${courseCatalog.catalog_info.total_courses} total):\n\n${courseEntries.join('\n\n---\n\n')}`;
+
+        chatLogger.info('Course semantic search results', {
+          query: userMessage.substring(0, 50),
+          matchCount: matchedCourses.length,
+          topSimilarity: matchedCourses[0]?.similarity.toFixed(3),
         });
       }
-    }
+    } catch (error) {
+      // Fallback to full course catalog if semantic search fails
+      chatLogger.warn('Course semantic search failed, falling back to full catalog', { error });
 
-    courseCatalogKnowledgeBase = `\n\nCOURSE CATALOG (${courseCatalog.catalog_info.total_courses} courses available):\nLast Updated: ${courseCatalog.catalog_info.last_updated}\n\n${courseEntries.join('\n\n---\n\n')}`;
+      const courseEntries: string[] = [];
+      for (const [partner, courses] of Object.entries(courseCatalog.courses_by_partner)) {
+        if (Array.isArray(courses) && courses.length > 0) {
+          courses.forEach((course: any) => {
+            const partnerName = partner === 'DeepLearning.AI (Independent)' ? 'DeepLearning.AI' : partner;
+            courseEntries.push(
+              `Course: ${course.name}\nFormat: ${course.format}\nPartner: ${partnerName}\nPlatform: ${course.platform}\nLearner Hours: ${course.learner_hours || 'N/A'}\nDescription: ${course.description}`
+            );
+          });
+        }
+      }
+
+      courseCatalogKnowledgeBase = `\n\nCOURSE CATALOG (${courseCatalog.catalog_info.total_courses} courses available):\n\n${courseEntries.join('\n\n---\n\n')}`;
+    }
   }
 
   return {

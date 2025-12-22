@@ -1,10 +1,10 @@
 // Embedding generation using Google's Gemini Embedding API
-// Model: gemini-embedding-001 (768 dimensions, top-ranked on MTEB benchmark)
+// Model: gemini-embedding-001 (3072 dimensions, top-ranked on MTEB benchmark)
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const EMBEDDING_MODEL = 'gemini-embedding-001';
-const EMBEDDING_DIMENSIONS = 768;
+const EMBEDDING_DIMENSIONS = 3072;
 
 let googleClient: GoogleGenerativeAI | null = null;
 
