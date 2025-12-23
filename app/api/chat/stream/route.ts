@@ -1,6 +1,17 @@
 import { NextRequest } from 'next/server';
 import { logAnalyticsEvent } from '@/lib/analytics';
-import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
+import {
+  checkRateLimit,
+  getClientIP,
+  rateLimitResponse,
+  RATE_LIMITS,
+  checkTokenBudget,
+  recordTokenUsage,
+  checkConversationLength,
+  checkAbuseThreshold,
+  logRateLimitEvent,
+} from '@/lib/rate-limit';
+import { validateApiKey, updateApiKeyUsage } from '@/lib/api-keys';
 import { chatLogger, logError } from '@/lib/logger';
 import { streamingChatCompletion, getModelInfo } from '@/lib/ai';
 import {
@@ -20,16 +31,79 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Widget-Origin',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Widget-Origin, X-API-Key',
     },
   });
 }
 
 export async function POST(req: NextRequest) {
   const clientIP = getClientIP(req);
-  const rateLimitResult = checkRateLimit(clientIP, RATE_LIMITS.chat);
+  const apiKeyHeader = req.headers.get('X-API-Key');
+
+  // Determine identifier (API key or IP)
+  let identifier = clientIP;
+  let identifierType: 'ip' | 'api_key' = 'ip';
+  let apiKeyId: string | null = null;
+
+  // 1. Validate API key if provided
+  if (apiKeyHeader) {
+    const keyValidation = await validateApiKey(apiKeyHeader);
+    if (!keyValidation.valid) {
+      logRateLimitEvent(clientIP, 'ip', 'invalid_api_key', { providedKey: apiKeyHeader.substring(0, 10) + '...' }).catch(() => {});
+      return new Response(
+        JSON.stringify({ error: 'Invalid API key', code: 'INVALID_API_KEY' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    identifier = keyValidation.keyId!;
+    identifierType = 'api_key';
+    apiKeyId = keyValidation.keyId;
+  }
+
+  // 2. Check abuse threshold (rapid requests detection)
+  const abuseCheck = checkAbuseThreshold(identifier);
+  if (abuseCheck.triggered) {
+    logRateLimitEvent(identifier, identifierType, 'abuse_threshold', {
+      cooldownUntil: abuseCheck.cooldownUntil?.toISOString(),
+    }).catch(() => {});
+    return new Response(
+      JSON.stringify({
+        error: 'Too many requests. Please wait before sending more messages.',
+        code: 'RATE_LIMIT_COOLDOWN',
+        cooldownUntil: abuseCheck.cooldownUntil?.toISOString(),
+      }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // 3. Standard rate limiting (requests per minute)
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMITS.chat);
   if (!rateLimitResult.success) {
+    logRateLimitEvent(identifier, identifierType, 'rate_limit_exceeded', {
+      limit: rateLimitResult.limit,
+      resetTime: new Date(rateLimitResult.resetTime).toISOString(),
+    }).catch(() => {});
     return rateLimitResponse(rateLimitResult);
+  }
+
+  // 4. Check daily token budget
+  const tokenBudget = await checkTokenBudget(identifier, identifierType);
+  if (!tokenBudget.allowed) {
+    logRateLimitEvent(identifier, identifierType, 'token_budget_exceeded', {
+      used: tokenBudget.used,
+      limit: tokenBudget.limit,
+      resetTime: tokenBudget.resetsAt.toISOString(),
+    }).catch(() => {});
+    return new Response(
+      JSON.stringify({
+        error: 'Daily token limit reached. Limit resets at midnight UTC.',
+        code: 'TOKEN_BUDGET_EXCEEDED',
+        used: tokenBudget.used,
+        limit: tokenBudget.limit,
+        resetsAt: tokenBudget.resetsAt.toISOString(),
+      }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
@@ -40,6 +114,24 @@ export async function POST(req: NextRequest) {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // 5. Check conversation length
+    const convCheck = checkConversationLength(conversationHistory || []);
+    if (!convCheck.allowed) {
+      logRateLimitEvent(identifier, identifierType, 'conversation_limit', {
+        conversationLength: convCheck.current,
+        limit: convCheck.limit,
+      }).catch(() => {});
+      return new Response(
+        JSON.stringify({
+          error: 'Conversation limit reached. Please start a new conversation.',
+          code: 'CONVERSATION_LIMIT',
+          current: convCheck.current,
+          limit: convCheck.limit,
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const startTime = Date.now();
@@ -117,6 +209,15 @@ export async function POST(req: NextRequest) {
                   cacheRead: cacheReadTokens,
                 },
               });
+
+              // 6. Record token usage for rate limiting (non-blocking)
+              const totalTokens = inputTokens + outputTokens;
+              recordTokenUsage(identifier, identifierType, totalTokens).catch(() => {});
+
+              // Update API key usage stats if using API key
+              if (apiKeyId) {
+                updateApiKeyUsage(apiKeyId, totalTokens).catch(() => {});
+              }
             },
             onError: (error) => {
               logError(error, { endpoint: '/api/chat/stream', ip: clientIP, model: modelInfo.displayName });

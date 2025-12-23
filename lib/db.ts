@@ -188,6 +188,61 @@ export async function initializeSchema() {
     await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_created ON faq_gaps(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_faq_gaps_type ON faq_gaps(gap_type)`;
 
+    // API keys table for widget embedding
+    await sql`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id SERIAL PRIMARY KEY,
+        key_id TEXT UNIQUE NOT NULL,
+        key_hash TEXT NOT NULL,
+        name TEXT NOT NULL,
+        created_by INTEGER REFERENCES admin_users(id),
+        is_active BOOLEAN DEFAULT true,
+        requests_today INTEGER DEFAULT 0,
+        tokens_today INTEGER DEFAULT 0,
+        last_used_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create indexes for API keys
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_key_id ON api_keys(key_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_active ON api_keys(is_active)`;
+
+    // Daily token usage tracking table
+    await sql`
+      CREATE TABLE IF NOT EXISTS daily_token_usage (
+        id SERIAL PRIMARY KEY,
+        identifier TEXT NOT NULL,
+        identifier_type TEXT NOT NULL,
+        date DATE NOT NULL,
+        tokens_used INTEGER DEFAULT 0,
+        request_count INTEGER DEFAULT 0,
+        last_request_at TIMESTAMPTZ,
+        UNIQUE(identifier, identifier_type, date)
+      )
+    `;
+
+    // Create indexes for daily token usage
+    await sql`CREATE INDEX IF NOT EXISTS idx_daily_usage_lookup ON daily_token_usage(identifier, identifier_type, date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_daily_usage_date ON daily_token_usage(date)`;
+
+    // Rate limit events table for tracking blocked requests
+    await sql`
+      CREATE TABLE IF NOT EXISTS rate_limit_events (
+        id SERIAL PRIMARY KEY,
+        identifier TEXT NOT NULL,
+        identifier_type TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        details JSONB,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create indexes for rate limit events
+    await sql`CREATE INDEX IF NOT EXISTS idx_rate_limit_events_created ON rate_limit_events(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_rate_limit_events_type ON rate_limit_events(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_rate_limit_events_identifier ON rate_limit_events(identifier)`;
+
     // Enable pgvector extension for semantic search
     await sql`CREATE EXTENSION IF NOT EXISTS vector`;
 

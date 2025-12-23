@@ -16,6 +16,8 @@ import {
   ExternalLink,
   Lightbulb,
   Code,
+  Key,
+  Shield,
 } from 'lucide-react';
 
 interface NavItem {
@@ -37,6 +39,8 @@ const adminNavItems: NavItem[] = [
   { label: 'Insights', href: '/admin/insights', icon: <Lightbulb className="w-4 h-4" /> },
   { label: 'Sessions', href: '/admin/sessions', icon: <Users className="w-4 h-4" /> },
   { label: 'Users', href: '/admin/users', icon: <UserCog className="w-4 h-4" /> },
+  { label: 'API Keys', href: '/admin/api-keys', icon: <Key className="w-4 h-4" /> },
+  { label: 'Rate Limits', href: '/admin/rate-limits', icon: <Shield className="w-4 h-4" /> },
 ];
 
 interface NavigationProps {
