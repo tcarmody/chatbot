@@ -60,12 +60,13 @@ export default function WidgetDemoPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <h2 className="font-semibold text-blue-900 mb-2">How to embed on your site</h2>
             <p className="text-blue-800 text-sm mb-3">
-              Add this single script tag to your HTML:
+              Add this single script tag to your HTML. For external sites, you&apos;ll need an API key (see Security section below):
             </p>
             <pre className="bg-blue-900 text-blue-100 p-4 rounded text-sm overflow-x-auto">
 {`<script
   src="${apiUrl || 'https://your-domain.com'}/widget.js"
   data-api-url="${apiUrl || 'https://your-domain.com'}"
+  data-api-key="YOUR_API_KEY"
 ></script>`}
             </pre>
           </div>
@@ -115,6 +116,11 @@ export default function WidgetDemoPage() {
                     <td className="py-2">Your chatbot API URL</td>
                   </tr>
                   <tr className="border-b border-gray-100">
+                    <td className="py-2 pr-4 font-mono text-xs">data-api-key</td>
+                    <td className="py-2 pr-4 text-orange-600">recommended</td>
+                    <td className="py-2">API key for authentication (required for external sites)</td>
+                  </tr>
+                  <tr className="border-b border-gray-100">
                     <td className="py-2 pr-4 font-mono text-xs">data-position</td>
                     <td className="py-2 pr-4">bottom-right</td>
                     <td className="py-2">bottom-right or bottom-left</td>
@@ -151,6 +157,81 @@ export default function WidgetDemoPage() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h2 className="font-semibold text-gray-900 mb-3">Security &amp; Rate Limits</h2>
+
+            <div className="space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h3 className="font-medium text-amber-900 mb-2">API Key Required for External Sites</h3>
+                <p className="text-amber-800 text-sm">
+                  When embedding the widget on external domains, you must include an API key to authenticate requests.
+                  API keys can be created and managed in the <a href="/admin/api-keys" className="underline font-medium">Admin &gt; API Keys</a> dashboard.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="font-medium text-gray-900 mb-2">Rate Limits</h3>
+                <p className="text-gray-700 text-sm mb-3">
+                  To prevent abuse, the following rate limits apply to widget usage:
+                </p>
+                <ul className="text-gray-700 text-sm space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span><strong>Daily Token Budget:</strong> 50,000 tokens per day per API key or IP address. Resets at midnight UTC.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span><strong>Conversation Limit:</strong> Maximum 30 messages per conversation. Users can start a new conversation to continue.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span><strong>Request Rate:</strong> 5 messages per 10 seconds. Rapid requests may trigger a cooldown period.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="font-medium text-gray-900 mb-2">Error Codes</h3>
+                <p className="text-gray-700 text-sm mb-3">
+                  When rate limits are exceeded, the API will return the following error codes:
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 pr-4 font-medium text-gray-700">Code</th>
+                        <th className="text-left py-2 pr-4 font-medium text-gray-700">HTTP</th>
+                        <th className="text-left py-2 font-medium text-gray-700">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-600">
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 pr-4 font-mono text-xs">INVALID_API_KEY</td>
+                        <td className="py-2 pr-4">401</td>
+                        <td className="py-2">API key is missing or invalid</td>
+                      </tr>
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 pr-4 font-mono text-xs">TOKEN_BUDGET_EXCEEDED</td>
+                        <td className="py-2 pr-4">429</td>
+                        <td className="py-2">Daily token limit reached</td>
+                      </tr>
+                      <tr className="border-b border-gray-100">
+                        <td className="py-2 pr-4 font-mono text-xs">CONVERSATION_LIMIT</td>
+                        <td className="py-2 pr-4">400</td>
+                        <td className="py-2">Maximum messages in conversation reached</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 pr-4 font-mono text-xs">RATE_LIMIT_COOLDOWN</td>
+                        <td className="py-2 pr-4">429</td>
+                        <td className="py-2">Too many rapid requests, must wait before continuing</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
