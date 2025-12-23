@@ -11,6 +11,7 @@ import {
   X,
   Home,
   Users,
+  UserCog,
   LogOut,
   ExternalLink,
   Lightbulb,
@@ -35,6 +36,7 @@ const adminNavItems: NavItem[] = [
   { label: 'Analytics', href: '/analytics', icon: <BarChart3 className="w-4 h-4" /> },
   { label: 'Insights', href: '/admin/insights', icon: <Lightbulb className="w-4 h-4" /> },
   { label: 'Sessions', href: '/admin/sessions', icon: <Users className="w-4 h-4" /> },
+  { label: 'Users', href: '/admin/users', icon: <UserCog className="w-4 h-4" /> },
 ];
 
 interface NavigationProps {
